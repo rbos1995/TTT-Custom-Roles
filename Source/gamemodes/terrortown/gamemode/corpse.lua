@@ -256,7 +256,7 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
         SCORE:HandleCreditFound(ply, nick, credits)
         return
     elseif DetectiveMode() and not covert then
-        if ply:IsDetective() or not detectiveSearchOnly then
+        if ply:IsDetective() or ply:IsDetraitor() or not detectiveSearchOnly then
             IdentifyBody(ply, rag)
         elseif not ply:IsSpec() and not ownerEnt:GetNWBool("det_called", false) and not ownerEnt:GetNWBool("body_searched", false) then
             if IsValid(rag) and rag:GetPos():Distance(ply:GetPos()) < 128 then
@@ -301,7 +301,7 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
     end
 
     local lastid = -1
-    if rag.lastid and ply:IsActiveDetective() then
+    if rag.lastid and (ply:IsActiveDetective() or ply:IsActiveDetraitor()) then
         -- if the person this victim last id'd has since disconnected, send -1 to
         -- indicate this
         lastid = IsValid(rag.lastid.ent) and rag.lastid.ent:EntIndex() or -1
@@ -338,7 +338,7 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
     -- 200
 
     -- If found by detective, send to all, else just the finder
-    if ply:IsActiveDetective() then
+    if ply:IsActiveDetective() or ply:IsActiveDetraitor() then
         net.Broadcast()
     else
         net.Send(ply)

@@ -125,8 +125,7 @@ end
 CreateConVar("ttt_detective_hats", "0")
 -- Just hats right now
 local function GiveLoadoutSpecial(ply)
-	if ply:IsActiveDetective() and GetConVar("ttt_detective_hats"):GetBool() and CanWearHat(ply) then
-
+	if (ply:IsActiveDetective() or ply:IsActiveDetraitor()) and GetConVar("ttt_detective_hats"):GetBool() and CanWearHat(ply) then
 		if not IsValid(ply.hat) then
 			local hat = ents.Create("ttt_hat_deerstalker")
 			if not IsValid(hat) then return end
@@ -384,7 +383,7 @@ end
 local function OrderEquipment(ply, cmd, args)
 	if not IsValid(ply) or #args ~= 1 then return end
 
-	if not (ply:IsActiveTraitorTeam() or ply:IsActiveMonsterTeam() or ply:IsActiveKiller() or ply:IsActiveDetective() or ply:IsActiveMercenary()) then return end
+	if not player.HasBuyMenu(ply, true) then return end
 
 	-- no credits, can't happen when buying through menu as button will be off
 	if ply:GetCredits() < 1 then return end

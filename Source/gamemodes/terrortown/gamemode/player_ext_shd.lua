@@ -319,10 +319,8 @@ end
 
 function player.HasBuyMenu(ply, active)
     if not IsValid(ply) then return false end
-    local hasMenu = ply:IsTraitor() or ply:IsHypnotist() or ply:IsAssassin() or ply:IsDetraitor() or
-            ply:IsDetective() or ply:IsMercenary() or
-            ply:IsZombie() or ply:IsVampire() or
-            ply:IsKiller()
+    local hasMenu = ply:IsTraitorTeam() or ply:IsDetective() or ply:IsMercenary() or
+            ply:IsMonsterTeam() or ply:IsKiller()
     -- Second parameter is optional so make sure it's actually "true"
     return hasMenu and ((not (active == true)) or ply:IsActive())
 end

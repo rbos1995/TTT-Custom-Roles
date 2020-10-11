@@ -173,10 +173,6 @@ function GM:TTTScoreboardRowColorForPlayer(ply)
         end
     end
 
-    if ply:IsDetective() then
-        return rolecolor.detective
-    end
-
     local client = LocalPlayer()
     if client:IsTraitorTeam() then
         if ply:IsTraitorTeam() or ply:IsGlitch() then
@@ -209,11 +205,12 @@ function GM:TTTScoreboardRowColorForPlayer(ply)
             end
             return rolecolor.jester
         end
-    -- Detraitor looks like a detective to anyone who doens't know any better
-    elseif ply:IsDetraitor() then
-        return rolecolor.detective
     end
 
+    -- Detraitor looks like a detective to anyone who doens't know any better
+    if ply:IsDetective() or ply:IsDetraitor() then
+        return rolecolor.detective
+    end
     return rolecolor.default
 end
 

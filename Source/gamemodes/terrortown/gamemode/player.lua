@@ -795,8 +795,8 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
             net.WriteString(deadPhantom:Nick())
             net.Broadcast()
             deadPhantom:PrintMessage(HUD_PRINTCENTER, "Your attacker died and you have been respawned.")
-            for k, v in pairs(player.GetAll()) do
-                if v:IsRole(ROLE_DETECTIVE) and v:Alive() then
+            for _, v in pairs(player.GetAll()) do
+                if (v:IsRole(ROLE_DETECTIVE) or v:IsRole(ROLE_DETRAITOR)) and v:Alive() then
                     v:PrintMessage(HUD_PRINTCENTER, "The phantom has been respawned.")
                 end
             end
@@ -1047,7 +1047,7 @@ function GM:PlayerDeath(victim, infl, attacker)
         end
         victim:PrintMessage(HUD_PRINTCENTER, "Your attacker has been haunted.")
         for _, v in pairs(player.GetAll()) do
-            if v:IsRole(ROLE_DETECTIVE) and v:Alive() then
+            if (v:IsRole(ROLE_DETECTIVE) or v:IsRole(ROLE_DETRAITOR)) and v:Alive() then
                 v:PrintMessage(HUD_PRINTCENTER, "The phantom has been killed.")
             end
         end

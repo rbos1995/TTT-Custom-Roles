@@ -347,7 +347,8 @@ local BuyableWeapons = {
 	[ROLE_TRAITOR] = {},
 	[ROLE_ASSASSIN] = {},
 	[ROLE_HYPNOTIST] = {},
-	[ROLE_KILLER] = {}
+	[ROLE_KILLER] = {},
+	[ROLE_DETRAITOR] = {}
 }
 -- If this logic or the list of roles who can buy is changed, it must also be updated in init.lua and cl_equip.lua
 local function ReadRoleEquipment(role, rolename)
@@ -372,6 +373,7 @@ ReadRoleEquipment(ROLE_TRAITOR, "Traitor")
 ReadRoleEquipment(ROLE_ASSASSIN, "Assassin")
 ReadRoleEquipment(ROLE_HYPNOTIST, "Hypnotist")
 ReadRoleEquipment(ROLE_KILLER, "Killer")
+ReadRoleEquipment(ROLE_DETRAITOR, "Detraitor")
 
 local function HandleRoleWeapons(role, roletable, swep_table, id)
     if roletable and table.HasValue(roletable, id) and not table.HasValue(swep_table.CanBuy, role) then

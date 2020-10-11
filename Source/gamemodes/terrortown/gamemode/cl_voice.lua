@@ -523,7 +523,7 @@ function GM:PlayerStartVoice(ply)
         end
     end
 
-    if ply:IsActiveDetective() then
+    if ply:IsActiveDetective() or (ply:IsActiveDetraitor() and ply.traitor_gvoice) then
         pnl.Color = Color(20, 20, 200, 255)
     end
 

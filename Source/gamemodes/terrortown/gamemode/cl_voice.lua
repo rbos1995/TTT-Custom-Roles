@@ -523,7 +523,7 @@ function GM:PlayerStartVoice(ply)
         end
     end
 
-    if ply:IsActiveDetective() or ply:IsActiveDetraitor() then
+    if ply:IsActiveDetective() then
         pnl.Color = Color(20, 20, 200, 255)
     end
 
@@ -546,7 +546,17 @@ local function ReceiveVoiceState()
         ply.traitor_gvoice = state
 
         if IsValid(PlayerVoicePanels[ply]) then
-            PlayerVoicePanels[ply].Color = state and Color(0, 200, 0) or Color(200, 0, 0)
+            local c
+            if state then
+                if ply:IsActiveDetraitor() then
+                    c = Color(20, 20, 200)
+                else
+                    c = Color(20, 200, 20)
+                end
+            else
+                c = Color(200, 20, 20)
+            end
+            PlayerVoicePanels[ply].Color = c
         end
     end
 end

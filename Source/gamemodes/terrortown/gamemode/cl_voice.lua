@@ -402,7 +402,7 @@ local function RadioMsgRecv()
         text = util.Capitalize(text)
     end
 
-    if sender:IsDetective() then
+    if sender:IsDetective() or sender:IsDetraitor() then
         AddDetectiveText(sender, text)
     else
         chat.AddText(sender,
@@ -523,7 +523,7 @@ function GM:PlayerStartVoice(ply)
         end
     end
 
-    if ply:IsActiveDetective() or (ply:IsActiveDetraitor() and ply.traitor_gvoice) then
+    if ply:IsActiveDetective() or (ply:IsActiveDetraitor() and (ply.traitor_gvoice or not player.IsActiveTraitorTeam(client))) then
         pnl.Color = Color(20, 20, 200, 255)
     end
 

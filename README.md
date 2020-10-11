@@ -17,7 +17,8 @@ Goal: Kill all non-team members (except Jester/Swapper)\
 \
 **Traitor** - Use your extensive weapon shop to help your team win\
 **Assassin** - Kill all of your targets in order to do massive damage and win for the Traitor team\
-**Hypnotist** - Use your brain washing device on dead players to make more traitors
+**Hypnotist** - Use your brain washing device on dead players to make more traitors\
+**Detraitor** - An evil replacement for the Detective who has access to all detective features (e.g. body search, detective buy menu) and appears to be a detective to non-traitors. **Not enabled by default. See [Configuration](CONVARS.md) to enable.**
 
 # Monster Team
 Goal: Kill all non-monsters (except Jester/Swapper)\
@@ -45,7 +46,7 @@ Goal: Work on your own to win the round by playing your role carefully\
 - Kommandos, Lix3, FunCheetah, B1andy413, Cooliew, The_Samarox, Arack12 and Aspirin for helping Noxx test.
 - Angela and Technofrood from the [Lonely Yogs](https://lonely-yogs.co.uk/) Discord for the fix for some traitor weapon incompatibilities.
 - Alex and other members of the [Lonely Yogs](https://lonely-yogs.co.uk/) Discord for using my versions of these addons and helping me fix and improve them.
-- Kobus and Alex of the [Lonely Yogs](https://lonely-yogs.co.uk/) Discord for creating some new icons.
+- Kobus and Alex of the [Lonely Yogs](https://lonely-yogs.co.uk/) Discord for creating a bunch new role icons.
 - u/ToXiN_reddit on Reddit for suggesting disallowing multi-jump if you didn't originally jump.
 - [GengarDC](https://steamcommunity.com/id/GengarDC) for his [TTT_Double_Jump_Nerfed](https://steamcommunity.com/sharedfiles/filedetails/?id=1962801891) mod whose functionality was integrated via a setting.
 - [KuMaGR](https://steamcommunity.com/id/kuma96) for his [TTT Glowing Traitors](https://steamcommunity.com/sharedfiles/filedetails/?id=690007939) mod which was the basis for the idea behind the Traitor team highlight feature.

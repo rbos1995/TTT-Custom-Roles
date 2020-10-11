@@ -53,7 +53,8 @@ local function GetLoadoutWeapons(r)
 			[ROLE_VAMPIRE] = {},
 			[ROLE_SWAPPER] = {},
 			[ROLE_ASSASSIN] = {},
-			[ROLE_KILLER] = {}
+			[ROLE_KILLER] = {},
+			[ROLE_DETRAITOR] = {}
 		};
 
 		for k, w in pairs(weapons.GetList()) do
@@ -124,8 +125,7 @@ end
 CreateConVar("ttt_detective_hats", "0")
 -- Just hats right now
 local function GiveLoadoutSpecial(ply)
-	if ply:IsActiveDetective() and GetConVar("ttt_detective_hats"):GetBool() and CanWearHat(ply) then
-
+	if (ply:IsActiveDetective() or ply:IsActiveDetraitor()) and GetConVar("ttt_detective_hats"):GetBool() and CanWearHat(ply) then
 		if not IsValid(ply.hat) then
 			local hat = ents.Create("ttt_hat_deerstalker")
 			if not IsValid(hat) then return end
@@ -347,7 +347,8 @@ local BuyableWeapons = {
 	[ROLE_TRAITOR] = {},
 	[ROLE_ASSASSIN] = {},
 	[ROLE_HYPNOTIST] = {},
-	[ROLE_KILLER] = {}
+	[ROLE_KILLER] = {},
+	[ROLE_DETRAITOR] = {}
 }
 -- If this logic or the list of roles who can buy is changed, it must also be updated in init.lua and cl_equip.lua
 local function ReadRoleEquipment(role, rolename)
@@ -372,6 +373,7 @@ ReadRoleEquipment(ROLE_TRAITOR, "Traitor")
 ReadRoleEquipment(ROLE_ASSASSIN, "Assassin")
 ReadRoleEquipment(ROLE_HYPNOTIST, "Hypnotist")
 ReadRoleEquipment(ROLE_KILLER, "Killer")
+ReadRoleEquipment(ROLE_DETRAITOR, "Detraitor")
 
 local function HandleRoleWeapons(role, roletable, swep_table, id)
     if roletable and table.HasValue(roletable, id) and not table.HasValue(swep_table.CanBuy, role) then
@@ -383,7 +385,7 @@ end
 local function OrderEquipment(ply, cmd, args)
 	if not IsValid(ply) or #args ~= 1 then return end
 
-	if not (ply:IsActiveTraitorTeam() or ply:IsActiveMonsterTeam() or ply:IsActiveKiller() or ply:IsActiveDetective() or ply:IsActiveMercenary()) then return end
+	if not player.HasBuyMenu(ply, true) then return end
 
 	-- no credits, can't happen when buying through menu as button will be off
 	if ply:GetCredits() < 1 then return end
@@ -449,6 +451,15 @@ local function OrderEquipment(ply, cmd, args)
 
             -- If this weapon is still not buyable but is buyable by Traitor, add this role directly
             if not table.HasValue(swep_table.CanBuy, role) and table.HasValue(swep_table.CanBuy, ROLE_TRAITOR) then
+                table.insert(swep_table.CanBuy, role)
+            end
+        end
+        -- If the player is a detraitor they should have all the weapons of a detective
+        if role == ROLE_DETRAITOR then
+            HandleRoleWeapons(role, BuyableWeapons[ROLE_DETECTIVE], swep_table, id)
+
+            -- If this weapon is still not buyable but is buyable by Detective, add this role directly
+            if not table.HasValue(swep_table.CanBuy, role) and table.HasValue(swep_table.CanBuy, ROLE_DETECTIVE) then
                 table.insert(swep_table.CanBuy, role)
             end
         end
@@ -642,7 +653,7 @@ end
 -- non-cheat developer commands can reveal precaching the first time equipment
 -- is bought, so trigger it at the start of a round instead
 function WEPS.ForcePrecache()
-	for k, w in ipairs(weapons.GetList()) do
+	for _, w in ipairs(weapons.GetList()) do
 		if w.WorldModel then
 			util.PrecacheModel(w.WorldModel)
 		end

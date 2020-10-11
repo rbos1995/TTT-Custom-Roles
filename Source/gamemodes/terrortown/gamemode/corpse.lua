@@ -85,6 +85,8 @@ local function IdentifyBody(ply, rag)
             roletext = "body_found_a"
         elseif role == ROLE_KILLER then
             roletext = "body_found_k"
+        elseif role == ROLE_DETRAITOR then
+            roletext = "body_found_dr"
         else
             roletext = "body_found_i"
         end
@@ -106,7 +108,7 @@ local function IdentifyBody(ply, rag)
 
             if traitor then
                 -- update innocent's list of traitors
-                SendConfirmedTraitors(GetNonTraitorFilter(false))
+                SendConfirmedTraitorList(GetNonTraitorFilter(false))
             end
             SCORE:HandleBodyFound(ply, deadply)
         end
@@ -219,7 +221,7 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
         return
     end
 
-    local was_traitor = rag.was_role == ROLE_TRAITOR or rag.was_role == ROLE_ASSASSIN or rag.was_role == ROLE_HYPNOTIST
+    local was_traitor = rag.was_role == ROLE_TRAITOR or rag.was_role == ROLE_ASSASSIN or rag.was_role == ROLE_HYPNOTIST or rag.was_role == ROLE_DETRAITOR
     if GetGlobalBool("ttt_monsters_are_traitors") then
         was_traitor = was_traitor or (rag.was_role == ROLE_ZOMBIE) or (rag.was_role == ROLE_VAMPIRE)
     end
@@ -246,7 +248,7 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
 
     local detectiveSearchOnly = GetGlobalBool("ttt_detective_search_only", true) and not (GetGlobalBool("ttt_all_search_postround", true) and GetRoundState() ~= ROUND_ACTIVE)
     local credits = CORPSE.GetCredits(rag, 0)
-    if (ply:IsActiveDetective() or ply:IsActiveTraitor() or ply:IsActiveMercenary() or ply:IsActiveZombie() or ply:IsActiveVampire() or ply:IsActiveHypnotist() or ply:IsActiveAssassin() or ply:IsActiveKiller()) and credits > 0 and (not long_range) then
+    if player.HasBuyMenu(ply, true) and credits > 0 and (not long_range) then
         LANG.Msg(ply, "body_credits", { num = credits })
         ply:AddCredits(credits)
         CORPSE.SetCredits(rag, 0)
@@ -254,7 +256,7 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
         SCORE:HandleCreditFound(ply, nick, credits)
         return
     elseif DetectiveMode() and not covert then
-        if ply:IsDetective() or not detectiveSearchOnly then
+        if ply:IsDetective() or ply:IsDetraitor() or not detectiveSearchOnly then
             IdentifyBody(ply, rag)
         elseif not ply:IsSpec() and not ownerEnt:GetNWBool("det_called", false) and not ownerEnt:GetNWBool("body_searched", false) then
             if IsValid(rag) and rag:GetPos():Distance(ply:GetPos()) < 128 then
@@ -292,14 +294,14 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
 
     -- build list of people this traitor killed
     local kill_entids = {}
-    for k, vicsid in pairs(rag.kills) do
+    for _, vicsid in pairs(rag.kills) do
         -- also send disconnected players as a marker
         local vic = player.GetBySteamID(vicsid)
         table.insert(kill_entids, IsValid(vic) and vic:EntIndex() or -1)
     end
 
     local lastid = -1
-    if rag.lastid and ply:IsActiveDetective() then
+    if rag.lastid and (ply:IsActiveDetective() or ply:IsActiveDetraitor()) then
         -- if the person this victim last id'd has since disconnected, send -1 to
         -- indicate this
         lastid = IsValid(rag.lastid.ent) and rag.lastid.ent:EntIndex() or -1
@@ -320,7 +322,7 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
     --net.WriteInt(stime, 16)
 
     net.WriteUInt(#kill_entids, 8)
-    for k, idx in pairs(kill_entids) do
+    for _, idx in pairs(kill_entids) do
         net.WriteUInt(idx, 8) -- first game.MaxPlayers() of entities are for players.
     end
 
@@ -336,7 +338,7 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
     -- 200
 
     -- If found by detective, send to all, else just the finder
-    if ply:IsActiveDetective() then
+    if ply:IsActiveDetective() or ply:IsActiveDetraitor() then
         net.Broadcast()
     else
         net.Send(ply)

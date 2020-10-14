@@ -51,9 +51,9 @@ local function RoleChatRecv()
              (client:IsMonsterTeam() and GetGlobalBool("ttt_monsters_know_swapper")) or
              (client:IsKiller() and GetGlobalBool("ttt_killers_know_swapper")) or
              (sender == client and (GetGlobalBool("ttt_traitors_know_swapper") or GetGlobalBool("ttt_monsters_know_swapper") or GetGlobalBool("ttt_killers_know_swapper")))) then
-            role_name = GetTranslation("swapper")
+            role_name = ROLE_STRINGS[ROLE_SWAPPER]
         else
-            role_name = GetTranslation("jester")
+            role_name = ROLE_STRINGS[ROLE_JESTER]
         end
 
         AddRoleText(role, role_name, sender:Nick(), text)

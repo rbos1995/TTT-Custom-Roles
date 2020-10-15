@@ -1,6 +1,0 @@
-"UnlitGeneric"
-{
- "$basetexture" "vgui/ttt/tutorial/tut04"
- "$vertexcolor" 1
- "$vertexalpha" 1
-}

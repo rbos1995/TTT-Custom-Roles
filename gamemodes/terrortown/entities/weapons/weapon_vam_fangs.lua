@@ -222,7 +222,9 @@ function SWEP:Think()
                 local ply = self.TargetEntity
                 ply:StripWeapon("weapon_hyp_brainwash")
                 ply:StripWeapon("weapon_ttt_wtester")
+                ply:SetVampirePreviousRole(ply:GetRole())
                 ply:SetRole(ROLE_VAMPIRE)
+                ply:SetVampirePrime(false)
                 ply:PrintMessage(HUD_PRINTCENTER, "You have become a Vampire! Use your fangs to suck blood or fade from view")
 
                 net.Start("TTT_Vampified")

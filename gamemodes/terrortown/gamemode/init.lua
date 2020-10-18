@@ -166,6 +166,7 @@ CreateConVar("ttt_vampire_damage_reduction", "0.8", FCVAR_ARCHIVE + FCVAR_REPLIC
 CreateConVar("ttt_vampire_fang_timer", "5", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_vampire_fang_heal", "50", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_vampire_fang_overheal", "25", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_vampire_prime_death_mode", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_traitors_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_monsters_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_killers_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
@@ -448,16 +449,6 @@ end
 
 -- Used to be in think, now a timer
 local function WinChecker()
-    hook.Add("PlayerDeath", "OnPlayerDeath", function(victim, infl, attacker)
-        if victim:IsJester() and attacker:IsPlayer() and infl:GetClass() ~= env_fire and (not attacker:IsJesterTeam()) and GetRoundState() == ROUND_ACTIVE then
-            net.Start("TTT_JesterKiller")
-            net.WriteString(attacker:Nick())
-            net.WriteString(victim:Nick())
-            net.WriteInt(-1, 6)
-            net.Broadcast()
-            jesterkilled = 1
-        end
-    end)
     if GetRoundState() == ROUND_ACTIVE then
         if CurTime() > GetGlobalFloat("ttt_round_end", 0) then
             EndRound(WIN_TIMELIMIT)
@@ -599,6 +590,9 @@ function PrepareRound()
         v:SetNWBool("KillerSmoke", false)
         v:SetNWBool("PlayerHighlightOn", false)
         v:SetNWBool("RoleRevealed", false)
+        v:SetNWBool("zombie_prime", false)
+        v:SetNWBool("vampire_prime", false)
+        v:SetNWInt("vampire_previous_role", ROLE_NONE)
         v:SetNWFloat("RmdtSpeedModifier", 1)
         -- Workaround to prevent GMod sprint from working
         v:SetRunSpeed(v:GetWalkSpeed())
@@ -821,6 +815,58 @@ local function InitRoundEndTime()
     SetRoundEnd(endtime)
 end
 
+local function OnPlayerDeath(victim, infl, attacker)
+    if victim:IsJester() and attacker:IsPlayer() and infl:GetClass() ~= env_fire and (not attacker:IsJesterTeam()) and GetRoundState() == ROUND_ACTIVE then
+        net.Start("TTT_JesterKiller")
+        net.WriteString(attacker:Nick())
+        net.WriteString(victim:Nick())
+        net.WriteInt(-1, 6)
+        net.Broadcast()
+        jesterkilled = 1
+    else
+        local vamp_prime_death_mode = GetConVar("ttt_vampire_prime_death_mode"):GetFloat()
+        -- If the prime died and we're doing something when that happens
+        if victim:IsVampirePrime() and vamp_prime_death_mode > 0 then
+            local living_vampire_primes = 0
+            local vampires = {}
+            -- Find all the living vampires anmd count the primes
+            for _, v in pairs(player.GetAll()) do
+                if v:Alive() and v:IsTerror() and v:IsVampire() then
+                    if v:IsVampirePrime() then
+                        living_vampire_primes = living_vampire_primes + 1
+                    end
+                    table.insert(vampires, v)
+                end
+            end
+
+            -- If there are no more living primes, do something with the non-primes
+            if living_vampire_primes == 0 and #vampires > 0 then
+                -- Kill them
+                if vamp_prime_death_mode == 1 then
+                    for _, vnp in pairs(vampires) do
+                        vnp:Kill()
+                    end
+                -- Change them back to their previous roles
+                elseif vamp_prime_death_mode == 2 then
+                    local converted = false
+                    for _, vnp in pairs(vampires) do
+                        local prev_role = vnp:GetVampirePreviousRole()
+                        if prev_role ~= ROLE_NONE then
+                            vnp:SetRoleAndBroadcast(prev_role)
+                            converted = true
+                        end
+                    end
+
+                    -- Tell everyone if a role was updated
+                    if converted then
+                        SendFullStateUpdate()
+                    end
+                end
+            end
+        end
+    end
+end
+
 function BeginRound()
     GAMEMODE:SyncGlobals()
 
@@ -928,6 +974,9 @@ function BeginRound()
             end
         end
     end)
+
+    -- Start watching for specific deaths
+    hook.Add("PlayerDeath", "OnPlayerDeath", OnPlayerDeath)
 
     -- Start the win condition check timer
     StartWinChecks()
@@ -1334,6 +1383,7 @@ function SelectRoles()
                     hasSpecial = hasSpecial or GetGlobalBool("ttt_monsters_are_traitors")
                     hasTraitor = hasTraitor or GetGlobalBool("ttt_monsters_are_traitors")
                     print(v:Nick() .. " (" .. v:SteamID() .. ") - Vampire")
+                    v:SetVampirePrime(true)
                 elseif role == ROLE_ASSASSIN then
                     ts = ts + 1
                     hasSpecial = true
@@ -1410,6 +1460,7 @@ function SelectRoles()
                 elseif GetGlobalBool("ttt_monsters_are_traitors") and ts >= GetConVar("ttt_vampire_required_traitors"):GetInt() and GetConVar("ttt_vampire_enabled"):GetBool() and math.random() <= vampire_chance and not hasSpecial then
                     print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Vampire")
                     pply:SetRole(ROLE_VAMPIRE)
+                    pply:SetVampirePrime(true)
                     hasSpecial = true
                 elseif ts >= GetConVar("ttt_assassin_required_traitors"):GetInt() and GetConVar("ttt_assassin_enabled"):GetBool() and math.random() <= assassin_chance and not hasSpecial then
                     print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Assassin")
@@ -1443,6 +1494,7 @@ function SelectRoles()
                 elseif ts >= GetConVar("ttt_vampire_required_traitors"):GetInt() and GetConVar("ttt_vampire_enabled"):GetBool() and math.random() <= vampire_chance and not hasMonster then
                     print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Vampire")
                     pply:SetRole(ROLE_VAMPIRE)
+                    pply:SetVampirePrime(true)
                     table.remove(choices, pick)
                     hasMonster = true
                 end

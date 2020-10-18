@@ -31,9 +31,13 @@ function plymeta:GetPhantom() return self:GetRole() == ROLE_PHANTOM end
 
 function plymeta:GetZombie() return self:GetRole() == ROLE_ZOMBIE end
 
-function plymeta:GetZombiePrime() return self:GetRole() == ROLE_ZOMBIE and self:GetNWBool("zombie_prime", false) end
+function plymeta:GetZombiePrime() return self:GetZombie() and self:GetNWBool("zombie_prime", false) end
 
 function plymeta:GetVampire() return self:GetRole() == ROLE_VAMPIRE end
+
+function plymeta:GetVampirePrime() return self:GetVampire() and self:GetNWBool("vampire_prime", false) end
+
+function plymeta:GetVampirePreviousRole() return self:GetNWInt("vampire_previous_role", ROLE_NONE) end
 
 function plymeta:GetSwapper() return self:GetRole() == ROLE_SWAPPER end
 
@@ -63,6 +67,7 @@ plymeta.IsPhantom = plymeta.GetPhantom
 plymeta.IsZombie = plymeta.GetZombie
 plymeta.IsZombiePrime = plymeta.GetZombiePrime
 plymeta.IsVampire = plymeta.GetVampire
+plymeta.IsVampirePrime = plymeta.GetVampirePrime
 plymeta.IsSwapper = plymeta.GetSwapper
 plymeta.IsAssassin = plymeta.GetAssassin
 plymeta.IsKiller = plymeta.GetKiller

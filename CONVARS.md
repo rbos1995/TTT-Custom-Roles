@@ -85,6 +85,7 @@ ttt_vampire_damage_reduction  0.8 // The fraction an attacker's bullet damage wi
 ttt_vampire_fang_timer        5   // The amount of time fangs must be used to fully drain a target's blood
 ttt_vampire_fang_heal         50  // The amount of health a Vampire will heal by when they fully drain a target's blood
 ttt_vampire_fang_overheal     25  // The amount over the Vampire's normal maximum health (e.g. 100 + this ConVar) that the Vampire can heal to by drinking blood.
+ttt_vampire_prime_death_mode  0   // What to do when the Prime Vampire(s) (e.g. playters who spawn as Vampires originally) are killed. 0 - Do nothing. 1 - Kill all non-prime Vampires. 2 - Revert all non-prime Vampires to their original role.
 ttt_zombie_vision_enable      1   // Whether Zombies have their special vision highlights enabled
 ttt_zombie_spit_enable        1   // Whether Zombies have their spit attack enabled
 ttt_zombie_leap_enable        1   // Whether Zombies have their leap attack enabled

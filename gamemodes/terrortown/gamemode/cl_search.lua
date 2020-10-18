@@ -554,6 +554,16 @@ local function ReceiveRagdollSearch()
 
     StoreSearchResult(search)
 
+    -- Remove the radar icon for the searched corpse
+    if RADAR and RADAR.called_corpses then
+        for i, v in pairs(RADAR.called_corpses) do
+            if v.eidx == search.eidx then
+                table.remove(RADAR.called_corpses, i)
+                return
+            end
+        end
+    end
+
     search = nil
 end
 

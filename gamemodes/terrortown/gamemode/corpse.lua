@@ -183,6 +183,7 @@ local function CallDetective(ply, cmd, args)
             -- show indicator to detectives
             net.Start("TTT_CorpseCall")
             net.WriteVector(rag:GetPos())
+            net.WriteUInt(rag:EntIndex(), 16)
             net.Send(GetDetectiveFilter(true))
 
             LANG.Msg("body_call", {
@@ -263,6 +264,7 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
                 hook.Call("TTTBodyFound", GAMEMODE, ply, ownerEnt, rag)
                 net.Start("TTT_CorpseCall")
                 net.WriteVector(rag:GetPos())
+                net.WriteUInt(rag:EntIndex(), 16)
                 net.Send(GetDetectiveFilter(true))
                 ownerEnt:SetNWBool("det_called", true)
                 ownerEnt:SetNWBool("body_found", true)

@@ -722,7 +722,7 @@ function TellTraitorsAboutTraitors()
         end
 
         -- Warn this player about the Killer if they are a traitor or we are configured to warn everyone
-        if (is_traitor or GetConVar("ttt_killer_warn_all"):GetBool()) and not table.IsEmpty(killernick) then
+        if not v:IsKiller() and (is_traitor or GetConVar("ttt_killer_warn_all"):GetBool()) and not table.IsEmpty(killernick) then
             v:PrintMessage(HUD_PRINTTALK, "There is a Killer.")
             -- Only delay this if the player is a traitor and there is a Glitch
             -- This gives time for the Glitch warning to go away

@@ -157,6 +157,7 @@ CreateConVar("ttt_killer_smoke_timer", "60", FCVAR_ARCHIVE)
 CreateConVar("ttt_killer_show_target_icon", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_killer_damage_scale", "0.25", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_killer_damage_reduction", "0.55", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_killer_warn_all", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_zombie_show_target_icon", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_zombie_damage_scale", "0.2", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_zombie_damage_reduction", "0.8", FCVAR_ARCHIVE + FCVAR_REPLICATED)
@@ -685,10 +686,7 @@ function TellTraitorsAboutTraitors()
     local jesternick = {}
     local killernick = {}
     for _, v in pairs(player.GetAll()) do
-        if v:IsTraitorTeam() then
-            table.insert(traitornicks, v:Nick())
-        -- Count Monsters when Monsters-as-Traitors is enabled
-        elseif GetGlobalBool("ttt_monsters_are_traitors") and v:IsMonsterTeam() then
+        if player.IsTraitorTeam(v) then
             table.insert(traitornicks, v:Nick())
         elseif v:IsGlitch() then
             table.insert(traitornicks, v:Nick())
@@ -703,25 +701,14 @@ function TellTraitorsAboutTraitors()
     -- This is ugly as hell, but it's kinda nice to filter out the names of the
     -- traitors themselves in the messages to them
     for _, v in pairs(player.GetAll()) do
-        -- Count Monsters when Monsters-as-Traitors is enabled
-        if v:IsTraitorTeam() or (GetGlobalBool("ttt_monsters_are_traitors") and v:IsMonsterTeam()) then
+        local is_traitor = player.IsTraitorTeam(v)
+        if is_traitor then
             if not table.IsEmpty(glitchnick) then
                 v:PrintMessage(HUD_PRINTTALK, "There is a Glitch.")
                 v:PrintMessage(HUD_PRINTCENTER, "There is a Glitch.")
             end
-            if not table.IsEmpty(killernick) then
-                v:PrintMessage(HUD_PRINTTALK, "There is a Killer.")
-                if not table.IsEmpty(glitchnick) then
-                    timer.Simple(2, function()
-                        v:PrintMessage(HUD_PRINTCENTER, "There is a Killer.")
-                    end)
-                else
-                    v:PrintMessage(HUD_PRINTCENTER, "There is a Killer.")
-                end
-            end
             if #traitornicks < 2 then
                 LANG.Msg(v, "round_traitors_one")
-                return
             else
                 local names = ""
                 for _, name in pairs(traitornicks) do
@@ -731,6 +718,20 @@ function TellTraitorsAboutTraitors()
                 end
                 names = string.sub(names, 1, -3)
                 LANG.Msg(v, "round_traitors_more", { names = names })
+            end
+        end
+
+        -- Warn this player about the Killer if they are a traitor or we are configured to warn everyone
+        if (is_traitor or GetConVar("ttt_killer_warn_all"):GetBool()) and not table.IsEmpty(killernick) then
+            v:PrintMessage(HUD_PRINTTALK, "There is a Killer.")
+            -- Only delay this if the player is a traitor and there is a Glitch
+            -- This gives time for the Glitch warning to go away
+            if is_traitor and not table.IsEmpty(glitchnick) then
+                timer.Simple(2, function()
+                    v:PrintMessage(HUD_PRINTCENTER, "There is a Killer.")
+                end)
+            else
+                v:PrintMessage(HUD_PRINTCENTER, "There is a Killer.")
             end
         end
     end

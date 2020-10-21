@@ -76,6 +76,7 @@ ttt_killer_vision_enable    1    // Whether Killers have their special vision hi
 ttt_killer_show_target_icon 1    // Whether Killers have an icon over other players' heads showing who to kill. Server or round must be restarted for changes to take effect.
 ttt_killer_damage_scale     0.25 // The fraction a Killer's damage will be scaled to when they are attacking without using their knife.
 ttt_killer_damage_reduction 0.55 // The fraction an attacker's bullet damage will be reduced to when they are shooting a Killer.
+ttt_killer_warn_all         0    // Whether to warn all players if there is a Killer. If 0, only traitors will be warned
 
 // Monsters
 ttt_monsters_are_traitors     0   // Whether Monsters (Zombie and Vampire) should be treated as members of the Traitors team. If enabled, ttt_monster_pct is not used.

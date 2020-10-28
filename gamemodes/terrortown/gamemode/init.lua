@@ -168,6 +168,7 @@ CreateConVar("ttt_vampire_fang_timer", "5", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_vampire_fang_heal", "50", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_vampire_fang_overheal", "25", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_vampire_prime_death_mode", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_jester_win_by_traitors", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_traitors_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_monsters_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_killers_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
@@ -823,7 +824,12 @@ local function OnPlayerDeath(victim, infl, attacker)
         net.WriteString(victim:Nick())
         net.WriteInt(-1, 6)
         net.Broadcast()
-        jesterkilled = 1
+
+        -- Don't track that the jester was killed (for win reporting) if they were killed by a traitor
+        -- and the functionality that blocks Jester wins from Traitor deaths is enabled
+        if GetConVar("ttt_jester_win_by_traitors"):GetBool() or not player.IsTraitorTeam(attacker) then
+            jesterkilled = 1
+        end
     else
         local vamp_prime_death_mode = GetConVar("ttt_vampire_prime_death_mode"):GetFloat()
         -- If the prime died and we're doing something when that happens

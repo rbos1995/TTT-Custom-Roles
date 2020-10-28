@@ -158,13 +158,16 @@ function KARMA.Hurt(attacker, victim, dmginfo)
             print(Format("%s (%f) attacked %s (%f) for %d and got penalised for %f", attacker:Nick(), attacker:GetLiveKarma(), victim:Nick(), victim:GetLiveKarma(), hurt_amount, penalty))
         end
     elseif victim:IsJesterTeam() then
-        local penalty = hurt_amount * config.jratio:GetFloat()
-        KARMA.GivePenalty(attacker, penalty, victim)
-        attacker:SetCleanRound(false)
-        attacker:SetCleanRounds(0)
+        -- Don't hurt a traitor's karma if killing a Jester doesn't end the round for them
+        if GetConVar("ttt_jester_win_by_traitors"):GetBool() or not player.IsTraitorTeam(attacker) then
+            local penalty = hurt_amount * config.jratio:GetFloat()
+            KARMA.GivePenalty(attacker, penalty, victim)
+            attacker:SetCleanRound(false)
+            attacker:SetCleanRounds(0)
 
-        if IsDebug() then
-            print(Format("%s (%f) attacked the jester %s (%f) for %d and got penalised for %f", attacker:Nick(), attacker:GetLiveKarma(), victim:Nick(), victim:GetLiveKarma(), hurt_amount, penalty))
+            if IsDebug() then
+                print(Format("%s (%f) attacked the jester %s (%f) for %d and got penalised for %f", attacker:Nick(), attacker:GetLiveKarma(), victim:Nick(), victim:GetLiveKarma(), hurt_amount, penalty))
+            end
         end
     else
         local reward = KARMA.GetHurtReward(hurt_amount)
@@ -206,13 +209,16 @@ function KARMA.Killed(attacker, victim, dmginfo)
             print(Format("%s (%f) killed %s (%f) and gets penalised for %f", attacker:Nick(), attacker:GetLiveKarma(), victim:Nick(), victim:GetLiveKarma(), penalty))
         end
     elseif victim:IsJesterTeam() then
-        local penalty = config.jpenalty:GetFloat()
-        KARMA.GivePenalty(attacker, penalty, victim)
-        attacker:SetCleanRound(false)
-        attacker:SetCleanRounds(0)
+        -- Don't hurt a traitor's karma if killing a Jester doesn't end the round for them
+        if GetConVar("ttt_jester_win_by_traitors"):GetBool() or not player.IsTraitorTeam(attacker) then
+            local penalty = config.jpenalty:GetFloat()
+            KARMA.GivePenalty(attacker, penalty, victim)
+            attacker:SetCleanRound(false)
+            attacker:SetCleanRounds(0)
 
-        if IsDebug() then
-            print(Format("%s (%f) killed the jester %s (%f) and gets penalised for %f", attacker:Nick(), attacker:GetLiveKarma(), victim:Nick(), victim:GetLiveKarma(), penalty))
+            if IsDebug() then
+                print(Format("%s (%f) killed the jester %s (%f) and gets penalised for %f", attacker:Nick(), attacker:GetLiveKarma(), victim:Nick(), victim:GetLiveKarma(), penalty))
+            end
         end
     else
         local reward = KARMA.GetKillReward()

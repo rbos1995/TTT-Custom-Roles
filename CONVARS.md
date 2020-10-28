@@ -119,6 +119,7 @@ ttt_sprint_consume             0.2  // Sets stamina consumption speed. (0.1-5)
 multijump_default_jumps          1 // The amount of extra jumps players should get. Set to 0 to disable multiple jumps
 multijump_default_power          1 // Multiplier for the jump-power when multi jumping
 multijump_can_jump_while_falling 1 // Whether the player should be able to multi-jump if they didn't jump to begin with
+multijump_max_fall_distance      0 // The maximum distance a player can fall before multi jump is disabled. 0 to disable
 ```
 
 Thanks to [KarlOfDuty](https://github.com/KarlOfDuty) for his original version of this document, [here](https://github.com/KarlOfDuty/TTT-Custom-Roles/blob/patch-1/README.md).

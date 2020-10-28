@@ -8,7 +8,7 @@ function PLAYER:SetJumpLevel(level)
     self:SetDTInt(23, level)
 end
 
-function PLAYER:GetMaxJumpLevel(level)
+function PLAYER:GetMaxJumpLevel()
     return self:GetDTInt(24)
 end
 
@@ -28,6 +28,22 @@ function PLAYER:GetJumped()
     return self:GetDTInt(26)
 end
 
-function PLAYER:SetJumped(level)
-    self:SetDTInt(26, level)
+function PLAYER:SetJumped(jumped)
+    self:SetDTInt(26, jumped)
+end
+
+function PLAYER:GetMaxJumpDistance()
+    return self:GetDTInt(27)
+end
+
+function PLAYER:SetMaxJumpDistance(max_distance)
+    self:SetDTInt(27, max_distance)
+end
+
+function PLAYER:GetJumpLocation()
+    return self:GetDTVector(28)
+end
+
+function PLAYER:SetJumpLocation(loc)
+    self:SetDTVector(28, loc)
 end

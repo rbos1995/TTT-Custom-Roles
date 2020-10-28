@@ -28,7 +28,7 @@ local function GetMoveVector(mv)
     return vec
 end
 
-hook.Add("SetupMove", "Multi Jump", function(ply, mv)
+hook.Add("SetupMove", "MultiJumpSetupMove", function(ply, mv)
     if gmod.GetGamemode().Name ~= "Trouble in Terrorist Town" then return end
 
     -- Let the engine handle movement from the ground
@@ -38,11 +38,33 @@ hook.Add("SetupMove", "Multi Jump", function(ply, mv)
         return
     elseif ply:OnGround() then
         ply:SetJumpLevel(0)
+        ply:SetJumpLocation(vector_origin)
         -- Only set the 'jumped' flag if that functionality is enabled
         if ply:GetJumped() ~= -1 then
             ply:SetJumped(0)
         end
         return
+    end
+
+    -- Ignore if the player is on a ladder
+    if ply:GetMoveType() == MOVETYPE_LADDER then
+        return
+    end
+
+    -- If we have a limited jump distance, keep track of the player's location
+    local max_distance = ply:GetMaxJumpDistance()
+    if max_distance > 0 then
+        local jump_loc = ply:GetJumpLocation()
+        if jump_loc == vector_origin then
+            jump_loc = ply:GetPos()
+            ply:SetJumpLocation(jump_loc)
+        else
+            local new_height = ply:GetPos().z
+            local distance = math.abs(jump_loc.z - new_height)
+            if distance > max_distance then
+                return
+            end
+        end
     end
 
     -- Don't do anything if not jumping

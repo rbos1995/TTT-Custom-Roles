@@ -170,6 +170,7 @@ CreateConVar("ttt_vampire_fang_overheal", "25", FCVAR_ARCHIVE + FCVAR_REPLICATED
 CreateConVar("ttt_vampire_prime_death_mode", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_jester_win_by_traitors", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_swapper_respawn_health", "100", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_weaker_each_respawn", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_traitors_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_monsters_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_killers_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)

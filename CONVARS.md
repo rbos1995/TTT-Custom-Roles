@@ -110,6 +110,7 @@ ttt_player_set_model_on_respawn       1 // Whether to set a player's model when 
 ttt_traitors_know_swapper             0 // Whether the Traitors are told when a member of the Jester team is really a Swapper
 ttt_monsters_know_swapper             0 // Whether the Monsters are told when a member of the Jester team is really a Swapper
 ttt_killers_know_swapper              0 // Whether the Killer is told when a member of the Jester team is really a Swapper
+ttt_phantom_weaker_each_respawn       0 // Whether a Phantom respawns weaker (1/2 as much HP) each time they respawn, down to a minimum of 1
 
 // Sprint
 ttt_sprint_enabled             1    // Whether to enable sprinting. NOTE: Disabling sprinting doesn't hide the bar on the client UI but it will never change from being 100% full

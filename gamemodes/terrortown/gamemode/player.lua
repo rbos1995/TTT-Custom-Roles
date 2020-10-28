@@ -5,7 +5,7 @@ local table = table
 local player = player
 local timer = timer
 local pairs = pairs
-local deadPhantom = nil
+local deadPhantoms = {}
 
 CreateConVar("ttt_bots_are_spectators", "0", FCVAR_ARCHIVE)
 CreateConVar("ttt_dyingshot", "0", FCVAR_ARCHIVE)
@@ -160,7 +160,7 @@ function GM:IsSpawnpointSuitable(ply, spwn, force, rigged)
 
     local blocking = ents.FindInBox(pos + Vector(-16, -16, 0), pos + Vector(16, 16, 64))
 
-    for k, p in pairs(blocking) do
+    for _, p in pairs(blocking) do
         if IsValid(p) and p:IsPlayer() and p:IsTerror() and p:Alive() then
             if force then
                 p:Kill()
@@ -182,7 +182,7 @@ local SpawnTypes = {
 
 function GetSpawnEnts(shuffled, force_all)
     local tbl = {}
-    for k, classname in pairs(SpawnTypes) do
+    for _, classname in pairs(SpawnTypes) do
         for _, e in pairs(ents.FindByClass(classname)) do
             if IsValid(e) and (not e.BeingRemoved) then
                 table.insert(tbl, e)
@@ -253,7 +253,7 @@ function GM:PlayerSelectSpawn(ply)
 
     -- Optimistic attempt: assume there are sufficient spawns for all and one is
     -- free
-    for k, spwn in pairs(self.SpawnPoints) do
+    for _, spwn in pairs(self.SpawnPoints) do
         if self:IsSpawnpointSuitable(ply, spwn, false) then
             return spwn
         end
@@ -262,7 +262,7 @@ function GM:PlayerSelectSpawn(ply)
     -- That did not work, so now look around spawns
     local picked = nil
 
-    for k, spwn in pairs(self.SpawnPoints) do
+    for _, spwn in pairs(self.SpawnPoints) do
         picked = spwn -- just to have something if all else fails
 
         -- See if we can jury rig a spawn near this one
@@ -284,7 +284,7 @@ function GM:PlayerSelectSpawn(ply)
     end
 
     -- Last attempt, force one
-    for k, spwn in pairs(self.SpawnPoints) do
+    for _, spwn in pairs(self.SpawnPoints) do
         if self:IsSpawnpointSuitable(ply, spwn, true) then
             return spwn
         end
@@ -784,25 +784,47 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
     end
 
     if ply:GetNWBool("HauntedSmoke") == true then
-        local phantomBody = deadPhantom.server_ragdoll or deadPhantom:GetRagdollEntity()
-        if phantomBody:IsValid() and deadPhantom:IsPhantom() then
-            deadPhantom:SpawnForRound(true)
-            deadPhantom:SetPos(FindRespawnLocation(phantomBody:GetPos()) or phantomBody:GetPos())
-            deadPhantom:SetEyeAngles(Angle(0, phantomBody:GetAngles().y, 0))
-            deadPhantom:SetHealth(50)
-            phantomBody:Remove()
-            net.Start("TTT_Defibrillated")
-            net.WriteString(deadPhantom:Nick())
-            net.Broadcast()
-            deadPhantom:PrintMessage(HUD_PRINTCENTER, "Your attacker died and you have been respawned.")
+        local respawn = false
+        local phantomUsers = table.GetKeys(deadPhantoms)
+        for _, key in pairs(phantomUsers) do
+            local phantom = deadPhantoms[key]
+            if phantom.attacker == ply:UniqueID() and phantom.player then
+                local deadPhantom = phantom.player
+                -- Find the Phantom's corpse
+                local phantomBody = deadPhantom.server_ragdoll or deadPhantom:GetRagdollEntity()
+                if phantomBody:IsValid() and deadPhantom:IsPhantom() and not deadPhantom:Alive() then
+                    deadPhantom:SpawnForRound(true)
+                    deadPhantom:SetPos(FindRespawnLocation(phantomBody:GetPos()) or phantomBody:GetPos())
+                    deadPhantom:SetEyeAngles(Angle(0, phantomBody:GetAngles().y, 0))
+
+                    local health = 50
+                    if GetConVar("ttt_phantom_weaker_each_respawn"):GetBool() then
+                        for _ = 0, phantom.times do
+                            health = health / 2
+                        end
+                        health = math.max(1, math.Round(health))
+                    end
+                    deadPhantom:SetHealth(health)
+                    phantomBody:Remove()
+                    net.Start("TTT_Defibrillated")
+                    net.WriteString(deadPhantom:Nick())
+                    net.Broadcast()
+                    deadPhantom:PrintMessage(HUD_PRINTCENTER, "Your attacker died and you have been respawned.")
+                    respawn = true
+                end
+            end
+        end
+
+        if respawn then
             for _, v in pairs(player.GetAll()) do
-                if (v:IsRole(ROLE_DETECTIVE) or v:IsRole(ROLE_DETRAITOR)) and v:Alive() then
+                if (v:IsDetective() or v:IsDetraitor()) and v:Alive() then
                     v:PrintMessage(HUD_PRINTCENTER, "The phantom has been respawned.")
                 end
             end
-            ply:SetNWBool("HauntedSmoke", false)
-            SendFullStateUpdate()
         end
+
+        ply:SetNWBool("HauntedSmoke", false)
+        SendFullStateUpdate()
     end
 
     local assassintarget = ""
@@ -1051,7 +1073,14 @@ function GM:PlayerDeath(victim, infl, attacker)
                 v:PrintMessage(HUD_PRINTCENTER, "The phantom has been killed.")
             end
         end
-        deadPhantom = victim
+
+        local uqid = victim:UniqueID()
+        -- Keep track of how many times this Phantom has been killed and by who
+        if not deadPhantoms[uqid] then
+            deadPhantoms[uqid] = {times = 1, player = victim, attacker = attacker:UniqueID()}
+        else
+            deadPhantoms[uqid] = {times = deadPhantoms[uqid].times + 1, player = victim, attacker = attacker:UniqueID()}
+        end
     end
 
     if attacker:IsPlayer() and attacker:IsKiller() then

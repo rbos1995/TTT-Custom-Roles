@@ -95,8 +95,9 @@ ttt_zombie_damage_scale       0.2 // The fraction a Zombie's damage will be scal
 ttt_zombie_damage_reduction   0.8 // The fraction an attacker's bullet damage will be reduced to when they are shooting a Zombie.
 ttt_zombie_prime_only_weapons 1   // Whether only Prime Zombies (e.g. players who spawn as Zombies originally) are allowed to pick up weapons.
 
-// Jester
-ttt_jester_win_by_traitors 1 // Whether the Jester will win the round if they are killed by a traitor
+// Jesters
+ttt_jester_win_by_traitors 1   // Whether the Jester will win the round if they are killed by a traitor
+ttt_swapper_respawn_health 100 // What amount of health to give the Swapper when they are killed and respawned
 
 // Other
 ttt_traitor_vision_enable             0 // Whether members of the Traitor team can see other members of the Traitor team (including Glitches) through walls via a highlight effect.

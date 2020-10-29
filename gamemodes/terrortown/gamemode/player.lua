@@ -827,7 +827,8 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
         SendFullStateUpdate()
     end
 
-    if attacker:IsPlayer() and attacker:IsAssassin() and ply:Nick() ~= attacker:GetNWString("AssassinTarget", "") then
+    local attackertarget = attacker:GetNWString("AssassinTarget", "")
+    if attacker:IsPlayer() and attacker:IsAssassin() and ply:Nick() ~= attackertarget and attackertarget ~= "" then
         attacker:PrintMessage(HUD_PRINTCENTER, "Contract failed. You killed the wrong player.")
         attacker:PrintMessage(HUD_PRINTTALK, "Contract failed. You killed the wrong player.")
         attacker:SetNWString("AssassinTarget", "")

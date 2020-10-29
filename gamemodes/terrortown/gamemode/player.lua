@@ -779,11 +779,11 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
         end
     end
 
-    if ply:GetNWBool("KillerSmoke") == true then
+    if ply:GetNWBool("KillerSmoke", false) then
         ply:SetNWBool("KillerSmoke", false)
     end
 
-    if ply:GetNWBool("HauntedSmoke") == true then
+    if ply:GetNWBool("HauntedSmoke", false) then
         local respawn = false
         local phantomUsers = table.GetKeys(deadPhantoms)
         for _, key in pairs(phantomUsers) do
@@ -827,53 +827,49 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
         SendFullStateUpdate()
     end
 
-    local assassintarget = ""
-    for _, v in pairs(player.GetAll()) do
-        if v:IsAssassin() then
-            assassintarget = v:GetNWString("AssassinTarget", "")
-        end
+    if attacker:IsPlayer() and attacker:IsAssassin() and ply:Nick() ~= attacker:GetNWString("AssassinTarget", "") then
+        attacker:PrintMessage(HUD_PRINTCENTER, "Contract failed. You killed the wrong player.")
+        attacker:PrintMessage(HUD_PRINTTALK, "Contract failed. You killed the wrong player.")
+        attacker:SetNWString("AssassinTarget", "")
     end
-    if ply:Nick() == assassintarget then
-        for _, v in pairs(player.GetAll()) do
-            if v:IsAssassin() then
-                local enemies = {}
-                local detectives = {}
-                for _, p in pairs(player.GetAll()) do
-                    if p:Alive() and not p:IsSpec() and p:Nick() ~= assassintarget then
-                        -- Exclude Glitch from this list so they don't get discovered immediately
-                        if p:IsInnocent() or p:IsPhantom() or p:IsMercenary() or p:IsKiller() then
-                            table.insert(enemies, p:Nick())
-                        -- Count monsters as enemies if Monsters-as-Traitors is not enabled
-                        elseif not GetGlobalBool("ttt_monsters_are_traitors") and (p:IsZombie() or p:IsVampire()) then
-                            table.insert(enemies, p:Nick())
-                        elseif p:IsDetective() then
-                            table.insert(detectives, p:Nick())
-                        end
-                    end
-                end
-                if #enemies > 0 then
-                    v:SetNWString("AssassinTarget", enemies[math.random(#enemies)])
-                elseif #detectives > 0 then
-                    v:SetNWString("AssassinTarget", detectives[math.random(#detectives)])
-                end
 
-                if #enemies + #detectives >= 1 then
-                    local targetCount
-                    if #enemies + #detectives > 1 then
-                        targetCount = "next"
-                    elseif #enemies + #detectives == 1 then
-                        targetCount = "final"
+    for _, v in pairs(player.GetAll()) do
+        local assassintarget = v:GetNWString("AssassinTarget", "")
+        if v:IsAssassin() and ply:Nick() == assassintarget then
+            local enemies = {}
+            local detectives = {}
+            for _, p in pairs(player.GetAll()) do
+                if p:Alive() and not p:IsSpec() and p:Nick() ~= assassintarget then
+                    -- Exclude Glitch from this list so they don't get discovered immediately
+                    if p:IsInnocent() or p:IsPhantom() or p:IsMercenary() or p:IsKiller() then
+                        table.insert(enemies, p:Nick())
+                    -- Count monsters as enemies if Monsters-as-Traitors is not enabled
+                    elseif not GetGlobalBool("ttt_monsters_are_traitors") and (p:IsZombie() or p:IsVampire()) then
+                        table.insert(enemies, p:Nick())
+                    elseif p:IsDetective() then
+                        table.insert(detectives, p:Nick())
                     end
-                    local targetMessage = "Your " .. targetCount .. " target is " .. v:GetNWString("AssassinTarget", "")
-                    v:PrintMessage(HUD_PRINTCENTER, "Target Eliminated. " .. targetMessage)
-                    v:PrintMessage(HUD_PRINTTALK, targetMessage)
                 end
             end
+
+            if #enemies > 0 then
+                v:SetNWString("AssassinTarget", enemies[math.random(#enemies)])
+            elseif #detectives > 0 then
+                v:SetNWString("AssassinTarget", detectives[math.random(#detectives)])
+            end
+
+            if #enemies + #detectives >= 1 then
+                local targetCount
+                if #enemies + #detectives > 1 then
+                    targetCount = "next"
+                elseif #enemies + #detectives == 1 then
+                    targetCount = "final"
+                end
+                local targetMessage = "Your " .. targetCount .. " target is " .. v:GetNWString("AssassinTarget", "")
+                v:PrintMessage(HUD_PRINTCENTER, "Target Eliminated. " .. targetMessage)
+                v:PrintMessage(HUD_PRINTTALK, targetMessage)
+            end
         end
-    end
-    if attacker:IsPlayer() and attacker:IsAssassin() and ply:Nick() ~= assassintarget and assassintarget ~= "" then
-        attacker:PrintMessage(HUD_PRINTCENTER, "Contract failed. You killed the wrong player.")
-        attacker:SetNWString("AssassinTarget", "")
     end
 
     -- Experimental: Fire a last shot if ironsighting and not headshot
@@ -1401,15 +1397,9 @@ function GM:EntityTakeDamage(ent, dmginfo)
     local att = dmginfo:GetAttacker()
 
     if SERVER and GetRoundState() == ROUND_ACTIVE then
-        local assassintarget = ""
-        for _, v in pairs(player.GetAll()) do
-            if v:IsAssassin() then
-                assassintarget = v:GetNWString("AssassinTarget", "")
-            end
-        end
         local assassinbonus = 1
         if att:IsPlayer() and att:IsAssassin() and ent:IsPlayer() then
-            if ent:Nick() == assassintarget then
+            if ent:Nick() == att:GetNWString("AssassinTarget", "") then
                 assassinbonus = 2
             else
                 assassinbonus = 0.5

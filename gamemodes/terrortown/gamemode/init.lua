@@ -204,6 +204,8 @@ local ttt_minply = CreateConVar("ttt_minimum_players", "2", FCVAR_ARCHIVE + FCVA
 
 -- debuggery
 local ttt_dbgwin = CreateConVar("ttt_debug_preventwin", "0")
+CreateConVar("ttt_debug_logkills", "1", FCVAR_ARCHIVE + FCVAR_NOTIFY)
+local ttt_dbgroles = CreateConVar("ttt_debug_logroles", "1", FCVAR_ARCHIVE + FCVAR_NOTIFY)
 
 -- Localise stuff we use often. It's like Lua go-faster stripes.
 local math = math
@@ -1276,6 +1278,15 @@ local function GetRandomPlayer(choicelist)
     return choicelist[pick], pick
 end
 
+local function PrintRoleText(text)
+    if not ttt_dbgroles:GetBool() then return end
+    print(text)
+end
+
+local function PrintRole(ply, role)
+    PrintRoleText(ply:Nick() .. " (" .. ply:SteamID() .. ") - " .. role)
+end
+
 function SelectRoles()
     local choices = {}
     local prev_roles = {
@@ -1353,7 +1364,7 @@ function SelectRoles()
     local hasKiller = false
     local hasDetraitor = false
 
-    print("-----CHECKING EXTERNALLY CHOSEN ROLES-----")
+    PrintRoleText("-----CHECKING EXTERNALLY CHOSEN ROLES-----")
     for _, v in pairs(player.GetAll()) do
         if IsValid(v) and (not v:IsSpec()) then
             local index = 0
@@ -1369,63 +1380,63 @@ function SelectRoles()
                     ts = ts + 1
                     vanilla_ts = vanilla_ts + 1
                     hasTraitor = true
-                    print(v:Nick() .. " (" .. v:SteamID() .. ") - Traitor")
+                    PrintRole(v, "Traitor")
                 elseif role == ROLE_DETRAITOR then
                     ts = ts + 1
                     hasDetraitor = true
-                    print(v:Nick() .. " (" .. v:SteamID() .. ") - Detraitor")
+                    PrintRole(v, "Detraitor")
                 elseif role == ROLE_ZOMBIE then
                     ms = ms + 1
                     hasMonster = true
                     hasZombie = true
                     hasSpecial = hasSpecial or GetGlobalBool("ttt_monsters_are_traitors")
                     hasTraitor = hasTraitor or GetGlobalBool("ttt_monsters_are_traitors")
-                    print(v:Nick() .. " (" .. v:SteamID() .. ") - Zombie")
+                    PrintRole(v, "Zombie")
                     v:SetZombiePrime(true)
                 elseif role == ROLE_HYPNOTIST then
                     ts = ts + 1
                     hasSpecial = true
-                    print(v:Nick() .. " (" .. v:SteamID() .. ") - Hypnotist")
+                    PrintRole(v, "Hypnotist")
                 elseif role == ROLE_VAMPIRE then
                     ms = ms + 1
                     hasMonster = true
                     hasSpecial = hasSpecial or GetGlobalBool("ttt_monsters_are_traitors")
                     hasTraitor = hasTraitor or GetGlobalBool("ttt_monsters_are_traitors")
-                    print(v:Nick() .. " (" .. v:SteamID() .. ") - Vampire")
+                    PrintRole(v, "Vampire")
                     v:SetVampirePrime(true)
                 elseif role == ROLE_ASSASSIN then
                     ts = ts + 1
                     hasSpecial = true
-                    print(v:Nick() .. " (" .. v:SteamID() .. ") - Assassin")
+                    PrintRole(v, "Assassin")
                 elseif role == ROLE_JESTER then
                     hasJester = true
-                    print(v:Nick() .. " (" .. v:SteamID() .. ") - Jester")
+                    PrintRole(v, "Jester")
                 elseif role == ROLE_SWAPPER then
                     hasJester = true
-                    print(v:Nick() .. " (" .. v:SteamID() .. ") - Swapper")
+                    PrintRole(v, "Swapper")
                 elseif role == ROLE_KILLER then
                     hasKiller = true
-                    print(v:Nick() .. " (" .. v:SteamID() .. ") - Killer")
+                    PrintRole(v, "Killer")
                 elseif role == ROLE_DETECTIVE then
                     ds = ds + 1
-                    print(v:Nick() .. " (" .. v:SteamID() .. ") - Detective")
+                    PrintRole(v, "Detective")
                 elseif role == ROLE_MERCENARY then
                     hasMercenary = true
-                    print(v:Nick() .. " (" .. v:SteamID() .. ") - Mercenary")
+                    PrintRole(v, "Mercenary")
                 elseif role == ROLE_PHANTOM then
                     hasPhantom = true
-                    print(v:Nick() .. " (" .. v:SteamID() .. ") - Phantom")
+                    PrintRole(v, "Phantom")
                 elseif role == ROLE_GLITCH then
                     hasGlitch = true
-                    print(v:Nick() .. " (" .. v:SteamID() .. ") - Glitch")
+                    PrintRole(v, "Glitch")
                 elseif role == ROLE_INNOCENT then
-                    print(v:Nick() .. " (" .. v:SteamID() .. ") - Innocent")
+                    PrintRole(v, "Innocent")
                 end
             end
         end
     end
 
-    print("-----RANDOMLY PICKING REMAINING ROLES-----")
+    PrintRoleText("-----RANDOMLY PICKING REMAINING ROLES-----")
 
     -- If monsters are traitors, run the old zombie check logic
     if GetGlobalBool("ttt_monsters_are_traitors") and (GetConVar("ttt_zombie_enabled"):GetBool() and math.random() <= zombie_chance and not hasTraitor and not hasSpecial) or hasZombie then
@@ -1435,7 +1446,7 @@ function SelectRoles()
 
             -- make this guy zombie if he was not a traitor last time, or if he makes a roll
             if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_TRAITOR, ROLE_ASSASSIN, ROLE_HYPNOTIST, ROLE_ZOMBIE, ROLE_VAMPIRE) or (math.random(1, 3) == 2)) then
-                print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Zombie")
+                PrintRole(pply, "Zombie")
                 pply:SetRole(ROLE_ZOMBIE)
                 pply:SetZombiePrime(true)
                 table.remove(choices, pick)
@@ -1458,25 +1469,25 @@ function SelectRoles()
             -- make this guy traitor if he was not one last time, or if he makes a roll
             if IsValid(pply) and (not wasTraitor or math.random(1, 3) == 2) then
                 if ts >= GetConVar("ttt_detraitor_required_traitors"):GetInt() and GetConVar("ttt_detraitor_enabled"):GetBool() and math.random() <= detraitor_chance and ds == 0 and not hasDetraitor then
-                    print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Detraitor")
+                    PrintRole(pply, "Detraitor")
                     pply:SetRole(ROLE_DETRAITOR)
                     hasDetraitor = true
                 elseif ts >= GetConVar("ttt_hypnotist_required_traitors"):GetInt() and GetConVar("ttt_hypnotist_enabled"):GetBool() and math.random() <= hypnotist_chance and not hasSpecial then
-                    print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Hypnotist")
+                    PrintRole(pply, "Hypnotist")
                     pply:SetRole(ROLE_HYPNOTIST)
                     hasSpecial = true
                 -- Include Vampires only if Monsters are considered traitors
                 elseif GetGlobalBool("ttt_monsters_are_traitors") and ts >= GetConVar("ttt_vampire_required_traitors"):GetInt() and GetConVar("ttt_vampire_enabled"):GetBool() and math.random() <= vampire_chance and not hasSpecial then
-                    print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Vampire")
+                    PrintRole(pply, "Vampire")
                     pply:SetRole(ROLE_VAMPIRE)
                     pply:SetVampirePrime(true)
                     hasSpecial = true
                 elseif ts >= GetConVar("ttt_assassin_required_traitors"):GetInt() and GetConVar("ttt_assassin_enabled"):GetBool() and math.random() <= assassin_chance and not hasSpecial then
-                    print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Assassin")
+                    PrintRole(pply, "Assassin")
                     pply:SetRole(ROLE_ASSASSIN)
                     hasSpecial = true
                 else
-                    print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Traitor")
+                    PrintRole(pply, "Traitor")
                     pply:SetRole(ROLE_TRAITOR)
                     vanilla_ts = vanilla_ts + 1
                 end
@@ -1495,13 +1506,13 @@ function SelectRoles()
             -- make this guy monster if he was not one last time, or if he makes a roll
             if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_ZOMBIE, ROLE_VAMPIRE) or math.random(1, 3) == 2) then
                 if ts >= GetConVar("ttt_zombie_required_traitors"):GetInt() and GetConVar("ttt_zombie_enabled"):GetBool() and math.random() <= zombie_chance and not hasMonster then
-                    print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Zombie")
+                    PrintRole(pply, "Zombie")
                     pply:SetRole(ROLE_ZOMBIE)
                     pply:SetZombiePrime(true)
                     table.remove(choices, pick)
                     hasMonster = true
                 elseif ts >= GetConVar("ttt_vampire_required_traitors"):GetInt() and GetConVar("ttt_vampire_enabled"):GetBool() and math.random() <= vampire_chance and not hasMonster then
-                    print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Vampire")
+                    PrintRole(pply, "Vampire")
                     pply:SetRole(ROLE_VAMPIRE)
                     pply:SetVampirePrime(true)
                     table.remove(choices, pick)
@@ -1523,7 +1534,7 @@ function SelectRoles()
         if #choices <= (det_count - ds) then
             for k, pply in pairs(choices) do
                 if IsValid(pply) then
-                    print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Detective")
+                    PrintRole(pply, "Detective")
                     pply:SetRole(ROLE_DETECTIVE)
                     table.remove(choices, k)
                     ds = ds + 1
@@ -1542,7 +1553,7 @@ function SelectRoles()
             -- him here (he might still get it if we don't have enough
             -- alternatives)
             if not pply:GetAvoidDetective() or math.random(1, 2) == 2 then
-                print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Detective")
+                PrintRole(pply, "Detective")
                 pply:SetRole(ROLE_DETECTIVE)
                 table.remove(choices, pick)
                 ds = ds + 1
@@ -1557,14 +1568,14 @@ function SelectRoles()
     if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_JESTER, ROLE_SWAPPER) or math.random(1, 3) == 2) then
         if GetConVar("ttt_jester_enabled"):GetBool() and #choices >= GetConVar("ttt_jester_required_innos"):GetInt() and math.random() <= jester_chance and not hasJester then
             if IsValid(pply) then
-                print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Jester")
+                PrintRole(pply, "Jester")
                 pply:SetRole(ROLE_JESTER)
                 table.remove(choices, pick)
                 hasJester = true
             end
         elseif GetConVar("ttt_swapper_enabled"):GetBool() and #choices >= GetConVar("ttt_swapper_required_innos"):GetInt() and math.random() <= swapper_chance and not hasJester then
             if IsValid(pply) then
-                print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Swapper")
+                PrintRole(pply, "Swapper")
                 pply:SetRole(ROLE_SWAPPER)
                 table.remove(choices, pick)
                 hasJester = true
@@ -1578,7 +1589,7 @@ function SelectRoles()
     if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_KILLER) or math.random(1, 3) == 2) then
         if GetConVar("ttt_killer_enabled"):GetBool() and #choices >= GetConVar("ttt_killer_required_innos"):GetInt() and math.random() <= killer_chance and not hasKiller then
             if IsValid(pply) then
-                print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Killer")
+                PrintRole(pply, "Killer")
                 pply:SetRole(ROLE_KILLER)
                 pply:SetMaxHealth(GetConVar("ttt_killer_max_health"):GetInt())
                 pply:SetHealth(GetConVar("ttt_killer_max_health"):GetInt())
@@ -1593,7 +1604,7 @@ function SelectRoles()
     if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_MERCENARY) or math.random(1, 3) == 2) then
         if GetConVar("ttt_mercenary_enabled"):GetBool() and #choices >= GetConVar("ttt_mercenary_required_innos"):GetInt() and math.random() <= mercenary_chance and not hasMercenary then
             if IsValid(pply) then
-                print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Mercenary")
+                PrintRole(pply, "Mercenary")
                 pply:SetRole(ROLE_MERCENARY)
                 table.remove(choices, pick)
                 hasMercenary = true
@@ -1606,7 +1617,7 @@ function SelectRoles()
     if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_PHANTOM) or math.random(1, 3) == 2) then
         if GetConVar("ttt_phantom_enabled"):GetBool() and #choices >= GetConVar("ttt_phantom_required_innos"):GetInt() and math.random() <= phantom_chance and not hasPhantom then
             if IsValid(pply) then
-                print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Phantom")
+                PrintRole(pply, "Phantom")
                 pply:SetRole(ROLE_PHANTOM)
                 table.remove(choices, pick)
                 hasPhantom = true
@@ -1620,7 +1631,7 @@ function SelectRoles()
         -- Only spawn a glitch if we have multiple vanilla Traitors since otherwise the role doesn't do anything
         if GetConVar("ttt_glitch_enabled"):GetBool() and #choices >= GetConVar("ttt_glitch_required_innos"):GetInt() and math.random() <= glitch_chance and not hasGlitch and vanilla_ts > 1 then
             if IsValid(pply) then
-                print(pply:Nick() .. " (" .. pply:SteamID() .. ") - Glitch")
+                PrintRole(pply, "Glitch")
                 pply:SetRole(ROLE_GLITCH)
                 table.remove(choices, pick)
                 hasGlitch = true
@@ -1630,10 +1641,10 @@ function SelectRoles()
 
     -- Anyone left is innocent
     for _, v in pairs(choices) do
+        PrintRole(v, "Innocent")
         v:SetRole(ROLE_INNOCENT)
-        print(v:Nick() .. " (" .. v:SteamID() .. ") - Innocent")
     end
-    print("------------DONE PICKING ROLES------------")
+    PrintRoleText("------------DONE PICKING ROLES------------")
 
     GAMEMODE.LastRole = {}
 

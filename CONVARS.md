@@ -120,6 +120,10 @@ ttt_sprint_regenerate_innocent 0.08 // Sets stamina regeneration for innocents. 
 ttt_sprint_regenerate_traitor  0.12 // Sets stamina regeneration speed for traitors. (0.01-2)
 ttt_sprint_consume             0.2  // Sets stamina consumption speed. (0.1-5)
 
+// Logging
+ttt_debug_logkills 1 // Whether to log when a player is killed in the console
+ttt_debug_logroles 1 // Whether to log what roles players are assigned in the console
+
 // Double Jump
 multijump_default_jumps          1 // The amount of extra jumps players should get. Set to 0 to disable multiple jumps
 multijump_default_power          1 // Multiplier for the jump-power when multi jumping

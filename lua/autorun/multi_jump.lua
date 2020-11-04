@@ -105,10 +105,10 @@ if CLIENT then
         if client:GetPos():Distance(pos) > 1000 then return end
 
         local emitter = ParticleEmitter(pos)
-        for _ = 0, math.random(30, 40) do
-            local partpos = ply:GetPos() + Vector(math.random(-3, 3), math.random(-3, 3), 10)
+        for _ = 0, math.random(40, 50) do
+            local partpos = ply:GetPos() + Vector(math.random(-10, 10), math.random(-10, 10), 10)
             local part = emitter:Add("particle/particle_smokegrenade", partpos)
-            if (part) then
+            if part then
                 part:SetDieTime(math.random(0.4, 0.7))
                 part:SetStartAlpha(math.random(200, 240))
                 part:SetEndAlpha(0)

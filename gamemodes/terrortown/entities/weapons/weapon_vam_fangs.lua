@@ -4,7 +4,7 @@ if CLIENT then
     SWEP.PrintName = "Fangs"
     SWEP.EquipMenuData = {
         type = "Weapon",
-        desc = "Left click suck blood from the living and dead. Right click to fade."
+        desc = "Left-click to suck blood. Right-click to fade."
     };
 
     SWEP.Slot = 8 -- add 1 to get the slot number key
@@ -13,6 +13,7 @@ if CLIENT then
     SWEP.UseHands = true
 else
     util.AddNetworkString("TTT_Vampified")
+    util.AddNetworkString("TTT_Vampire_Fade")
 end
 
 SWEP.InLoadoutFor = { ROLE_VAMPIRE }
@@ -64,7 +65,7 @@ function SWEP:Initialize()
     self.fading = false
 
     if CLIENT then
-        self:AddHUDHelp("Left click suck blood from the living and dead", "Right click to fade", false)
+        self:AddHUDHelp("Left-click to suck blood", "Right-click to fade", false)
     end
 end
 
@@ -123,6 +124,12 @@ end
 function SWEP:SecondaryAttack()
     if self:Clip1() == 100 then
         self:SetClip1(0)
+
+        if SERVER then
+            net.Start("TTT_Vampire_Fade")
+            net.WriteEntity(self:GetOwner())
+            net.Broadcast()
+        end
     end
 end
 
@@ -355,4 +362,53 @@ else
 
         return util.TraceHull({start=spos, endpos=sdest, filter=self:GetOwner(), mask=MASK_SHOT_HULL, mins=kmins, maxs=kmaxs})
     end
+end
+
+if CLIENT then
+    net.Receive("TTT_Vampire_Fade", function()
+        local ply = net.ReadEntity()
+        if not IsValid(ply) or ply:IsSpec() or not ply:Alive() then return end
+
+        local pos = ply:GetPos() + Vector(0, 0, 10)
+        local client = LocalPlayer()
+        if client:GetPos():Distance(pos) > 1000 then return end
+
+        local emitter = ParticleEmitter(pos)
+        for _ = 0, math.random(150, 250) do
+            local max_height = ply:GetViewOffset().z + 10
+            local height = math.random(0, max_height)
+
+            -- Set width limits based on what the random height is so it vaguely resembles a person-shape (or just their head)
+            local width_min = -20
+            local width_max = 20
+
+            local location = (height / max_height)
+            -- Head
+            if location > 0.75 then
+                width_min = -5
+                width_max = 5
+            end
+
+            local partpos = ply:GetPos() + Vector(math.random(width_min, width_max), math.random(width_min, width_max), height)
+            local part = emitter:Add("particle/particle_smokegrenade", partpos)
+            if part then
+                part:SetDieTime(math.random(0.7, 1.2))
+                part:SetStartAlpha(math.random(200, 240))
+                part:SetEndAlpha(0)
+                part:SetColor(math.random(200, 220), math.random(200, 220), math.random(200, 220))
+
+                part:SetStartSize(math.random(6, 8))
+                part:SetEndSize(0)
+
+                part:SetRoll(0)
+                part:SetRollDelta(0)
+
+                local velocity = VectorRand() * math.random(10, 15);
+                velocity.z = 5;
+                part:SetVelocity(velocity)
+            end
+        end
+
+        emitter:Finish()
+    end)
 end

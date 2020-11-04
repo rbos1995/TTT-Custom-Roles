@@ -81,6 +81,7 @@ ttt_killer_warn_all         0    // Whether to warn all players if there is a Ki
 // Monsters
 ttt_monsters_are_traitors     0   // Whether Monsters (Zombie and Vampire) should be treated as members of the Traitors team. If enabled, ttt_monster_pct is not used.
 ttt_vampire_vision_enable     1   // Whether Vampires have their special vision highlights enabled
+ttt_vampire_convert_enable    1   // Whether Vampires have the ability to drain other players' blood using their fangs
 ttt_vampire_show_target_icon  1   // Whether Vampires have an icon over other players' heads showing who to kill. Server or round must be restarted for changes to take effect.
 ttt_vampire_damage_reduction  0.8 // The fraction an attacker's bullet damage will be reduced to when they are shooting a Vampire.
 ttt_vampire_fang_timer        5   // The amount of time fangs must be used to fully drain a target's blood

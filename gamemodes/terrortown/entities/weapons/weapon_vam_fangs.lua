@@ -45,6 +45,8 @@ local STATE_CONVERT = 3
 
 local beep = Sound("npc/fast_zombie/fz_alert_close1.wav")
 
+local vampire_convert = CreateConVar("ttt_vampire_convert_enable", "1", FCVAR_ARCHIVE)
+
 function SWEP:SetupDataTables()
     self:NetworkVar("Int", 0, "State")
     self:NetworkVar("Int", 1, "FangTime")
@@ -106,7 +108,7 @@ function SWEP:PrimaryAttack()
             end
 
             self:Eat(tr.Entity)
-        elseif ent:IsPlayer() then
+        elseif ent:IsPlayer() and vampire_convert:GetBool() then
             if ent:IsJesterTeam() then
                 self:Error("TARGET IS A JESTER")
             elseif ent:IsMonsterAlly() then

@@ -46,7 +46,11 @@ local STATE_CONVERT = 3
 
 local beep = Sound("npc/fast_zombie/fz_alert_close1.wav")
 
-local vampire_convert = CreateConVar("ttt_vampire_convert_enable", "1", FCVAR_ARCHIVE)
+local vampire_convert = CreateConVar("ttt_vampire_convert_enable", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+local vampire_fang_timer = CreateConVar("ttt_vampire_fang_timer", "5", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+local vampire_fang_heal = CreateConVar("ttt_vampire_fang_heal", "50", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+local vampire_fang_overheal = CreateConVar("ttt_vampire_fang_overheal", "25", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+local vampire_prime_convert = CreateConVar("ttt_vampire_prime_only_convert", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 
 function SWEP:SetupDataTables()
     self:NetworkVar("Int", 0, "State")
@@ -54,7 +58,7 @@ function SWEP:SetupDataTables()
     self:NetworkVar("Float", 0, "StartTime")
     self:NetworkVar("String", 0, "Message")
     if SERVER then
-        self:SetFangTime(GetConVar("ttt_vampire_fang_timer"):GetInt())
+        self:SetFangTime(vampire_fang_timer:GetInt())
         self:Reset()
     end
 end
@@ -80,6 +84,10 @@ function SWEP:OnDrop()
     end
     self:Reset()
     self:Remove()
+end
+
+local function CanConvert(ply)
+    return not vampire_prime_convert:GetBool() or ply:IsVampirePrime()
 end
 
 local function GetPlayerFromBody(body)
@@ -227,7 +235,8 @@ function SWEP:Think()
 
         local tr = self:GetTraceEntity()
         if not self:GetOwner():KeyDown(IN_ATTACK) or tr.Entity ~= self.TargetEntity then
-            if self:GetState() == STATE_CONVERT then
+            -- If the player is allowed to convert, do that
+            if self:GetState() == STATE_CONVERT and CanConvert(self:GetOwner()) then
                 local ply = self.TargetEntity
                 ply:StripWeapon("weapon_hyp_brainwash")
                 ply:StripWeapon("weapon_ttt_wtester")
@@ -274,8 +283,8 @@ function SWEP:Think()
 
                 self:SetState(STATE_NONE)
 
-                local vamheal = GetConVar("ttt_vampire_fang_heal"):GetInt()
-                local vamoverheal = GetConVar("ttt_vampire_fang_overheal"):GetInt()
+                local vamheal = vampire_fang_heal:GetInt()
+                local vamoverheal = vampire_fang_overheal:GetInt()
                 self:GetOwner():SetHealth(math.min(self:GetOwner():Health() + vamheal, self:GetOwner():GetMaxHealth() + vamoverheal))
 
                 self:DropBones()
@@ -283,7 +292,10 @@ function SWEP:Think()
         else
             if CurTime() >= self:GetStartTime() + (self:GetFangTime() / 2) then
                 self:SetState(STATE_CONVERT)
-                self:SetMessage("DRAINING - RELEASE TO CONVERT")
+                -- Only update the message if this player can convert
+                if CanConvert(self:GetOwner()) then
+                    self:SetMessage("DRAINING - RELEASE TO CONVERT")
+                end
             end
         end
     end

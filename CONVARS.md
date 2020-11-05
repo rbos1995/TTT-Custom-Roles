@@ -79,22 +79,23 @@ ttt_killer_damage_reduction 0.55 // The fraction an attacker's bullet damage wil
 ttt_killer_warn_all         0    // Whether to warn all players if there is a Killer. If 0, only traitors will be warned
 
 // Monsters
-ttt_monsters_are_traitors     0   // Whether Monsters (Zombie and Vampire) should be treated as members of the Traitors team. If enabled, ttt_monster_pct is not used.
-ttt_vampire_vision_enable     1   // Whether Vampires have their special vision highlights enabled
-ttt_vampire_convert_enable    1   // Whether Vampires have the ability to drain other players' blood using their fangs
-ttt_vampire_show_target_icon  1   // Whether Vampires have an icon over other players' heads showing who to kill. Server or round must be restarted for changes to take effect.
-ttt_vampire_damage_reduction  0.8 // The fraction an attacker's bullet damage will be reduced to when they are shooting a Vampire.
-ttt_vampire_fang_timer        5   // The amount of time fangs must be used to fully drain a target's blood
-ttt_vampire_fang_heal         50  // The amount of health a Vampire will heal by when they fully drain a target's blood
-ttt_vampire_fang_overheal     25  // The amount over the Vampire's normal maximum health (e.g. 100 + this ConVar) that the Vampire can heal to by drinking blood.
-ttt_vampire_prime_death_mode  0   // What to do when the Prime Vampire(s) (e.g. playters who spawn as Vampires originally) are killed. 0 - Do nothing. 1 - Kill all non-prime Vampires. 2 - Revert all non-prime Vampires to their original role.
-ttt_zombie_vision_enable      1   // Whether Zombies have their special vision highlights enabled
-ttt_zombie_spit_enable        1   // Whether Zombies have their spit attack enabled
-ttt_zombie_leap_enable        1   // Whether Zombies have their leap attack enabled
-ttt_zombie_show_target_icon   1   // Whether Zombies have an icon over other players' heads showing who to kill. Server or round must be restarted for changes to take effect.
-ttt_zombie_damage_scale       0.2 // The fraction a Zombie's damage will be scaled to when they are attacking without using their knife.
-ttt_zombie_damage_reduction   0.8 // The fraction an attacker's bullet damage will be reduced to when they are shooting a Zombie.
-ttt_zombie_prime_only_weapons 1   // Whether only Prime Zombies (e.g. players who spawn as Zombies originally) are allowed to pick up weapons.
+ttt_monsters_are_traitors      0   // Whether Monsters (Zombie and Vampire) should be treated as members of the Traitors team. If enabled, ttt_monster_pct is not used.
+ttt_vampire_vision_enable      1   // Whether Vampires have their special vision highlights enabled
+ttt_vampire_convert_enable     1   // Whether Vampires have the ability to drain other players' blood using their fangs
+ttt_vampire_show_target_icon   1   // Whether Vampires have an icon over other players' heads showing who to kill. Server or round must be restarted for changes to take effect.
+ttt_vampire_damage_reduction   0.8 // The fraction an attacker's bullet damage will be reduced to when they are shooting a Vampire.
+ttt_vampire_fang_timer         5   // The amount of time fangs must be used to fully drain a target's blood
+ttt_vampire_fang_heal          50  // The amount of health a Vampire will heal by when they fully drain a target's blood
+ttt_vampire_fang_overheal      25  // The amount over the Vampire's normal maximum health (e.g. 100 + this ConVar) that the Vampire can heal to by drinking blood.
+ttt_vampire_prime_death_mode   0   // What to do when the Prime Vampire(s) (e.g. playters who spawn as Vampires originally) are killed. 0 - Do nothing. 1 - Kill all non-prime Vampires. 2 - Revert all non-prime Vampires to their original role.
+ttt_vampire_prime_only_convert 1   // Whether only Prime Vampires (e.g. players who spawn as Vampire originally) are allowed to convert other players.
+ttt_zombie_vision_enable       1   // Whether Zombies have their special vision highlights enabled
+ttt_zombie_spit_enable         1   // Whether Zombies have their spit attack enabled
+ttt_zombie_leap_enable         1   // Whether Zombies have their leap attack enabled
+ttt_zombie_show_target_icon    1   // Whether Zombies have an icon over other players' heads showing who to kill. Server or round must be restarted for changes to take effect.
+ttt_zombie_damage_scale        0.2 // The fraction a Zombie's damage will be scaled to when they are attacking without using their knife.
+ttt_zombie_damage_reduction    0.8 // The fraction an attacker's bullet damage will be reduced to when they are shooting a Zombie.
+ttt_zombie_prime_only_weapons  1   // Whether only Prime Zombies (e.g. players who spawn as Zombies originally) are allowed to pick up weapons.
 
 // Jesters
 ttt_jester_win_by_traitors 1   // Whether the Jester will win the round if they are killed by a traitor

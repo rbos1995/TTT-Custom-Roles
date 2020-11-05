@@ -1774,13 +1774,17 @@ function GM:PlayerShouldTaunt(ply, actid)
     return true
 end
 
-local function HasKiller()
+local function GetKillerPlayer()
     for _, v in pairs(player.GetAll()) do
-        if v:Team() == TEAM_TERROR and v:IsTerror() and v:GetKiller() then
-            return true
+        if v:Team() == TEAM_TERROR and v:IsTerror() and v:IsKiller() then
+            return v
         end
     end
-    return false
+    return nil
+end
+
+local function HasKillerPlayer()
+    return GetKillerPlayer() ~= nil
 end
 
 local killerSmokeTime = 0
@@ -1803,7 +1807,7 @@ local function HandleKillerSmokeTick()
                     if v:IsKiller() and v:Alive() then
                         v:SetNWBool("KillerSmoke", true)
                         v:PrintMessage(HUD_PRINTCENTER, "Your Evil is showing")
-                    elseif (v:IsKiller() and not v:Alive()) or not HasKiller() then
+                    elseif (v:IsKiller() and not v:Alive()) or not HasKillerPlayer() then
                         timer.Remove("KillerKillCheckTimer")
                     end
                 end
@@ -1815,9 +1819,22 @@ local function HandleKillerSmokeTick()
 end
 
 timer.Create("KillerKillCheckTimer", 1, 0, function()
-    if GetRoundState() == ROUND_ACTIVE and GetConVar("ttt_killer_smoke_enabled"):GetBool() and HasKiller() then
+    local killer = GetKillerPlayer();
+    if GetRoundState() == ROUND_ACTIVE and GetConVar("ttt_killer_smoke_enabled"):GetBool() and killer ~= nil then
         killerSmokeTime = killerSmokeTime + 1
-        if killerSmokeTime >= GetConVar("ttt_killer_smoke_timer"):GetInt() then
+
+        -- Warn the killer that they need to kill at 1/2 time remaining, 1/4 time remaining, 10 seconds remaining, and 5 seconds remaining
+        local smoke_timer = GetConVar("ttt_killer_smoke_timer"):GetInt()
+        local timer_remaining = smoke_timer - killerSmokeTime
+        local timer_fraction = (timer_remaining / smoke_timer)
+        -- Don't do the 1/2 and 1/4 checks if they represent < 10 seconds
+        if (timer_fraction == 0.5 and timer_remaining > 10) or
+            (timer_fraction == 0.25 and timer_remaining > 10) or
+            timer_remaining == 10 or timer_remaining == 5 then
+            killer:PrintMessage(HUD_PRINTTALK, "Your Evil grows impatient -- kill someone in the next " .. timer_remaining .. " seconds!")
+        end
+
+        if killerSmokeTime >= smoke_timer then
             HandleKillerSmokeTick()
         else
             timer.Remove("KillerTick")

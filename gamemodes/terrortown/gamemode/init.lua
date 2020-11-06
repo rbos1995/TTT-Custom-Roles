@@ -1437,10 +1437,11 @@ function SelectRoles()
 
     -- If monsters are traitors, run the old zombie check logic
     if GetGlobalBool("ttt_monsters_are_traitors") and (GetConVar("ttt_zombie_enabled"):GetBool() and math.random() <= zombie_chance and not hasTraitor and not hasSpecial) or hasZombie then
+        print("Monsters - A - ts=" .. tostring(ts) .. " monster_count=" .. tostring(monster_count) .. " #choices=" .. tostring(#choices))
         while ts < monster_count and #choices > 0 do
             -- select random index in choices table
             local pply, pick = GetRandomPlayer(choices)
-
+            print("Checking " .. pply:Nick())
             -- make this guy zombie if he was not a traitor last time, or if he makes a roll
             if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_TRAITOR, ROLE_ASSASSIN, ROLE_HYPNOTIST, ROLE_ZOMBIE, ROLE_VAMPIRE) or (math.random(1, 3) == 2)) then
                 PrintRole(pply, "Zombie")
@@ -1453,10 +1454,11 @@ function SelectRoles()
             end
         end
     else
+        print("Traitors - ts=" .. tostring(ts) .. " traitor_count=" .. tostring(traitor_count) .. " #choices=" .. tostring(#choices))
         while ts < traitor_count and #choices > 0 do
             -- select random index in choices table
             local pply, pick = GetRandomPlayer(choices)
-
+            print("Checking " .. pply:Nick())
             -- Handle previous role logic, paying attention to whether monsters are traitors
             local wasTraitor = WasRole(prev_roles, pply, ROLE_TRAITOR, ROLE_ASSASSIN, ROLE_HYPNOTIST, ROLE_DETRAITOR)
             if GetGlobalBool("ttt_monsters_are_traitors") then
@@ -1496,10 +1498,11 @@ function SelectRoles()
 
     -- If monsters aren't traitors, add some monsters maybe
     if not GetGlobalBool("ttt_monsters_are_traitors") then
+        print("Monsters - B - ms=" .. tostring(ms) .. " monster_count=" .. tostring(monster_count) .. " #choices=" .. tostring(#choices))
         while ms < monster_count and #choices > 0 do
             -- select random index in choices table
             local pply, pick = GetRandomPlayer(choices)
-
+            print("Checking " .. pply:Nick())
             -- make this guy monster if he was not one last time, or if he makes a roll
             if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_ZOMBIE, ROLE_VAMPIRE) or math.random(1, 3) == 2) then
                 if ts >= GetConVar("ttt_zombie_required_traitors"):GetInt() and GetConVar("ttt_zombie_enabled"):GetBool() and math.random() <= zombie_chance and not hasMonster then
@@ -1525,10 +1528,12 @@ function SelectRoles()
     -- traitor, so becoming detective does not mean you lost a chance to be
     -- traitor
     local min_karma = GetConVarNumber("ttt_detective_karma_min") or 0
+    print("Detective - ds=" .. tostring(ds) .. " det_count=" .. tostring(det_count) .. " #choices=" .. tostring(#choices))
     while not hasDetraitor and ds < det_count and #choices > 0 do
         -- sometimes we need all remaining choices to be detective to fill the
         -- roles up, this happens more often with a lot of detective-deniers
         if #choices <= (det_count - ds) then
+            print("Backfill #choices=" .. tostring(#choices) .. " ds=" .. tostring(ds) .. " det_count=" .. tostring(det_count))
             for k, pply in pairs(choices) do
                 if IsValid(pply) then
                     PrintRole(pply, "Detective")
@@ -1543,7 +1548,7 @@ function SelectRoles()
 
         -- select random index in choices table
         local pply, pick = GetRandomPlayer(choices)
-
+        print("Checking " .. pply:Nick())
         -- we are less likely to be a detective unless we were innocent last round
         if (IsValid(pply) and pply:GetBaseKarma() > min_karma and (WasRole(prev_roles, pply, ROLE_INNOCENT, ROLE_GLITCH, ROLE_PHANTOM, ROLE_MERCENARY) or math.random(1, 3) == 2)) then
             -- if a player has specified he does not want to be detective, we skip
@@ -1560,7 +1565,7 @@ function SelectRoles()
 
     -- select random index in choices table
     local pply, pick = GetRandomPlayer(choices)
-
+    print("Checking " .. pply:Nick() .. " for Jester/Swapper")
     -- make this guy jester if he was not one last time, or if he makes a roll
     if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_JESTER, ROLE_SWAPPER) or math.random(1, 3) == 2) then
         if GetConVar("ttt_jester_enabled"):GetBool() and #choices >= GetConVar("ttt_jester_required_innos"):GetInt() and math.random() <= jester_chance and not hasJester then
@@ -1582,6 +1587,7 @@ function SelectRoles()
 
     -- select random index in choices table
     pply, pick = GetRandomPlayer(choices)
+    print("Checking " .. pply:Nick() .. " for Killer")
     -- make this guy killer if he was not one last time, or if he makes a roll
     if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_KILLER) or math.random(1, 3) == 2) then
         if GetConVar("ttt_killer_enabled"):GetBool() and #choices >= GetConVar("ttt_killer_required_innos"):GetInt() and math.random() <= killer_chance and not hasKiller then
@@ -1598,6 +1604,7 @@ function SelectRoles()
 
     -- select random index in choices table
     pply, pick = GetRandomPlayer(choices)
+    print("Checking " .. pply:Nick() .. " for Mercenary")
     if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_MERCENARY) or math.random(1, 3) == 2) then
         if GetConVar("ttt_mercenary_enabled"):GetBool() and #choices >= GetConVar("ttt_mercenary_required_innos"):GetInt() and math.random() <= mercenary_chance and not hasMercenary then
             if IsValid(pply) then
@@ -1611,6 +1618,7 @@ function SelectRoles()
 
     -- select random index in choices table
     pply, pick = GetRandomPlayer(choices)
+    print("Checking " .. pply:Nick() .. " for Phantom")
     if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_PHANTOM) or math.random(1, 3) == 2) then
         if GetConVar("ttt_phantom_enabled"):GetBool() and #choices >= GetConVar("ttt_phantom_required_innos"):GetInt() and math.random() <= phantom_chance and not hasPhantom then
             if IsValid(pply) then
@@ -1624,6 +1632,7 @@ function SelectRoles()
 
     -- select random index in choices table
     pply, pick = GetRandomPlayer(choices)
+    print("Checking " .. pply:Nick() .. " for Glitch")
     if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_GLITCH) or math.random(1, 3) == 2) then
         -- Only spawn a glitch if we have multiple vanilla Traitors since otherwise the role doesn't do anything
         if GetConVar("ttt_glitch_enabled"):GetBool() and #choices >= GetConVar("ttt_glitch_required_innos"):GetInt() and math.random() <= glitch_chance and not hasGlitch and vanilla_ts > 1 then
@@ -1636,6 +1645,7 @@ function SelectRoles()
         end
     end
 
+    print("Checking " .. #choices .. " remaining players for Innocent")
     -- Anyone left is innocent
     for _, v in pairs(choices) do
         PrintRole(v, "Innocent")

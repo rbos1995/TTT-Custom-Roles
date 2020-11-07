@@ -377,7 +377,7 @@ function GM:DrawDeathNotice() end
 
 function GM:Think()
     for _, v in pairs(player.GetAll()) do
-        if v:Alive() and (v:GetNWBool("HauntedSmoke") or v:GetNWBool("KillerSmoke")) then
+        if v:Alive() and ((v:GetNWBool("HauntedSmoke", false) and GetGlobalBool("ttt_phantom_killer_smoke")) or v:GetNWBool("KillerSmoke", false)) then
             if not v.SmokeEmitter then v.SmokeEmitter = ParticleEmitter(v:GetPos()) end
             if not v.SmokeNextPart then v.SmokeNextPart = CurTime() end
             local pos = v:GetPos() + Vector(0, 0, 30)
@@ -387,8 +387,8 @@ function GM:Think()
                 v.SmokeEmitter:SetPos(pos)
                 v.SmokeNextPart = CurTime() + math.Rand(0.003, 0.01)
                 local vec = Vector(math.Rand(-8, 8), math.Rand(-8, 8), math.Rand(10, 55))
-                local pos = v:LocalToWorld(vec)
-                local particle = v.SmokeEmitter:Add("particle/snow.vmt", pos)
+                local world_pos = v:LocalToWorld(vec)
+                local particle = v.SmokeEmitter:Add("particle/snow.vmt", world_pos)
                 particle:SetVelocity(Vector(0, 0, 4) + VectorRand() * 3)
                 particle:SetDieTime(math.Rand(0.5, 2))
                 particle:SetStartAlpha(math.random(150, 220))
@@ -611,3 +611,74 @@ net.Receive("TTT_LoadMonsterEquipment", function()
     local monsters_are_traitors = net.ReadBool()
     LoadMonsterEquipment(monsters_are_traitors)
 end)
+
+local FootSteps = {}
+local footMat = Material("thieves/footprint")
+local maxDistance = 600 ^ 2
+local function DrawFootprints()
+    local ply = LocalPlayer()
+    if not IsValid(ply) then return end
+
+	cam.Start3D(ply:EyePos(), ply:EyeAngles())
+	render.SetMaterial(footMat)
+	local pos = ply:EyePos()
+	for k, footstep in pairs(FootSteps) do
+		if footstep.curtime + footstep.fadetime > CurTime() then
+			if (footstep.pos - pos):LengthSqr() < maxDistance then
+				render.DrawQuadEasy(footstep.pos + footstep.normal * 0.01, footstep.normal, 10, 20, footstep.col, footstep.angle)
+			end
+		else
+			FootSteps[k] = nil
+		end
+	end
+	cam.End3D()
+end
+
+local function AddFootstep(ply, pos, ang, foot, col, fade_time)
+	ang.p = 0
+	ang.r = 0
+	local fpos = pos
+	if foot == 1 then
+		fpos = fpos + ang:Right() * 5
+	else
+		fpos = fpos + ang:Right() * -5
+    end
+
+	local trace = {
+        start = fpos,
+        endpos = fpos + Vector(0, 0, -10),
+        filter = ply
+    }
+	local tr = util.TraceLine(trace)
+	if tr.Hit then
+		local tbl = {
+            pos = tr.HitPos,
+            curtime = CurTime(),
+            fadetime = fade_time,
+            angle = ang.y,
+            normal = tr.HitNormal,
+            col = col
+        }
+		table.insert(FootSteps, tbl)
+    end
+end
+
+net.Receive("TTT_PlayerFootstep", function()
+    local ply = net.ReadEntity()
+    local pos = net.ReadVector()
+    local ang = net.ReadAngle()
+    local foot = net.ReadBit()
+    local color = net.ReadTable()
+    local fade_time = net.ReadUInt(8)
+
+    AddFootstep(ply, pos, ang, foot, color, fade_time)
+end)
+
+net.Receive("TTT_ClearPlayerFootsteps", function()
+    print("Clearing Footsteps")
+    table.Empty(FootSteps)
+end)
+
+function GM:PostDrawTranslucentRenderables()
+	DrawFootprints()
+end

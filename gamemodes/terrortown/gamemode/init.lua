@@ -171,6 +171,8 @@ CreateConVar("ttt_phantom_weaker_each_respawn", "0", FCVAR_ARCHIVE + FCVAR_REPLI
 CreateConVar("ttt_traitors_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_monsters_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_killers_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_killer_footstep_time", "5", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The amount of time a Phantom's killer's footsteps should show before fading", 0, 250)
+CreateConVar("ttt_phantom_killer_smoke", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 
 CreateConVar("ttt_use_weapon_spawn_scripts", "1")
 CreateConVar("ttt_weapon_spawn_count", "0")
@@ -269,8 +271,15 @@ util.AddNetworkString("TTT_BuyableWeapon_Assassin")
 util.AddNetworkString("TTT_BuyableWeapon_Hypnotist")
 util.AddNetworkString("TTT_BuyableWeapon_Killer")
 util.AddNetworkString("TTT_LoadMonsterEquipment")
+util.AddNetworkString("TTT_PlayerFootstep")
+util.AddNetworkString("TTT_ClearPlayerFootsteps")
 
 local jesterkilled = 0
+
+local function ClearAllFootsteps()
+    net.Start("TTT_ClearPlayerFootsteps")
+    net.Broadcast()
+end
 
 -- Round mechanics
 function GM:Initialize()
@@ -385,6 +394,8 @@ function GM:SyncGlobals()
     SetGlobalBool("ttt_killer_show_target_icon", GetConVar("ttt_killer_show_target_icon"):GetBool())
     SetGlobalBool("ttt_zombie_show_target_icon", GetConVar("ttt_zombie_show_target_icon"):GetBool())
     SetGlobalBool("ttt_vampire_show_target_icon", GetConVar("ttt_vampire_show_target_icon"):GetBool())
+
+    SetGlobalBool("ttt_phantom_killer_smoke", GetConVar("ttt_phantom_killer_smoke"):GetBool())
 end
 
 function SendRoundState(state, ply)
@@ -670,7 +681,7 @@ function PrepareRound()
     timer.Simple(1, SendRoleReset)
     -- Tell hooks and map we started prep
     hook.Call("TTTPrepareRound")
-
+    ClearAllFootsteps()
     ents.TTT.TriggerRoundStateOutputs(ROUND_PREP)
 end
 
@@ -1004,7 +1015,7 @@ function BeginRound()
     SetRoundState(ROUND_ACTIVE)
     LANG.Msg("round_started")
     ServerLog("Round proper has begun...\n")
-
+    ClearAllFootsteps()
     GAMEMODE:UpdatePlayerLoadouts() -- needs to happen when round_active
 
     hook.Call("TTTBeginRound")
@@ -1688,5 +1699,29 @@ function ReadRoleEquipment()
         net.Start("TTT_BuyableWeapon_" .. role)
         net.WriteTable(roleweapons)
         net.Broadcast()
+    end
+end
+
+-- Kill footsteps on player and client
+function GM:PlayerFootstep(ply, pos, foot, sound, volume, rf)
+    if not IsValid(ply) then return end
+    if ply:IsSpec() then return true end
+
+    -- This player killed a Phantom. Tell everyone where their foot steps should go
+    local phantom_killer_time = GetConVar("ttt_phantom_killer_footstep_time"):GetInt()
+    if phantom_killer_time > 0 and ply:GetNWBool("HauntedSmoke", false) then
+        net.Start("TTT_PlayerFootstep")
+        net.WriteEntity(ply)
+        net.WriteVector(pos)
+        net.WriteAngle(ply:GetAimVector():Angle())
+        net.WriteBit(foot)
+        net.WriteTable(Color(138, 4, 4))
+        net.WriteUInt(phantom_killer_time, 8)
+        net.Broadcast()
+    end
+
+    if ply:Crouching() or ply:GetMaxSpeed() < 150 then
+        -- do not play anything, just prevent normal sounds from playing
+        return true
     end
 end

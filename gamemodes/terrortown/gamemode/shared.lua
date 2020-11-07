@@ -225,14 +225,6 @@ function GM:TTTPlayerColor(model)
     return COLOR_WHITE
 end
 
--- Kill footsteps on player and client
-function GM:PlayerFootstep(ply, pos, foot, sound, volume, rf)
-    if IsValid(ply) and (ply:Crouching() or ply:GetMaxSpeed() < 150 or ply:IsSpec()) then
-        -- do not play anything, just prevent normal sounds from playing
-        return true
-    end
-end
-
 -- Predicted move speed changes
 function GM:Move(ply, mv)
     if ply:IsTerror() then

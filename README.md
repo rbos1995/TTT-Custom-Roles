@@ -50,6 +50,7 @@ Goal: Work on your own to win the round by playing your role carefully\
 - u/ToXiN_reddit on Reddit for suggesting disallowing multi-jump if you didn't originally jump.
 - u/Trenched_Colonel, u/JeremyDaBanana, and u/JanuryFirstCakeDay on Reddit for the ideas behind my implementation of the Detraitor role.
 - u/The00Devon on Reddit for the idea for the Killer smoke countdown warning.
+- u/Left4DayZ1 on Reddit f or the idea for Phantom killer footprints.
 - [GengarDC](https://steamcommunity.com/id/GengarDC) for his [TTT_Double_Jump_Nerfed](https://steamcommunity.com/sharedfiles/filedetails/?id=1962801891) mod whose functionality was integrated via a setting.
 - [KuMaGR](https://steamcommunity.com/id/kuma96) for his [TTT Glowing Traitors](https://steamcommunity.com/sharedfiles/filedetails/?id=690007939) mod which was the basis for the idea behind the Traitor team highlight feature.
 

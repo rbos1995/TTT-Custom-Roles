@@ -68,8 +68,8 @@ ttt_vam_credits_starting 0 // Number of credits the Vampire starts with
 ttt_der_credits_starting 2 // Number of credits the Detraitor starts with
 
 // Innocents
-ttt_phantom_killer_footstep_time 5 // The amount of time a Phantom's killer's footsteps should show before fading. 0 to disable
-ttt_phantom_killer_smoke         1 // Whether to show smoke on the player who killed the Phantom
+ttt_phantom_killer_footstep_time 10 // The amount of time a Phantom's killer's footsteps should show before fading. 0 to disable
+ttt_phantom_killer_smoke         1  // Whether to show smoke on the player who killed the Phantom
 
 // Killer
 ttt_killer_knife_enabled    1    // Whether the Killer knife is enabled

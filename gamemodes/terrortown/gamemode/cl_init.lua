@@ -622,10 +622,13 @@ local function DrawFootprints()
 	cam.Start3D(ply:EyePos(), ply:EyeAngles())
 	render.SetMaterial(footMat)
 	local pos = ply:EyePos()
-	for k, footstep in pairs(FootSteps) do
-		if footstep.curtime + footstep.fadetime > CurTime() then
-			if (footstep.pos - pos):LengthSqr() < maxDistance then
-				render.DrawQuadEasy(footstep.pos + footstep.normal * 0.01, footstep.normal, 10, 20, footstep.col, footstep.angle)
+    for k, footstep in pairs(FootSteps) do
+        local timediff = (footstep.curtime + footstep.fadetime) - CurTime()
+        if timediff > 0 then
+            if (footstep.pos - pos):LengthSqr() < maxDistance then
+                local faderatio = timediff / footstep.fadetime
+                local col = Color(footstep.col.r, footstep.col.g, footstep.col.b, faderatio * 255)
+				render.DrawQuadEasy(footstep.pos + footstep.normal * 0.01, footstep.normal, 10, 20, col, footstep.angle)
 			end
 		else
 			FootSteps[k] = nil

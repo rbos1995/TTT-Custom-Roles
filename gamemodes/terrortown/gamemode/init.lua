@@ -171,7 +171,7 @@ CreateConVar("ttt_phantom_weaker_each_respawn", "0", FCVAR_ARCHIVE + FCVAR_REPLI
 CreateConVar("ttt_traitors_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_monsters_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_killers_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
-CreateConVar("ttt_phantom_killer_footstep_time", "5", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The amount of time a Phantom's killer's footsteps should show before fading", 0, 250)
+CreateConVar("ttt_phantom_killer_footstep_time", "10", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The amount of time a Phantom's killer's footsteps should show before fading", 0, 250)
 CreateConVar("ttt_phantom_killer_smoke", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 
 CreateConVar("ttt_use_weapon_spawn_scripts", "1")

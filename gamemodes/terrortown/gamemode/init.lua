@@ -1556,7 +1556,7 @@ function SelectRoles()
         local pply, pick = GetRandomPlayer(choices)
 
         -- we are less likely to be a detective unless we were innocent last round
-        if (IsValid(pply) and pply:GetBaseKarma() > min_karma and (WasRole(prev_roles, pply, ROLE_INNOCENT, ROLE_GLITCH, ROLE_PHANTOM, ROLE_MERCENARY) or math.random(1, 3) == 2)) then
+        if (IsValid(pply) and (pply:GetBaseKarma() >= min_karma and WasRole(prev_roles, pply, ROLE_INNOCENT, ROLE_GLITCH, ROLE_PHANTOM, ROLE_MERCENARY) or math.random(1, 3) == 2)) then
             -- if a player has specified he does not want to be detective, we skip
             -- him here (he might still get it if we don't have enough
             -- alternatives)

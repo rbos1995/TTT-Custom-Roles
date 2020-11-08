@@ -68,8 +68,16 @@ ttt_vam_credits_starting 0 // Number of credits the Vampire starts with
 ttt_der_credits_starting 2 // Number of credits the Detraitor starts with
 
 // Innocents
-ttt_phantom_killer_footstep_time 10 // The amount of time a Phantom's killer's footsteps should show before fading. 0 to disable
-ttt_phantom_killer_smoke         1  // Whether to show smoke on the player who killed the Phantom
+ttt_phantom_weaker_each_respawn      0   // Whether a Phantom respawns weaker (1/2 as much HP) each time they respawn, down to a minimum of 1
+ttt_phantom_killer_footstep_time     10  // The amount of time a Phantom's killer's footsteps should show before fading. 0 to disable
+ttt_phantom_killer_smoke             1   // Whether to show smoke on the player who killed the Phantom
+ttt_phantom_killer_haunt             1   // Whether to have the Phantom haunt their killer
+ttt_phantom_killer_haunt_power_max   100 // The maximum amount of power a Phantom can have when haunting their killer
+ttt_phantom_killer_haunt_power_rate  10  // The amount of power to regain per second when a Phantom is haunting their killer
+ttt_phantom_killer_haunt_move_cost   25  // The amount of power to spend when a Phantom is moving their killer via a haunting. 0 to disable
+ttt_phantom_killer_haunt_attack_cost 50  // The amount of power to spend when a Phantom is making their killer attack via a haunting. 0 to disable
+ttt_phantom_killer_haunt_jump_cost   20  // The amount of power to spend when a Phantom is making their killer jump via a haunting. 0 to disable
+ttt_phantom_killer_haunt_drop_cost   15  // The amount of power to spend when a Phantom is making their killer drop their wepon via a haunting. 0 to disable
 
 // Killer
 ttt_killer_knife_enabled    1    // Whether the Killer knife is enabled
@@ -116,7 +124,6 @@ ttt_player_set_model_on_respawn       1 // Whether to set a player's model when 
 ttt_traitors_know_swapper             0 // Whether the Traitors are told when a member of the Jester team is really a Swapper
 ttt_monsters_know_swapper             0 // Whether the Monsters are told when a member of the Jester team is really a Swapper
 ttt_killers_know_swapper              0 // Whether the Killer is told when a member of the Jester team is really a Swapper
-ttt_phantom_weaker_each_respawn       0 // Whether a Phantom respawns weaker (1/2 as much HP) each time they respawn, down to a minimum of 1
 
 // Sprint
 ttt_sprint_enabled             1    // Whether to enable sprinting. NOTE: Disabling sprinting doesn't hide the bar on the client UI but it will never change from being 100% full

@@ -377,7 +377,7 @@ function GM:DrawDeathNotice() end
 
 function GM:Think()
     for _, v in pairs(player.GetAll()) do
-        if v:Alive() and ((v:GetNWBool("HauntedSmoke", false) and GetGlobalBool("ttt_phantom_killer_smoke")) or v:GetNWBool("KillerSmoke", false)) then
+        if v:Alive() and ((v:GetNWBool("Haunted", false) and GetGlobalBool("ttt_phantom_killer_smoke")) or v:GetNWBool("KillerSmoke", false)) then
             if not v.SmokeEmitter then v.SmokeEmitter = ParticleEmitter(v:GetPos()) end
             if not v.SmokeNextPart then v.SmokeNextPart = CurTime() end
             local pos = v:GetPos() + Vector(0, 0, 30)

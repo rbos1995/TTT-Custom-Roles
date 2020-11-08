@@ -167,12 +167,19 @@ CreateConVar("ttt_vampire_damage_reduction", "0.8", FCVAR_ARCHIVE + FCVAR_REPLIC
 CreateConVar("ttt_vampire_prime_death_mode", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_jester_win_by_traitors", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_swapper_respawn_health", "100", FCVAR_ARCHIVE + FCVAR_REPLICATED)
-CreateConVar("ttt_phantom_weaker_each_respawn", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_traitors_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_monsters_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_killers_know_swapper", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_weaker_each_respawn", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_phantom_killer_footstep_time", "10", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The amount of time a Phantom's killer's footsteps should show before fading", 0, 250)
 CreateConVar("ttt_phantom_killer_smoke", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_killer_haunt", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_killer_haunt_power_max", "100", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_killer_haunt_power_rate", "10", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_killer_haunt_move_cost", "25", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_killer_haunt_attack_cost", "50", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_killer_haunt_jump_cost", "20", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_killer_haunt_drop_cost", "15", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 
 CreateConVar("ttt_use_weapon_spawn_scripts", "1")
 CreateConVar("ttt_weapon_spawn_count", "0")
@@ -396,6 +403,11 @@ function GM:SyncGlobals()
     SetGlobalBool("ttt_vampire_show_target_icon", GetConVar("ttt_vampire_show_target_icon"):GetBool())
 
     SetGlobalBool("ttt_phantom_killer_smoke", GetConVar("ttt_phantom_killer_smoke"):GetBool())
+    SetGlobalInt("ttt_phantom_killer_haunt_power_max", GetConVar("ttt_phantom_killer_haunt_power_max"):GetInt())
+    SetGlobalInt("ttt_phantom_killer_haunt_move_cost", GetConVar("ttt_phantom_killer_haunt_move_cost"):GetInt())
+    SetGlobalInt("ttt_phantom_killer_haunt_attack_cost", GetConVar("ttt_phantom_killer_haunt_attack_cost"):GetInt())
+    SetGlobalInt("ttt_phantom_killer_haunt_jump_cost", GetConVar("ttt_phantom_killer_haunt_jump_cost"):GetInt())
+    SetGlobalInt("ttt_phantom_killer_haunt_drop_cost", GetConVar("ttt_phantom_killer_haunt_drop_cost"):GetInt())
 end
 
 function SendRoundState(state, ply)
@@ -600,7 +612,9 @@ end
 
 function PrepareRound()
     for _, v in pairs(player.GetAll()) do
-        v:SetNWBool("HauntedSmoke", false)
+        v:SetNWBool("Haunted", false)
+        v:SetNWBool("Haunting", false)
+        v:SetNWInt("HauntingPower", 0)
         v:SetNWBool("KillerSmoke", false)
         v:SetNWBool("PlayerHighlightOn", false)
         v:SetNWBool("RoleRevealed", false)
@@ -1708,15 +1722,15 @@ function GM:PlayerFootstep(ply, pos, foot, sound, volume, rf)
     if ply:IsSpec() then return true end
 
     -- This player killed a Phantom. Tell everyone where their foot steps should go
-    local phantom_killer_time = GetConVar("ttt_phantom_killer_footstep_time"):GetInt()
-    if phantom_killer_time > 0 and ply:GetNWBool("HauntedSmoke", false) then
+    local phantom_killer_footstep_time = GetConVar("ttt_phantom_killer_footstep_time"):GetInt()
+    if phantom_killer_footstep_time > 0 and ply:GetNWBool("Haunted", false) then
         net.Start("TTT_PlayerFootstep")
         net.WriteEntity(ply)
         net.WriteVector(pos)
         net.WriteAngle(ply:GetAimVector():Angle())
         net.WriteBit(foot)
         net.WriteTable(Color(138, 4, 4))
-        net.WriteUInt(phantom_killer_time, 8)
+        net.WriteUInt(phantom_killer_footstep_time, 8)
         net.Broadcast()
     end
 

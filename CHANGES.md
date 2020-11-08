@@ -2,6 +2,10 @@
 ## Mercenary
 - Added setting to allow Mercenary to buy all Traitor and/or Detective weapons in their shop. See [Configuration](CONVARS.md).
 
+## Phantom
+- Added bloody footprints following the Phantom's killer. See [Configuration](CONVARS.md) to disable.
+- Added ability to haunt the Phantom's killer and perform various actions. See [Configuration](CONVARS.md) to disable and adjust costs.
+
 # Traitors
 - Made Hypnotist and Assassin more integrated traitor team members by
   - Allowing transferring of credits

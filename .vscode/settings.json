@@ -227,6 +227,9 @@
         "AddFavorite",
         "C4_WIRE_COUNT",
         "CARRY_WEIGHT_LIMIT",
-        "PrintTable"
+        "PrintTable",
+        "IN_MOVELEFT",
+        "IN_MOVERIGHT",
+        "IN_BACK"
     ]
 }

@@ -1666,7 +1666,6 @@ local function SendHighlightEvent(ply, role, enabled, onenabled, ondisabled)
             if onenabled ~= nil then onenabled(ply) end
 
             net.Start("TTT_" .. role .. "_PlayerHighlightOn")
-            net.WriteEntity(ply)
             net.Send(ply)
             ply:SetNWBool("PlayerHighlightOn", true)
         end
@@ -1674,7 +1673,6 @@ local function SendHighlightEvent(ply, role, enabled, onenabled, ondisabled)
         if ondisabled ~= nil then ondisabled(ply) end
 
         net.Start("TTT_PlayerHighlightOff")
-        net.WriteEntity(ply)
         net.Send(ply)
         ply:SetNWBool("PlayerHighlightOn", false)
     end

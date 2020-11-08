@@ -619,42 +619,49 @@ local function DrawFootprints()
     local ply = LocalPlayer()
     if not IsValid(ply) then return end
 
-	cam.Start3D(ply:EyePos(), ply:EyeAngles())
-	render.SetMaterial(footMat)
-	local pos = ply:EyePos()
+    cam.Start3D(ply:EyePos(), ply:EyeAngles())
+    render.SetMaterial(footMat)
+    local pos = ply:EyePos()
     for k, footstep in pairs(FootSteps) do
         local timediff = (footstep.curtime + footstep.fadetime) - CurTime()
         if timediff > 0 then
             if (footstep.pos - pos):LengthSqr() < maxDistance then
+                -- Fade the footprints into invisibility based on how long they've been around
                 local faderatio = timediff / footstep.fadetime
                 local col = Color(footstep.col.r, footstep.col.g, footstep.col.b, faderatio * 255)
-				render.DrawQuadEasy(footstep.pos + footstep.normal * 0.01, footstep.normal, 10, 20, col, footstep.angle)
-			end
-		else
-			FootSteps[k] = nil
-		end
-	end
-	cam.End3D()
+
+                local hitpos = footstep.pos
+                -- If this player is spectating through the target's eyes, move the prints down so they don't appear to float
+                if ply:IsSpec() and ply:GetNWInt("SpecMode", -1) == OBS_MODE_IN_EYE then
+                    hitpos = hitpos + Vector(0, 0, -50)
+                end
+                render.DrawQuadEasy(hitpos + footstep.normal * 0.01, footstep.normal, 10, 20, col, footstep.angle)
+            end
+        else
+            FootSteps[k] = nil
+        end
+    end
+    cam.End3D()
 end
 
 local function AddFootstep(ply, pos, ang, foot, col, fade_time)
-	ang.p = 0
-	ang.r = 0
-	local fpos = pos
-	if foot == 1 then
-		fpos = fpos + ang:Right() * 5
-	else
-		fpos = fpos + ang:Right() * -5
+    ang.p = 0
+    ang.r = 0
+    local fpos = pos
+    if foot == 1 then
+        fpos = fpos + ang:Right() * 5
+    else
+        fpos = fpos + ang:Right() * -5
     end
 
-	local trace = {
+    local trace = {
         start = fpos,
         endpos = fpos + Vector(0, 0, -10),
         filter = ply
     }
-	local tr = util.TraceLine(trace)
-	if tr.Hit then
-		local tbl = {
+    local tr = util.TraceLine(trace)
+    if tr.Hit then
+        local tbl = {
             pos = tr.HitPos,
             curtime = CurTime(),
             fadetime = fade_time,
@@ -662,7 +669,7 @@ local function AddFootstep(ply, pos, ang, foot, col, fade_time)
             normal = tr.HitNormal,
             col = col
         }
-		table.insert(FootSteps, tbl)
+        table.insert(FootSteps, tbl)
     end
 end
 
@@ -683,5 +690,5 @@ net.Receive("TTT_ClearPlayerFootsteps", function()
 end)
 
 function GM:PostDrawTranslucentRenderables()
-	DrawFootprints()
+    DrawFootprints()
 end

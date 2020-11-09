@@ -164,7 +164,6 @@
         "SetGlobalInt",
         "OBS_MODE_ROAMING",
         "MOVETYPE_NOCLIP",
-        "env_fire",
         "RandomPairs",
         "ROUND_BEGIN",
         "FindMetaTable",

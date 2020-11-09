@@ -38,7 +38,8 @@ if CLIENT then
         elseif role == ROLE_DETRAITOR then
             role = "a detraitor"
         else
-            role = "innocent"
+            col = COLOR_WHITE
+            role = "a hidden role"
         end
 
         -- Format the reason for their death
@@ -85,7 +86,13 @@ if SERVER then
                     elseif killer:IsPlayer() and victim ~= killer then
                         reason = "ply"
                         killerz = killer:Nick()
-                        role = killer:GetRole()
+
+                        -- If this Phantom was killed by a player and they are supposed to haunt them, hide their killer's role
+                        if GetRoundState() == ROUND_ACTIVE and victim:IsPhantom() and GetConVar("ttt_phantom_killer_haunt"):GetBool() then
+                            role = ROLE_NONE
+                        else
+                            role = killer:GetRole()
+                        end
                     end
                 end
             end

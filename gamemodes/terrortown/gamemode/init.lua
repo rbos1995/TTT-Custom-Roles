@@ -175,11 +175,11 @@ CreateConVar("ttt_phantom_killer_footstep_time", "10", FCVAR_ARCHIVE + FCVAR_REP
 CreateConVar("ttt_phantom_killer_smoke", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_phantom_killer_haunt", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_phantom_killer_haunt_power_max", "100", FCVAR_ARCHIVE + FCVAR_REPLICATED)
-CreateConVar("ttt_phantom_killer_haunt_power_rate", "10", FCVAR_ARCHIVE + FCVAR_REPLICATED)
-CreateConVar("ttt_phantom_killer_haunt_move_cost", "25", FCVAR_ARCHIVE + FCVAR_REPLICATED)
-CreateConVar("ttt_phantom_killer_haunt_attack_cost", "50", FCVAR_ARCHIVE + FCVAR_REPLICATED)
-CreateConVar("ttt_phantom_killer_haunt_jump_cost", "20", FCVAR_ARCHIVE + FCVAR_REPLICATED)
-CreateConVar("ttt_phantom_killer_haunt_drop_cost", "15", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_killer_haunt_power_rate", "5", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_killer_haunt_move_cost", "50", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_killer_haunt_attack_cost", "75", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_killer_haunt_jump_cost", "30", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_killer_haunt_drop_cost", "25", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 
 CreateConVar("ttt_use_weapon_spawn_scripts", "1")
 CreateConVar("ttt_weapon_spawn_count", "0")
@@ -844,7 +844,7 @@ local function InitRoundEndTime()
 end
 
 local function OnPlayerDeath(victim, infl, attacker)
-    if victim:IsJester() and attacker:IsPlayer() and infl:GetClass() ~= env_fire and (not attacker:IsJesterTeam()) and GetRoundState() == ROUND_ACTIVE then
+    if victim:IsJester() and attacker:IsPlayer() and (not attacker:IsJesterTeam()) and GetRoundState() == ROUND_ACTIVE then
         net.Start("TTT_JesterKiller")
         net.WriteString(attacker:Nick())
         net.WriteString(victim:Nick())

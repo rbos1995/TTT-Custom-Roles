@@ -397,10 +397,13 @@ function GM:KeyPress(ply, key)
 
             if action == nil then return end
 
+            -- If this cost isn't valid, this action isn't valid
+            local cost = action[4]
+            if cost <= 0 then return end
+
             -- Check power level
             local currentpower = ply:GetNWInt("HauntingPower", 0)
-            local cost = action[4]
-            if cost > 0 and currentpower < cost then return end
+            if currentpower < cost then return end
 
             ply:SetNWInt("HauntingPower", currentpower - cost)
             killer:ConCommand(action[1])
@@ -1101,7 +1104,7 @@ function GM:PlayerDeath(victim, infl, attacker)
         end
         DRINKS.AddPlayerAction("suicide", victim)
     end
-    if victim:IsPhantom() and attacker:IsPlayer() and attacker ~= victim and infl:GetClass() ~= env_fire and GetRoundState() == ROUND_ACTIVE then
+    if victim:IsPhantom() and attacker:IsPlayer() and attacker ~= victim and GetRoundState() == ROUND_ACTIVE then
         attacker:SetNWBool("Haunted", true)
 
         if GetConVar("ttt_phantom_killer_haunt"):GetBool() then
@@ -1144,7 +1147,7 @@ function GM:PlayerDeath(victim, infl, attacker)
         ResetKillerKillCheckTimer()
     end
 
-    if victim:IsSwapper() and attacker:IsPlayer() and attacker ~= victim and infl:GetClass() ~= env_fire and GetRoundState() == ROUND_ACTIVE then
+    if victim:IsSwapper() and attacker:IsPlayer() and attacker ~= victim and GetRoundState() == ROUND_ACTIVE then
         for _, ply in pairs(player.GetAll()) do
             if ply == attacker then
                 attacker:PrintMessage(HUD_PRINTCENTER, "You killed the swapper!")
@@ -1925,4 +1928,4 @@ concommand.Add("ttt_kill_from_random", function(ply)
     dmginfo:SetInflictor(killer)
     dmginfo:SetDamageType(DMG_BULLET)
     ply:TakeDamageInfo(dmginfo)
-end)
+end, nil, nil, FCVAR_CHEAT)

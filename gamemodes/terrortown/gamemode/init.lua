@@ -886,6 +886,8 @@ local function OnPlayerDeath(victim, infl, attacker)
                         local prev_role = vnp:GetVampirePreviousRole()
                         if prev_role ~= ROLE_NONE then
                             vnp:SetRoleAndBroadcast(prev_role)
+                            vnp:StripWeapon("weapon_vam_fangs")
+                            vnp:SelectWeapon("weapon_zm_improvised")
                             converted = true
                         end
                     end

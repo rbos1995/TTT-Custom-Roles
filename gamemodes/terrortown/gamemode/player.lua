@@ -17,11 +17,6 @@ CreateConVar("ttt_player_set_model_on_respawn", "1", FCVAR_ARCHIVE)
 CreateConVar("ttt_killer_dna_range", "550", FCVAR_ARCHIVE)
 CreateConVar("ttt_killer_dna_basetime", "100", FCVAR_ARCHIVE)
 
-CreateConVar("ttt_killer_vision_enable", "1", FCVAR_ARCHIVE)
-CreateConVar("ttt_zombie_vision_enable", "1", FCVAR_ARCHIVE)
-CreateConVar("ttt_vampire_vision_enable", "1", FCVAR_ARCHIVE)
-CreateConVar("ttt_traitor_vision_enable", "0", FCVAR_ARCHIVE)
-
 -- First spawn on the server
 function GM:PlayerInitialSpawn(ply)
     if not GAMEMODE.cvar_init then

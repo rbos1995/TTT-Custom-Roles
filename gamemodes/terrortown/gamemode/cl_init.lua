@@ -606,13 +606,13 @@ function HandleRoleForcedWeapons(ply)
 
     local enabled = false
     if ply:IsKiller() then
-        if GetConVar("ttt_killer_vision_enable"):GetBool() then
+        if GetGlobalBool("ttt_killer_vision_enable") then
             EnableKillerHighlights()
             enabled = true
         end
     elseif ply:IsZombie() then
         if ply.GetActiveWeapon and IsValid(ply:GetActiveWeapon()) then
-            if GetConVar("ttt_zombie_vision_enable"):GetBool() and ply:GetActiveWeapon():GetClass() == "weapon_zom_claws" then
+            if GetGlobalBool("ttt_zombie_vision_enable") and ply:GetActiveWeapon():GetClass() == "weapon_zom_claws" then
                 EnableZombieHighlights()
                 enabled = true
                 ply:SetColor(Color(70, 100, 25, 255))
@@ -624,13 +624,13 @@ function HandleRoleForcedWeapons(ply)
         end
     elseif ply:IsVampire() then
         if ply.GetActiveWeapon and IsValid(ply:GetActiveWeapon()) then
-            if GetConVar("ttt_vampire_vision_enable"):GetBool() and ply:GetActiveWeapon():GetClass() == "weapon_vam_fangs" then
+            if GetGlobalBool("ttt_vampire_vision_enable") and ply:GetActiveWeapon():GetClass() == "weapon_vam_fangs" then
                 EnableVampireHighlights()
                 enabled = true
             end
         end
     elseif ply:IsTraitorTeam() then
-        if GetConVar("ttt_traitor_vision_enable"):GetBool() then
+        if GetGlobalBool("ttt_traitor_vision_enable") then
             EnableTraitorHighlights()
             enabled = true
         end

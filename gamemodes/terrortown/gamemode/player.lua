@@ -1709,7 +1709,7 @@ function GM:Tick()
                 ply.scanner_weapon:Think()
             end
 
-            HandlePlayerHighlights(ply)
+            HandleRoleForcedWeapons(ply)
         elseif tm == TEAM_SPEC then
             if ply.propspec then
                 PROPSPEC.Recharge(ply)
@@ -1728,85 +1728,37 @@ function GM:Tick()
     end
 end
 
-local function SendHighlightEvent(ply, role, enabled, onenabled, ondisabled)
-    if enabled then
-        if not ply:GetNWBool("PlayerHighlightOn", false) then
-            if onenabled ~= nil then onenabled(ply) end
+function HandleRoleForcedWeapons(ply)
+    if not IsValid(ply) or GetRoundState() ~= ROUND_ACTIVE then return end
 
-            net.Start("TTT_" .. role .. "_PlayerHighlightOn")
-            net.Send(ply)
-            ply:SetNWBool("PlayerHighlightOn", true)
-        end
-    elseif ply:GetNWBool("PlayerHighlightOn", false) then
-        if ondisabled ~= nil then ondisabled(ply) end
-
-        net.Start("TTT_PlayerHighlightOff")
-        net.Send(ply)
-        ply:SetNWBool("PlayerHighlightOn", false)
-    end
-end
-
-function HandlePlayerHighlights(ply)
     if ply:IsKiller() then
-        SendHighlightEvent(ply, "Killer", GetConVar("ttt_killer_vision_enable"):GetBool())
-
         -- Ensure the Killer has their knife, if its enabled
-        if GetRoundState() == ROUND_ACTIVE and not ply:HasWeapon("weapon_kil_knife") and GetConVar("ttt_killer_knife_enabled"):GetBool() then
+        if not ply:HasWeapon("weapon_kil_knife") and GetConVar("ttt_killer_knife_enabled"):GetBool() then
             ply:StripWeapon("weapon_zm_improvised")
             ply:Give("weapon_kil_knife")
         end
-        return
     elseif ply:IsZombie() then
-        if ply.GetActiveWeapon and IsValid(ply:GetActiveWeapon()) then
-            SendHighlightEvent(ply, "Zombie", GetConVar("ttt_zombie_vision_enable"):GetBool() and ply:GetActiveWeapon():GetClass() == "weapon_zom_claws",
-                -- OnEnabled
-                function(p)
-                    p:SetColor(Color(70, 100, 25, 255))
-                    p:SetRenderMode(RENDERMODE_NORMAL)
-                end,
-                -- OnDisabled
-                function(p)
-                    p:SetColor(Color(255, 255, 255, 255))
-                    p:SetRenderMode(RENDERMODE_TRANSALPHA)
-                end)
-        end
-
-        if GetRoundState() == ROUND_ACTIVE then
-            -- Strip all non-claw weapons for non-prime zombies if that feature is enabled
-            -- Strip individual weapons instead of all because otherwise the player will have their claws added and removed constantly
-            if GetConVar("ttt_zombie_prime_only_weapons"):GetBool() and not ply:GetZombiePrime() then
-                local weapons = ply:GetWeapons()
-                for _, v in pairs(weapons) do
-                    local weapclass = WEPS.GetClass(v)
-                    if weapclass ~= "weapon_zom_claws" then
-                        ply:StripWeapon(weapclass)
-                    end
+        -- Strip all non-claw weapons for non-prime zombies if that feature is enabled
+        -- Strip individual weapons instead of all because otherwise the player will have their claws added and removed constantly
+        if GetConVar("ttt_zombie_prime_only_weapons"):GetBool() and not ply:GetZombiePrime() then
+            local weapons = ply:GetWeapons()
+            for _, v in pairs(weapons) do
+                local weapclass = WEPS.GetClass(v)
+                if weapclass ~= "weapon_zom_claws" then
+                    ply:StripWeapon(weapclass)
                 end
             end
-
-            -- If this zombie doesn't have claws, give them claws
-            if ply:HasWeapon("weapon_zom_claws") == false then
-                ply:Give("weapon_zom_claws")
-            end
         end
-        return
+
+        -- If this zombie doesn't have claws, give them claws
+        if ply:HasWeapon("weapon_zom_claws") == false then
+            ply:Give("weapon_zom_claws")
+        end
     elseif ply:IsVampire() then
-        if ply.GetActiveWeapon and IsValid(ply:GetActiveWeapon()) then
-            SendHighlightEvent(ply, "Vampire", GetConVar("ttt_vampire_vision_enable"):GetBool() and ply:GetActiveWeapon():GetClass() == "weapon_vam_fangs")
+        if ply:HasWeapon("weapon_vam_fangs") == false then
+            ply:Give("weapon_vam_fangs")
         end
-
-        if GetRoundState() == ROUND_ACTIVE then
-            if ply:HasWeapon("weapon_vam_fangs") == false then
-                ply:Give("weapon_vam_fangs")
-            end
-        end
-        return
-    elseif ply:IsTraitorTeam() then
-        SendHighlightEvent(ply, "Traitor", GetConVar("ttt_traitor_vision_enable"):GetBool())
-        return
     end
-
-    ply:SetNWBool("PlayerHighlightOn", false)
 end
 
 function GM:ShowHelp(ply)

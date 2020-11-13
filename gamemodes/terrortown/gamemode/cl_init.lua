@@ -427,6 +427,7 @@ function GM:Tick()
         if client:Alive() and client:Team() ~= TEAM_SPEC then
             WSWITCH:Think()
             RADIO:StoreTarget()
+            HandleRoleForcedWeapons(client)
         end
 
         VOICE.Tick()
@@ -506,17 +507,58 @@ function GM:OnEntityCreated(ent)
     return self.BaseClass.OnEntityCreated(self, ent)
 end
 
-local showHighlights = false
+-- Player highlights
 
-net.Receive("TTT_Killer_PlayerHighlightOn", function(len, ply)
+local function OnPlayerHighlightEnabled(role, alliedRoles, hideEnemies, traitorAllies)
+    if GetRoundState() ~= ROUND_ACTIVE then return end
+
+    local client = LocalPlayer()
+    if not IsValid(client) or client:GetRole() ~= role then return end
+
+    local enemies = {}
+    local friends = {}
+    local jesters = {}
+    for _, v in pairs(player.GetAll()) do
+        if IsValid(v) and v:Alive() and not v:IsSpec() then
+            if v:IsJesterTeam() then
+                table.insert(jesters, v)
+            elseif v:GetRole() == role or (alliedRoles ~= nil and table.HasValue(alliedRoles, v:GetRole())) then
+                table.insert(friends, v)
+            -- Don't even track enemies if this role can't see them
+            elseif not hideEnemies then
+                table.insert(enemies, v)
+            end
+        end
+    end
+
+    -- If the allies of this role are Traitors, show them in red to be thematic
+    if traitorAllies then
+        halo.Add(friends, Color(255, 0, 0), 1, 1, 1, true, true)
+    -- Otherwise green is good
+    else
+        halo.Add(friends, Color(0, 255, 0), 1, 1, 1, true, true)
+    end
+
+    -- Don't show enemies if we're hiding them
+    if not hideEnemies then
+        -- If the allies of this role are Traitors, show enemies as green to be difference
+        if traitorAllies then
+            halo.Add(enemies, Color(0, 255, 0), 1, 1, 1, true, true)
+        else
+            halo.Add(enemies, Color(255, 0, 0), 1, 1, 1, true, true)
+        end
+    end
+
+    halo.Add(jesters, Color(255, 85, 100), 1, 1, 1, true, true)
+end
+
+local function EnableKillerHighlights()
     hook.Add("PreDrawHalos", "AddPlayerHighlights", function()
-        showHighlights = true
         OnPlayerHighlightEnabled(ROLE_KILLER)
     end)
-end)
-net.Receive("TTT_Zombie_PlayerHighlightOn", function(len, ply)
+end
+local function EnableZombieHighlights()
     hook.Add("PreDrawHalos", "AddPlayerHighlights", function()
-        showHighlights = true
         local allies = {ROLE_VAMPIRE}
         local traitors_are_friends = GetGlobalBool("ttt_monsters_are_traitors")
         if traitors_are_friends then
@@ -525,10 +567,9 @@ net.Receive("TTT_Zombie_PlayerHighlightOn", function(len, ply)
 
         OnPlayerHighlightEnabled(ROLE_ZOMBIE, allies, false, traitors_are_friends)
     end)
-end)
-net.Receive("TTT_Vampire_PlayerHighlightOn", function(len, ply)
+end
+local function EnableVampireHighlights()
     hook.Add("PreDrawHalos", "AddPlayerHighlights", function()
-        showHighlights = true
         local allies = {ROLE_ZOMBIE}
         local traitors_are_friends = GetGlobalBool("ttt_monsters_are_traitors")
         if traitors_are_friends then
@@ -537,10 +578,9 @@ net.Receive("TTT_Vampire_PlayerHighlightOn", function(len, ply)
 
         OnPlayerHighlightEnabled(ROLE_VAMPIRE, allies, false, traitors_are_friends)
     end)
-end)
-net.Receive("TTT_Traitor_PlayerHighlightOn", function(len, ply)
+end
+local function EnableTraitorHighlights()
     hook.Add("PreDrawHalos", "AddPlayerHighlights", function()
-        showHighlights = true
         local monsters_are_friends = GetGlobalBool("ttt_monsters_are_traitors")
         local traitor_allies = {ROLE_ASSASSIN, ROLE_HYPNOTIST, ROLE_GLITCH, ROLE_DETRAITOR}
         local assassin_allies = {ROLE_TRAITOR, ROLE_HYPNOTIST, ROLE_GLITCH, ROLE_DETRAITOR}
@@ -559,62 +599,59 @@ net.Receive("TTT_Traitor_PlayerHighlightOn", function(len, ply)
         OnPlayerHighlightEnabled(ROLE_HYPNOTIST, hypnotist_allies, true, true)
         OnPlayerHighlightEnabled(ROLE_DETRAITOR, detraitor_allies, true, true)
     end)
-end)
-net.Receive("TTT_PlayerHighlightOff", function(len, ply)
-    showHighlights = false
-    hook.Remove("PreDrawHalos", "AddPlayerHighlights")
-end)
+end
 
-function OnPlayerHighlightEnabled(role, alliedRoles, hideEnemies, traitorAllies)
-    local client = LocalPlayer()
-    if not IsValid(client) then return end
-    if showHighlights and client:GetRole() == role and GetRoundState() == ROUND_ACTIVE then
-        local enemies = {}
-        local friends = {}
-        local jesters = {}
-        for _, v in pairs(player.GetAll()) do
-            if IsValid(v) and v:Alive() and not v:IsSpec() then
-                if v:IsJesterTeam() then
-                    table.insert(jesters, v)
-                elseif v:GetRole() == role or (alliedRoles ~= nil and table.HasValue(alliedRoles, v:GetRole())) then
-                    table.insert(friends, v)
-                -- Don't even track enemies if this role can't see them
-                elseif not hideEnemies then
-                    table.insert(enemies, v)
-                end
-            end
+function HandleRoleForcedWeapons(ply)
+    if not IsValid(ply) then return end
+
+    local enabled = false
+    if ply:IsKiller() then
+        if GetConVar("ttt_killer_vision_enable"):GetBool() then
+            EnableKillerHighlights()
+            enabled = true
         end
-
-        -- If the allies of this role are Traitors, show them in red to be thematic
-        if traitorAllies then
-            halo.Add(friends, Color(255, 0, 0), 1, 1, 1, true, true)
-        -- Otherwise green is good
-        else
-            halo.Add(friends, Color(0, 255, 0), 1, 1, 1, true, true)
-        end
-
-        -- Don't show enemies if we're hiding them
-        if not hideEnemies then
-            -- If the allies of this role are Traitors, show enemies as green to be difference
-            if traitorAllies then
-                halo.Add(enemies, Color(0, 255, 0), 1, 1, 1, true, true)
+    elseif ply:IsZombie() then
+        if ply.GetActiveWeapon and IsValid(ply:GetActiveWeapon()) then
+            if GetConVar("ttt_zombie_vision_enable"):GetBool() and ply:GetActiveWeapon():GetClass() == "weapon_zom_claws" then
+                EnableZombieHighlights()
+                enabled = true
+                ply:SetColor(Color(70, 100, 25, 255))
+                ply:SetRenderMode(RENDERMODE_NORMAL)
             else
-                halo.Add(enemies, Color(255, 0, 0), 1, 1, 1, true, true)
+                ply:SetColor(Color(255, 255, 255, 255))
+                ply:SetRenderMode(RENDERMODE_TRANSALPHA)
             end
         end
+    elseif ply:IsVampire() then
+        if ply.GetActiveWeapon and IsValid(ply:GetActiveWeapon()) then
+            if GetConVar("ttt_vampire_vision_enable"):GetBool() and ply:GetActiveWeapon():GetClass() == "weapon_vam_fangs" then
+                EnableVampireHighlights()
+                enabled = true
+            end
+        end
+    elseif ply:IsTraitorTeam() then
+        if GetConVar("ttt_traitor_vision_enable"):GetBool() then
+            EnableTraitorHighlights()
+            enabled = true
+        end
+    end
 
-        halo.Add(jesters, Color(255, 85, 100), 1, 1, 1, true, true)
+    if not enabled then
+        hook.Remove("PreDrawHalos", "AddPlayerHighlights")
     end
 end
+
+-- Monster-as-traitors equipment
 
 net.Receive("TTT_LoadMonsterEquipment", function()
     local monsters_are_traitors = net.ReadBool()
     LoadMonsterEquipment(monsters_are_traitors)
 end)
 
-local FootSteps = {}
+-- Footsteps
+
+local footSteps = {}
 local footMat = Material("thieves/footprint")
-local maxDistance = 600 ^ 2
 local function DrawFootprints()
     local ply = LocalPlayer()
     if not IsValid(ply) then return end
@@ -622,10 +659,10 @@ local function DrawFootprints()
     cam.Start3D(ply:EyePos(), ply:EyeAngles())
     render.SetMaterial(footMat)
     local pos = ply:EyePos()
-    for k, footstep in pairs(FootSteps) do
+    for k, footstep in pairs(footSteps) do
         local timediff = (footstep.curtime + footstep.fadetime) - CurTime()
         if timediff > 0 then
-            if (footstep.pos - pos):LengthSqr() < maxDistance then
+            if (footstep.pos - pos):LengthSqr() < 600 ^ 2 then
                 -- Fade the footprints into invisibility based on how long they've been around
                 local faderatio = timediff / footstep.fadetime
                 local col = Color(footstep.col.r, footstep.col.g, footstep.col.b, faderatio * 255)
@@ -638,7 +675,7 @@ local function DrawFootprints()
                 render.DrawQuadEasy(hitpos + footstep.normal * 0.01, footstep.normal, 10, 20, col, footstep.angle)
             end
         else
-            FootSteps[k] = nil
+            footSteps[k] = nil
         end
     end
     cam.End3D()
@@ -669,7 +706,7 @@ local function AddFootstep(ply, pos, ang, foot, col, fade_time)
             normal = tr.HitNormal,
             col = col
         }
-        table.insert(FootSteps, tbl)
+        table.insert(footSteps, tbl)
     end
 end
 
@@ -686,9 +723,9 @@ end)
 
 net.Receive("TTT_ClearPlayerFootsteps", function()
     print("Clearing Footsteps")
-    table.Empty(FootSteps)
+    table.Empty(footSteps)
 end)
 
-function GM:PostDrawTranslucentRenderables()
+hook.Add("PostDrawTranslucentRenderables", "FootstepRender", function(depth, skybox)
     DrawFootprints()
-end
+end)

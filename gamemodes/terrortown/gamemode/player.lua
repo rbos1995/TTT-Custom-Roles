@@ -1875,4 +1875,12 @@ concommand.Add("ttt_kill_from_random", function(ply)
     dmginfo:SetInflictor(killer)
     dmginfo:SetDamageType(DMG_BULLET)
     ply:TakeDamageInfo(dmginfo)
+
+    timer.Simple(0.25, function()
+        local body = ply.server_ragdoll or ply:GetRagdollEntity()
+        if IsValid(body) then
+            print("and removing body")
+            body:Remove()
+        end
+    end)
 end, nil, nil, FCVAR_CHEAT)

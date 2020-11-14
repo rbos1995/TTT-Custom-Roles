@@ -145,8 +145,6 @@ function SWEP:PrimaryAttack()
                         if hitEnt:GetRole() ~= ROLE_ZOMBIE then
                             local body = hitEnt.server_ragdoll or hitEnt:GetRagdollEntity()
                             hitEnt:SpawnForRound(true)
-                            hitEnt:SetPos(FindRespawnLocation(body:GetPos()) or body:GetPos())
-                            hitEnt:SetEyeAngles(Angle(0, body:GetAngles().y, 0))
                             hitEnt:SetRole(ROLE_ZOMBIE)
                             hitEnt:SetZombiePrime(false)
                             hitEnt:SetMaxHealth(100)
@@ -154,6 +152,8 @@ function SWEP:PrimaryAttack()
                             hitEnt:StripAll()
                             hitEnt:Give("weapon_zom_claws")
                             if IsValid(body) then
+                                hitEnt:SetPos(FindRespawnLocation(body:GetPos()) or body:GetPos())
+                                hitEnt:SetEyeAngles(Angle(0, body:GetAngles().y, 0))
                                 body:Remove()
                             end
                         end

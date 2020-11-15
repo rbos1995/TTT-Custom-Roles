@@ -1103,7 +1103,9 @@ function GM:PlayerDeath(victim, infl, attacker)
         end
         DRINKS.AddPlayerAction("suicide", victim)
     end
-    if victim:IsPhantom() and attacker:IsPlayer() and attacker ~= victim and GetRoundState() == ROUND_ACTIVE then
+
+    local valid_kill = attacker:IsPlayer() and attacker ~= victim and GetRoundState() == ROUND_ACTIVE
+    if victim:IsPhantom() and valid_kill then
         attacker:SetNWBool("Haunted", true)
 
         if GetConVar("ttt_phantom_killer_haunt"):GetBool() then
@@ -1141,12 +1143,12 @@ function GM:PlayerDeath(victim, infl, attacker)
         end
     end
 
-    if attacker:IsPlayer() and attacker:IsKiller() then
+    if attacker:IsKiller() and valid_kill then
         attacker:SetNWBool("KillerSmoke", false)
         ResetKillerKillCheckTimer()
     end
 
-    if victim:IsSwapper() and attacker:IsPlayer() and attacker ~= victim and GetRoundState() == ROUND_ACTIVE then
+    if victim:IsSwapper() and valid_kill then
         for _, ply in pairs(player.GetAll()) do
             if ply == attacker then
                 attacker:PrintMessage(HUD_PRINTCENTER, "You killed the swapper!")
@@ -1201,7 +1203,7 @@ function GM:PlayerDeath(victim, infl, attacker)
     victim:Freeze(false)
 
     -- Haunt the attacker if that functionality is enabled
-    if GetConVar("ttt_phantom_killer_haunt"):GetBool() then
+    if victim:IsPhantom() and valid_kill and GetConVar("ttt_phantom_killer_haunt"):GetBool() then
         timer.Simple(1, function()
             victim:Spectate(OBS_MODE_CHASE)
             victim:SpectateEntity(attacker)

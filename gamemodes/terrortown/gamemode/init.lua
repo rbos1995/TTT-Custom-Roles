@@ -491,6 +491,14 @@ local function WinChecker()
     end
 end
 
+local function GetPlayerName(ply)
+    local name = ply:GetNWString("PlayerName", nil)
+    if name ~= nil then
+        name = ply:Nick()
+    end
+    return name
+end
+
 local function NameChangeKick()
     if not GetConVar("ttt_namechange_kick"):GetBool() then
         timer.Remove("namecheck")
@@ -500,7 +508,7 @@ local function NameChangeKick()
     if GetRoundState() == ROUND_ACTIVE then
         for _, ply in pairs(player.GetHumans()) do
             if ply.spawn_nick then
-                if ply.has_spawned and ply.spawn_nick ~= ply:Nick() and not hook.Call("TTTNameChangeKick", GAMEMODE, ply) then
+                if ply.has_spawned and ply.spawn_nick ~= GetPlayerName(ply) and not hook.Call("TTTNameChangeKick", GAMEMODE, ply) then
                     local t = GetConVar("ttt_namechange_bantime"):GetInt()
                     local msg = "Changed name during a round"
                     if t > 0 then
@@ -510,7 +518,7 @@ local function NameChangeKick()
                     end
                 end
             else
-                ply.spawn_nick = ply:Nick()
+                ply.spawn_nick = GetPlayerName(ply)
             end
         end
     end
@@ -521,7 +529,7 @@ function StartNameChangeChecks()
 
     -- bring nicks up to date, may have been changed during prep/post
     for _, ply in pairs(player.GetAll()) do
-        ply.spawn_nick = ply:Nick()
+        ply.spawn_nick = GetPlayerName(ply)
     end
 
     if not timer.Exists("namecheck") then

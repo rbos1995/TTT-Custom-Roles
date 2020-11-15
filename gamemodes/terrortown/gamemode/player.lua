@@ -97,7 +97,6 @@ function GM:PlayerSpawn(ply)
         SendRoundState(GetRoundState(), ply)
     end
 
-    ply.spawn_nick = ply:Nick()
     ply.has_spawned = true
 
     -- Reset player color and transparency

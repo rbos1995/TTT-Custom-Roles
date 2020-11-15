@@ -32,6 +32,14 @@ local function AddRoleText(role, rolename, nick, text)
         ": " .. text)
 end
 
+local function GetPlayerName(ply)
+    local name = ply:GetNWString("PlayerName", nil)
+    if name ~= nil then
+        name = ply:Nick()
+    end
+    return name
+end
+
 local function RoleChatRecv()
     -- virtually always our role, but future equipment might allow listening in
     local role = net.ReadUInt(4)
@@ -42,6 +50,7 @@ local function RoleChatRecv()
     local client = LocalPlayer()
     if not IsValid(client) then return end
 
+    local name = GetPlayerName(sender)
     if role == ROLE_JESTER or role == ROLE_SWAPPER then
         local role_name
         -- Show Swapper name if the client's role is allowed to know the difference between Jester and Swapper
@@ -56,9 +65,9 @@ local function RoleChatRecv()
             role_name = ROLE_STRINGS[ROLE_JESTER]
         end
 
-        AddRoleText(role, role_name, sender:Nick(), text)
+        AddRoleText(role, role_name, name, text)
     else
-        AddRoleText(role, ROLE_STRINGS[role], sender:Nick(), text)
+        AddRoleText(role, ROLE_STRINGS[role], name, text)
     end
 end
 
@@ -81,13 +90,42 @@ end
 -- Detectives have a blue name, in both chat and radio messages
 local function AddDetectiveText(ply, text)
     chat.AddText(ROLE_COLORS[ROLE_DETECTIVE],
-        ply:Nick(),
+        GetPlayerName(ply),
         COLOR_WHITE,
         ": " .. text)
 end
 
+-- Use this instead of the base class so we can control the colors and name of the player
+local function OnPlayerChat(player, strText, bTeamOnly, bPlayerIsDead)
+    local tab = {}
+    if bPlayerIsDead then
+        table.insert(tab, Color(255, 30, 40))
+        table.insert(tab, "*DEAD* ")
+        table.insert(tab, Color(201, 201, 0))
+    elseif bTeamOnly then
+        table.insert(tab, Color(30, 160, 40))
+        table.insert(tab, "(TEAM) ")
+        table.insert(tab, Color(201, 201, 0))
+    else
+        table.insert(tab, Color(0, 201, 0))
+    end
+
+    if IsValid(player) then
+        table.insert(tab, GetPlayerName(player))
+    else
+        table.insert(tab, "Console")
+    end
+
+    table.insert(tab, color_white)
+    table.insert(tab, ": " .. strText)
+
+    chat.AddText(unpack(tab))
+
+    return true
+end
+
 function GM:OnPlayerChat(ply, text, teamchat, dead)
-    if not IsValid(ply) then return BaseClass.OnPlayerChat(self, ply, text, teamchat, dead) end
+    if not IsValid(ply) then return OnPlayerChat(ply, text, teamchat, dead) end
 
     if ply:IsActiveDetective() or ply:IsActiveDetraitor() then
         AddDetectiveText(ply, text)
@@ -95,7 +133,6 @@ function GM:OnPlayerChat(ply, text, teamchat, dead)
     end
 
     local team = ply:Team() == TEAM_SPEC
-
     if team and not dead then
         dead = true
     end
@@ -104,7 +141,7 @@ function GM:OnPlayerChat(ply, text, teamchat, dead)
         teamchat = false
     end
 
-    return BaseClass.OnPlayerChat(self, ply, text, teamchat, dead)
+    return OnPlayerChat(ply, text, teamchat, dead)
 end
 
 local last_chat = ""

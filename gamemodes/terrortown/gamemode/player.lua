@@ -830,29 +830,34 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
             local phantom = deadPhantoms[key]
             if phantom.attacker == ply:UniqueID() and phantom.player then
                 local deadPhantom = phantom.player
-                -- Find the Phantom's corpse
-                local phantomBody = deadPhantom.server_ragdoll or deadPhantom:GetRagdollEntity()
-                if phantomBody:IsValid() and deadPhantom:IsPhantom() and not deadPhantom:Alive() then
-                    deadPhantom:SpawnForRound(true)
-                    deadPhantom:SetPos(FindRespawnLocation(phantomBody:GetPos()) or phantomBody:GetPos())
-                    deadPhantom:SetEyeAngles(Angle(0, phantomBody:GetAngles().y, 0))
+                if deadPhantom:IsPhantom() and not deadPhantom:Alive() then
+                    -- Find the Phantom's corpse
+                    local phantomBody = deadPhantom.server_ragdoll or deadPhantom:GetRagdollEntity()
+                    if IsValid(phantomBody) then
+                        deadPhantom:SpawnForRound(true)
+                        deadPhantom:SetPos(FindRespawnLocation(phantomBody:GetPos()) or phantomBody:GetPos())
+                        deadPhantom:SetEyeAngles(Angle(0, phantomBody:GetAngles().y, 0))
 
-                    local health = 50
-                    if GetConVar("ttt_phantom_weaker_each_respawn"):GetBool() then
-                        for _ = 0, phantom.times do
-                            health = health / 2
+                        local health = 50
+                        if GetConVar("ttt_phantom_weaker_each_respawn"):GetBool() then
+                            for _ = 0, phantom.times do
+                                health = health / 2
+                            end
+                            health = math.max(1, math.Round(health))
                         end
-                        health = math.max(1, math.Round(health))
+                        deadPhantom:SetHealth(health)
+                        phantomBody:Remove()
+                        net.Start("TTT_Defibrillated")
+                        net.WriteString(deadPhantom:Nick())
+                        net.Broadcast()
+                        deadPhantom:PrintMessage(HUD_PRINTCENTER, "Your attacker died and you have been respawned.")
+                        respawn = true
+                    else
+                        deadPhantom:PrintMessage(HUD_PRINTCENTER, "Your attacker died but your body has been destroyed.")
                     end
-                    deadPhantom:SetHealth(health)
-                    deadPhantom:SetBWBool("Haunting", false)
+
+                    deadPhantom:SetNWBool("Haunting", false)
                     deadPhantom:SetNWInt("HauntingPower", 0)
-                    phantomBody:Remove()
-                    net.Start("TTT_Defibrillated")
-                    net.WriteString(deadPhantom:Nick())
-                    net.Broadcast()
-                    deadPhantom:PrintMessage(HUD_PRINTCENTER, "Your attacker died and you have been respawned.")
-                    respawn = true
                 end
             end
         end
@@ -1866,7 +1871,9 @@ timer.Create("KillerKillCheckTimer", 1, 0, function()
     end
 end)
 
-concommand.Add("ttt_kill_from_random", function(ply)
+concommand.Add("ttt_kill_from_random", function(ply, cmd, args)
+    if not IsValid(ply) or not ply:Alive() then return end
+
     local killer = nil
     for _, v in RandomPairs(player.GetAll()) do
         if IsValid(v) and v:Alive() and v ~= ply and not v:IsJesterTeam() then
@@ -1885,11 +1892,13 @@ concommand.Add("ttt_kill_from_random", function(ply)
     dmginfo:SetDamageType(DMG_BULLET)
     ply:TakeDamageInfo(dmginfo)
 
-    timer.Simple(0.25, function()
-        local body = ply.server_ragdoll or ply:GetRagdollEntity()
-        if IsValid(body) then
-            print("and removing body")
-            body:Remove()
-        end
-    end)
+    if #args > 0 and tobool(args[1]) then
+        timer.Simple(0.25, function()
+            local body = ply.server_ragdoll or ply:GetRagdollEntity()
+            if IsValid(body) then
+                print("and removing body")
+                body:Remove()
+            end
+        end)
+    end
 end, nil, nil, FCVAR_CHEAT)

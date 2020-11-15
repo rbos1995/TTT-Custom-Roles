@@ -615,11 +615,6 @@ function HandleRoleForcedWeapons(ply)
             if GetGlobalBool("ttt_zombie_vision_enable") and ply:GetActiveWeapon():GetClass() == "weapon_zom_claws" then
                 EnableZombieHighlights()
                 enabled = true
-                ply:SetColor(Color(70, 100, 25, 255))
-                ply:SetRenderMode(RENDERMODE_NORMAL)
-            else
-                ply:SetColor(Color(255, 255, 255, 255))
-                ply:SetRenderMode(RENDERMODE_TRANSALPHA)
             end
         end
     elseif ply:IsVampire() then

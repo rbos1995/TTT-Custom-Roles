@@ -1732,6 +1732,16 @@ function HandleRoleForcedWeapons(ply)
             ply:Give("weapon_kil_knife")
         end
     elseif ply:IsZombie() then
+        if ply.GetActiveWeapon and IsValid(ply:GetActiveWeapon()) then
+            if ply:GetActiveWeapon():GetClass() == "weapon_zom_claws" then
+                ply:SetColor(Color(70, 100, 25, 255))
+                ply:SetRenderMode(RENDERMODE_NORMAL)
+            else
+                ply:SetColor(Color(255, 255, 255, 255))
+                ply:SetRenderMode(RENDERMODE_TRANSALPHA)
+            end
+        end
+
         -- Strip all non-claw weapons for non-prime zombies if that feature is enabled
         -- Strip individual weapons instead of all because otherwise the player will have their claws added and removed constantly
         if GetConVar("ttt_zombie_prime_only_weapons"):GetBool() and not ply:GetZombiePrime() then

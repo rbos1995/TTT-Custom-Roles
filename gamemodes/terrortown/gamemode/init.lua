@@ -782,7 +782,7 @@ function SpawnWillingPlayers(dead_only)
     -- simple method, should make this a case of the other method once that has
     -- been tested.
     if wave_delay <= 0 or dead_only then
-        for k, ply in pairs(player.GetAll()) do
+        for _, ply in pairs(player.GetAll()) do
             if IsValid(ply) then
                 ply:SpawnForRound(dead_only, true)
             end
@@ -997,7 +997,7 @@ function BeginRound()
     net.Start("TTT_ClearRoleSwaps")
     net.Broadcast()
 
-    for k, v in pairs(player.GetAll()) do
+    for _, v in pairs(player.GetAll()) do
         if v:Alive() and v:IsTerror() then
             net.Start("TTT_SpawnedPlayers")
             net.WriteString(v:Nick())

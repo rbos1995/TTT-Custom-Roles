@@ -16,7 +16,7 @@ ttt_vampire_enabled   1 // Whether the Vampire should spawn or not
 ttt_zombie_enabled    1 // Whether Zombies should spawn or not
 ttt_jester_enabled    1 // Whether the Jester should spawn or not
 ttt_swapper_enabled   1 // Whether the Swapper should spawn or not
-ttt_killer_enabled    1 // Whether the Swapper should spawn or not
+ttt_killer_enabled    1 // Whether the Killer should spawn or not
 ttt_detraitor_enabled 0 // Whether the Detraitor should spawn or not
 
 // Role Spawn Chances

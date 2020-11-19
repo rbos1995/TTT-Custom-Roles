@@ -53,7 +53,7 @@ local function RoleChatRecv()
     local name = GetPlayerName(sender)
     if role == ROLE_JESTER or role == ROLE_SWAPPER then
         -- Show Jester/Swapper name if the client's role is allowed to know it
-        local role_name = player.GetJesterValueByRoleAndMode(client, role, ROLE_STRINGS[ROLE_JESTER], ROLE_STRINGS[ROLE_SWAPPER], nil)
+        local role_name = player.GetJesterValueByRoleAndMode(client, role, ROLE_STRINGS[ROLE_JESTER], ROLE_STRINGS[ROLE_SWAPPER], ROLE_STRINGS[ROLE_JESTER])
         -- Also show the Swapper name if the local player is the one who said the text and any of the other roles know the difference between Jester and Swapper
         local traitor_mode = GetGlobalInt("ttt_traitors_jester_id_mode")
         local monster_mode = GetGlobalInt("ttt_monsters_jester_id_mode")

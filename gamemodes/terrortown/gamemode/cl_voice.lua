@@ -23,15 +23,6 @@ end
 
 net.Receive("TTT_LastWordsMsg", LastWordsRecv)
 
-local function AddRoleText(role, rolename, nick, text)
-    chat.AddText(ROLE_COLORS[role],
-        Format("(%s) ", string.upper(GetTranslation(rolename))),
-        ROLE_COLORS[role],
-        nick,
-        COLOR_WHITE,
-        ": " .. text)
-end
-
 local function GetPlayerName(ply)
     local name = ply:GetNWString("PlayerName", nil)
     if name ~= nil then
@@ -51,9 +42,10 @@ local function RoleChatRecv()
     if not IsValid(client) then return end
 
     local name = GetPlayerName(sender)
+    local visible_role = role
     if role == ROLE_JESTER or role == ROLE_SWAPPER then
         -- Show Jester/Swapper name if the client's role is allowed to know it
-        local role_name = player.GetJesterValueByRoleAndMode(client, role, ROLE_STRINGS[ROLE_JESTER], ROLE_STRINGS[ROLE_SWAPPER], ROLE_STRINGS[ROLE_JESTER])
+        visible_role = player.GetJesterValueByRoleAndMode(client, role, ROLE_JESTER, ROLE_SWAPPER, ROLE_JESTER)
         -- Also show the Swapper name if the local player is the one who said the text and any of the other roles know the difference between Jester and Swapper
         local traitor_mode = GetGlobalInt("ttt_traitors_jester_id_mode")
         local monster_mode = GetGlobalInt("ttt_monsters_jester_id_mode")
@@ -62,13 +54,16 @@ local function RoleChatRecv()
             monster_mode == 2 or monster_mode == 3 or
             killer_mode == 2 or killer_mode == 3
         if role == ROLE_SWAPPER and (sender == client and someone_knows_swapper) then
-            role_name = ROLE_STRINGS[ROLE_SWAPPER]
+            visible_role = ROLE_SWAPPER
         end
-
-        AddRoleText(role, role_name, name, text)
-    else
-        AddRoleText(role, ROLE_STRINGS[role], name, text)
     end
+
+    chat.AddText(ROLE_COLORS[visible_role],
+        Format("(%s) ", string.upper(GetTranslation(ROLE_STRINGS[visible_role]))),
+        ROLE_COLORS[visible_role],
+        name,
+        COLOR_WHITE,
+        ": " .. text)
 end
 
 net.Receive("TTT_RoleChat", RoleChatRecv)

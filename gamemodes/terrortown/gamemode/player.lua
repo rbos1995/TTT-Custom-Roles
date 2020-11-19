@@ -828,8 +828,10 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
         local phantomUsers = table.GetKeys(deadPhantoms)
         for _, key in pairs(phantomUsers) do
             local phantom = deadPhantoms[key]
-            if phantom.attacker == ply:UniqueID() and phantom.player then
+            if phantom.attacker == ply:UniqueID() and IsValid(phantom.player) then
                 local deadPhantom = phantom.player
+                deadPhantom:SetNWBool("Haunting", false)
+                deadPhantom:SetNWInt("HauntingPower", 0)
                 if deadPhantom:IsPhantom() and not deadPhantom:Alive() then
                     -- Find the Phantom's corpse
                     local phantomBody = deadPhantom.server_ragdoll or deadPhantom:GetRagdollEntity()
@@ -840,7 +842,8 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
 
                         local health = 50
                         if GetConVar("ttt_phantom_weaker_each_respawn"):GetBool() then
-                            for _ = 0, phantom.times do
+                            -- Don't reduce them the first time since 50 is already reduced
+                            for _ = 1, phantom.times - 1 do
                                 health = health / 2
                             end
                             health = math.max(1, math.Round(health))
@@ -855,9 +858,6 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
                     else
                         deadPhantom:PrintMessage(HUD_PRINTCENTER, "Your attacker died but your body has been destroyed.")
                     end
-
-                    deadPhantom:SetNWBool("Haunting", false)
-                    deadPhantom:SetNWInt("HauntingPower", 0)
                 end
             end
         end

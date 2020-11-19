@@ -345,3 +345,26 @@ function player.IsTraitorTeam(ply)
     end
     return is_traitor
 end
+
+function player.GetJesterValueByRoleAndMode(ply, role, jester_value, swapper_value, default_value)
+    -- 0 - Don't show either Jester or Swapper
+    -- 1 - Show both as Jester
+    -- 2 - Show Jester as Jester and Swapper as Swapper
+    -- 3 - Show Jester but don't show Swapper
+    -- 4 - Show Swapper but don't show Jester
+    local function GetJesterValueByRoleAndMode(mode)
+        if mode == 0 then return default_value
+        elseif mode == 1 or ((role == ROLE_JESTER) and mode ~= 4) then return jester_value
+        elseif (role == ROLE_SWAPPER) and mode ~= 3 then return swapper_value
+        else return default_value end
+    end
+
+    if player.IsTraitorTeam(ply) then
+        return GetJesterValueByRoleAndMode(GetGlobalInt("ttt_traitors_jester_id_mode"))
+    elseif ply:IsMonsterTeam() then
+        return GetJesterValueByRoleAndMode(GetGlobalInt("ttt_monsters_jester_id_mode"))
+    elseif ply:IsKiller() then
+        return GetJesterValueByRoleAndMode(GetGlobalInt("ttt_killers_jester_id_mode"))
+    end
+    return default_value
+end

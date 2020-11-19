@@ -52,17 +52,17 @@ local function RoleChatRecv()
 
     local name = GetPlayerName(sender)
     if role == ROLE_JESTER or role == ROLE_SWAPPER then
-        local role_name
-        -- Show Swapper name if the client's role is allowed to know the difference between Jester and Swapper
-        -- Also show the Swapper name if the local player is the one who said the text and any of the "ttt_*_know_swapper" settings are enabled
-        if role == ROLE_SWAPPER and
-            ((player.IsTraitorTeam(client) and GetGlobalBool("ttt_traitors_know_swapper")) or
-             (client:IsMonsterTeam() and GetGlobalBool("ttt_monsters_know_swapper")) or
-             (client:IsKiller() and GetGlobalBool("ttt_killers_know_swapper")) or
-             (sender == client and (GetGlobalBool("ttt_traitors_know_swapper") or GetGlobalBool("ttt_monsters_know_swapper") or GetGlobalBool("ttt_killers_know_swapper")))) then
+        -- Show Jester/Swapper name if the client's role is allowed to know it
+        local role_name = player.GetJesterValueByRoleAndMode(client, role, ROLE_STRINGS[ROLE_JESTER], ROLE_STRINGS[ROLE_SWAPPER], nil)
+        -- Also show the Swapper name if the local player is the one who said the text and any of the other roles know the difference between Jester and Swapper
+        local traitor_mode = GetGlobalInt("ttt_traitors_jester_id_mode")
+        local monster_mode = GetGlobalInt("ttt_monsters_jester_id_mode")
+        local killer_mode = GetGlobalInt("ttt_killers_jester_id_mode")
+        local someone_knows_swapper = traitor_mode == 2 or traitor_mode == 3 or
+            monster_mode == 2 or monster_mode == 3 or
+            killer_mode == 2 or killer_mode == 3
+        if role == ROLE_SWAPPER and (sender == client and someone_knows_swapper) then
             role_name = ROLE_STRINGS[ROLE_SWAPPER]
-        else
-            role_name = ROLE_STRINGS[ROLE_JESTER]
         end
 
         AddRoleText(role, role_name, name, text)

@@ -113,6 +113,21 @@ local FormatTime = util.SimpleTime
 
 local near_cursor_dist = 180
 
+-- 0 - Don't show either Jester or Swapper
+-- 1 - Show both as Jester
+-- 2 - Show Jester as Jester and Swapper as Swapper
+-- 3 - Show Jester but don't show Swapper
+-- 4 - Show Swapper but don't show Jester
+local function ShouldMarkJester(mode)
+    return mode == 1 or mode == 2 or mode == 3
+end
+local function ShouldMarkSwapper(mode)
+    return mode == 1 or mode == 2 or mode == 4
+end
+local function ShouldMarkJesterTeam(mode)
+    return ShouldMarkJester(mode), ShouldMarkSwapper(mode)
+end
+
 function RADAR:Draw(client)
     if not client then return end
 
@@ -173,7 +188,7 @@ function RADAR:Draw(client)
     local mpos = Vector(ScrW() / 2, ScrH() / 2, 0)
 
     local role, alpha, scrpos, md
-    for k, tgt in pairs(RADAR.targets) do
+    for _, tgt in pairs(RADAR.targets) do
         alpha = alpha_base
 
         scrpos = tgt.pos:ToScreen()
@@ -185,10 +200,11 @@ function RADAR:Draw(client)
 
             role = tgt.role
             if player.IsTraitorTeam(client) then
+                local showJester, showSwapper = ShouldMarkJesterTeam(GetGlobalInt("ttt_traitors_jester_id_mode"))
                 if role == ROLE_TRAITOR or role == ROLE_HYPNOTIST or role == ROLE_ASSASSIN or role == ROLE_GLITCH or (GetGlobalBool("ttt_monsters_are_traitors") and (role == ROLE_VAMPIRE or role == ROLE_ZOMBIE)) then
                     surface.SetDrawColor(255, 0, 0, alpha)
                     surface.SetTextColor(255, 0, 0, alpha)
-                elseif role == ROLE_JESTER or role == ROLE_SWAPPER then
+                elseif (role == ROLE_JESTER and showJester) or (role == ROLE_SWAPPER and showSwapper) then
                     surface.SetDrawColor(180, 23, 253, alpha)
                     surface.SetTextColor(180, 23, 253, alpha)
                 elseif role == -1 then

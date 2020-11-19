@@ -48,19 +48,35 @@ function TraitorMsg(ply_or_rfilter, msg)
 end
 
 -- Traitorchat
-local function RoleChatMsg(sender, role, msg)
+local function RoleChatMsg(sender, msg)
     net.Start("TTT_RoleChat")
-    net.WriteUInt(role, 4)
+    net.WriteUInt(sender:GetRole(), 4)
     net.WriteEntity(sender)
     net.WriteString(msg)
 
     local monstersAsTraitors = GetGlobalBool("ttt_monsters_are_traitors")
-    if role == ROLE_TRAITOR or role == ROLE_HYPNOTIST or role == ROLE_ASSASSIN or role == ROLE_DETRAITOR then
+    if sender:IsTraitorTeam() then
         net.Send(monstersAsTraitors and GetTraitorsAndMonstersFilter() or GetTraitorsFilter())
-    elseif role == ROLE_VAMPIRE or role == ROLE_ZOMBIE then
+    elseif sender:IsMonsterTeam() then
         net.Send(monstersAsTraitors and GetTraitorsAndMonstersFilter() or GetMonstersFilter())
-    elseif role == ROLE_JESTER or role == ROLE_SWAPPER then
-        net.Send(GetTraitorsAndJestersFilter())
+    elseif sender:IsJesterTeam() then
+        -- 0 - Don't show either Jester or Swapper
+        -- 1 - Show both as Jester
+        -- 2 - Show Jester as Jester and Swapper as Swapper
+        -- 3 - Show Jester but don't show Swapper
+        -- 4 - Show Swapper but don't show Jester
+        local mode = GetGlobalInt("ttt_traitors_jester_id_mode")
+        local filter
+        -- If nobody knows who the jesters are just send to jesters
+        if mode == 0 then
+            filter = GetJestersFilter()
+        -- If the traitors know who the Jester, Swapper, or both are then send to jesters and traitors
+        elseif mode == 1 or mode == 2 or
+            (mode == 3 and sender:IsJester()) or
+            (mode == 4 and sender:IsSwapper()) then
+            filter = GetTraitorsAndJestersFilter()
+        end
+        net.Send(filter)
     else
         net.Send(GetDetectiveFilter())
     end
@@ -109,10 +125,6 @@ function GetPhantomFilter(alive_only)
     return GetPlayerFilter(function(p) return p:IsPhantom() and (not alive_only or p:IsTerror()) end)
 end
 
-function GetJesterFilter(alive_only)
-    return GetPlayerFilter(function(p) return p:IsJester() and (not alive_only or p:IsTerror()) end)
-end
-
 function GetZombieFilter(alive_only)
     return GetPlayerFilter(function(p) return p:IsZombie() and (not alive_only or p:IsTerror()) end)
 end
@@ -123,6 +135,14 @@ end
 
 function GetSwapperFilter(alive_only)
     return GetPlayerFilter(function(p) return p:IsSwapper() and (not alive_only or p:IsTerror()) end)
+end
+
+function GetJesterFilter(alive_only)
+    return GetPlayerFilter(function(p) return p:IsJester() and (not alive_only or p:IsTerror()) end)
+end
+
+function GetJestersFilter(alive_only)
+    return GetPlayerFilter(function(p) return p:IsJesterTeam() and (not alive_only or p:IsTerror()) end)
 end
 
 function GetAssassinFilter(alive_only)
@@ -236,7 +256,7 @@ function GM:PlayerSay(ply, text, team_only)
                 ply:SendLua("chat.AddText(\"The glitch is scrambling your communications\")")
                 return ""
             else
-                RoleChatMsg(ply, ply:GetRole(), text)
+                RoleChatMsg(ply, text)
                 return ""
             end
         end

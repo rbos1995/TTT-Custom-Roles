@@ -86,6 +86,14 @@ local function ShowMonsterIcon(ply, pos, dir)
     end
 end
 
+local function ShowJesterIcon(client, ply, pos, dir)
+    local v_material = player.GetJesterValueByRoleAndMode(client, ply:GetRole(), indicator_matjes, indicator_matswa, nil)
+    if v_material ~= nil then
+        render.SetMaterial(v_material)
+        render.DrawQuadEasy(pos, dir, 8, 8, indicator_col, 180)
+    end
+end
+
 -- using this hook instead of pre/postplayerdraw because playerdraw seems to
 -- happen before certain entities are drawn, which then clip over the sprite
 function GM:PostDrawTranslucentRenderables()
@@ -230,12 +238,7 @@ function GM:PostDrawTranslucentRenderables()
                     if v:IsTraitorTeam() or v:IsGlitch() then
                         ShowTraitorIcon(v, pos, dir)
                     elseif v:IsJesterTeam() then
-                        local v_material = indicator_matjes
-                        if GetGlobalBool("ttt_traitors_know_swapper") and v:IsSwapper() then
-                            v_material = indicator_matswa
-                        end
-                        render.SetMaterial(v_material)
-                        render.DrawQuadEasy(pos, dir, 8, 8, indicator_col, 180)
+                        ShowJesterIcon(client, v, pos, dir)
                     -- If Monsters-as-Traitors is enabled and the target is a Monster, show icons
                     elseif client:IsMonsterAlly() and v:IsMonsterTeam() then
                         ShowMonsterIcon(v, pos, dir)
@@ -247,12 +250,7 @@ function GM:PostDrawTranslucentRenderables()
                     if v:IsMonsterTeam() then
                         ShowMonsterIcon(v, pos, dir)
                     elseif v:IsJesterTeam() then
-                        local v_material = indicator_matjes
-                        if GetGlobalBool("ttt_monsters_know_swapper") and v:IsSwapper() then
-                            v_material = indicator_matswa
-                        end
-                        render.SetMaterial(v_material)
-                        render.DrawQuadEasy(pos, dir, 8, 8, indicator_col, 180)
+                        ShowJesterIcon(client, v, pos, dir)
                     -- Since Zombie and Vampire were already handled above, this will only cover the traitor team and only if Monsters-as-Traitors is enabled
                     elseif GetGlobalBool("ttt_monsters_are_traitors") and (v:IsTraitorTeam() or v:IsGlitch()) then
                         ShowTraitorIcon(v, pos, dir)
@@ -262,12 +260,7 @@ function GM:PostDrawTranslucentRenderables()
                     end
                 elseif client:IsKiller() then
                     if v:IsJesterTeam() then
-                        local v_material = indicator_matjes
-                        if GetGlobalBool("ttt_killers_know_swapper") and v:IsSwapper() then
-                            v_material = indicator_matswa
-                        end
-                        render.SetMaterial(v_material)
-                        render.DrawQuadEasy(pos, dir, 8, 8, indicator_col, 180)
+                        ShowJesterIcon(client, v, pos, dir)
                     elseif showkillicon then
                         render.SetMaterial(indicator_mat_target)
                         render.DrawQuadEasy(pos, dir, 8, 8, indicator_col, 180)
@@ -360,6 +353,27 @@ local rag_color = Color(200, 200, 200, 255)
 local GetLang = LANG.GetUnsafeLanguageTable
 
 local MAX_TRACE_LENGTH = math.sqrt(3) * 2 * 16384
+
+local function GetIsJesterTeam(mode, ent)
+    -- 0 - Don't show either Jester or Swapper
+    -- 1 - Show both as Jester
+    -- 2 - Show Jester as Jester and Swapper as Swapper
+    -- 3 - Show Jester but don't show Swapper
+    -- 4 - Show Swapper but don't show Jester
+    local target_jester = false
+    local target_swapper = false
+    if mode == 1 then
+        target_jester = ent:IsJesterTeam()
+    else
+        if mode == 2 or mode == 3 then
+            target_jester = ent:IsJester()
+        end
+        if mode == 2 or mode == 4 then
+            target_swapper = ent:IsSwapper()
+        end
+    end
+    return target_jester, target_swapper
+end
 
 function GM:HUDDrawTargetID()
     local client = LocalPlayer()
@@ -467,12 +481,7 @@ function GM:HUDDrawTargetID()
                 target_hypnotist = ent:IsHypnotist()
                 target_assassin = ent:IsAssassin()
                 target_detraitor = ent:IsDetraitor()
-                if GetGlobalBool("ttt_traitors_know_swapper") then
-                    target_jester = ent:IsJester()
-                    target_swapper = ent:IsSwapper()
-                else
-                    target_jester = ent:IsJesterTeam()
-                end
+                target_jester, target_swapper = GetIsJesterTeam(GetGlobalInt("ttt_traitors_jester_id_mode"), ent)
 
                 -- Show monster icons if Monsters-as-Traitors is enabled
                 if client:IsMonsterAlly() and ent:IsMonsterTeam() then
@@ -486,12 +495,7 @@ function GM:HUDDrawTargetID()
                     target_zombie = ent:IsZombie()
                 end
                 target_vampire = ent:IsVampire()
-                if GetGlobalBool("ttt_monsters_know_swapper") then
-                    target_jester = ent:IsJester()
-                    target_swapper = ent:IsSwapper()
-                else
-                    target_jester = ent:IsJesterTeam()
-                end
+                target_jester, target_swapper = GetIsJesterTeam(GetGlobalInt("ttt_monsters_jester_id_mode"), ent)
 
                 -- Show traitor icons if Monsters-as-Traitors is enabled
                 if GetGlobalBool("ttt_monsters_are_traitors") then
@@ -504,12 +508,7 @@ function GM:HUDDrawTargetID()
             elseif client:IsAssassin() then
                 target_current_target = (ent:Nick() == client:GetNWString("AssassinTarget", ""))
             elseif client:IsKiller() then
-                if GetGlobalBool("ttt_killers_know_swapper") then
-                    target_jester = ent:IsJester()
-                    target_swapper = ent:IsSwapper()
-                else
-                    target_jester = ent:IsJesterTeam()
-                end
+                target_jester, target_swapper = GetIsJesterTeam(GetGlobalInt("ttt_killers_jester_id_mode"), ent)
             end
 
             target_detective = ent:IsDetective() or ent:IsDetraitor()

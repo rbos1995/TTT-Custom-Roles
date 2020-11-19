@@ -121,9 +121,9 @@ ttt_all_search_postround              1 // Whether to allow anyone to search bod
 ttt_player_set_model_on_initial_spawn 1 // Whether to set a player's model when they first join the server. Set to false if your players are not enforcing their custom player models.
 ttt_player_set_model_on_new_round     1 // Whether to set a player's model when they spawn on each new round. Set to false if your players are not enforcing their custom player models.
 ttt_player_set_model_on_respawn       1 // Whether to set a player's model when they are respawned. Set to false if your players are not enforcing their custom player models.
-ttt_traitors_know_swapper             0 // Whether the Traitors are told when a member of the Jester team is really a Swapper
-ttt_monsters_know_swapper             0 // Whether the Monsters are told when a member of the Jester team is really a Swapper
-ttt_killers_know_swapper              0 // Whether the Killer is told when a member of the Jester team is really a Swapper
+ttt_traitors_jester_id_mode           1 // The logic to use when a member of the traitor team is identifying a member of the Jester team (by looking at them, on the scoreboard, etc). 0 - Don't show either Jester or Swapper. 1 - Show both as Jester. 2 - Show Jester as Jester and Swapper as Swapper. 3 - Show Jester but don't show Swapper. 4 - Show Swapper but don't show Jester
+ttt_monsters_jester_id_mode           1 // The logic to use when a member of the monsters team is identifying a member of the Jester team (by looking at them, on the scoreboard, etc). 0 - Don't show either Jester or Swapper. 1 - Show both as Jester. 2 - Show Jester as Jester and Swapper as Swapper. 3 - Show Jester but don't show Swapper. 4 - Show Swapper but don't show Jester
+ttt_killers_jester_id_mode            1 // The logic to use when the Killer is identifying a member of the Jester team (by looking at them, on the scoreboard, etc). 0 - Don't show either Jester or Swapper. 1 - Show both as Jester. 2 - Show Jester as Jester and Swapper as Swapper. 3 - Show Jester but don't show Swapper. 4 - Show Swapper but don't show Jester
 
 // Sprint
 ttt_sprint_enabled             1    // Whether to enable sprinting. NOTE: Disabling sprinting doesn't hide the bar on the client UI but it will never change from being 100% full

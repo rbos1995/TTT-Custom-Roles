@@ -509,7 +509,7 @@ end
 
 -- Player highlights
 
-local function OnPlayerHighlightEnabled(role, alliedRoles, hideEnemies, traitorAllies)
+local function OnPlayerHighlightEnabled(role, showJesters, showSwappers, alliedRoles, hideEnemies, traitorAllies)
     if GetRoundState() ~= ROUND_ACTIVE then return end
 
     local client = LocalPlayer()
@@ -520,7 +520,9 @@ local function OnPlayerHighlightEnabled(role, alliedRoles, hideEnemies, traitorA
     local jesters = {}
     for _, v in pairs(player.GetAll()) do
         if IsValid(v) and v:Alive() and not v:IsSpec() then
-            if v:IsJesterTeam() then
+            if v:IsJester() and showJesters then
+                table.insert(jesters, v)
+            elseif v:IsSwapper() and showSwappers then
                 table.insert(jesters, v)
             elseif v:GetRole() == role or (alliedRoles ~= nil and table.HasValue(alliedRoles, v:GetRole())) then
                 table.insert(friends, v)
@@ -552,9 +554,24 @@ local function OnPlayerHighlightEnabled(role, alliedRoles, hideEnemies, traitorA
     halo.Add(jesters, Color(255, 85, 100), 1, 1, 1, true, true)
 end
 
+-- 0 - Don't show either Jester or Swapper
+-- 1 - Show both as Jester
+-- 2 - Show Jester as Jester and Swapper as Swapper
+-- 3 - Show Jester but don't show Swapper
+-- 4 - Show Swapper but don't show Jester
+local function ShouldHighlightJester(mode)
+    return mode == 1 or mode == 2 or mode == 3
+end
+local function ShouldHighlightSwapper(mode)
+    return mode == 1 or mode == 2 or mode == 4
+end
+local function ShouldHighlightJesterTeam(mode)
+    return ShouldHighlightJester(mode), ShouldHighlightSwapper(mode)
+end
 local function EnableKillerHighlights()
     hook.Add("PreDrawHalos", "AddPlayerHighlights", function()
-        OnPlayerHighlightEnabled(ROLE_KILLER)
+        local showJester, showSwapper = ShouldHighlightJesterTeam(GetGlobalInt("ttt_killers_jester_id_mode"))
+        OnPlayerHighlightEnabled(ROLE_KILLER, showJester, showSwapper)
     end)
 end
 local function EnableZombieHighlights()
@@ -565,7 +582,8 @@ local function EnableZombieHighlights()
             table.Add(allies, {ROLE_TRAITOR, ROLE_ASSASSIN, ROLE_HYPNOTIST, ROLE_DETRAITOR})
         end
 
-        OnPlayerHighlightEnabled(ROLE_ZOMBIE, allies, false, traitors_are_friends)
+        local showJester, showSwapper = ShouldHighlightJesterTeam(GetGlobalInt("ttt_monsters_jester_id_mode"))
+        OnPlayerHighlightEnabled(ROLE_ZOMBIE, showJester, showSwapper, allies, false, traitors_are_friends)
     end)
 end
 local function EnableVampireHighlights()
@@ -576,7 +594,8 @@ local function EnableVampireHighlights()
             table.Add(allies, {ROLE_TRAITOR, ROLE_ASSASSIN, ROLE_HYPNOTIST, ROLE_DETRAITOR})
         end
 
-        OnPlayerHighlightEnabled(ROLE_VAMPIRE, allies, false, traitors_are_friends)
+        local showJester, showSwapper = ShouldHighlightJesterTeam(GetGlobalInt("ttt_monsters_jester_id_mode"))
+        OnPlayerHighlightEnabled(ROLE_VAMPIRE, showJester, showSwapper, allies, false, traitors_are_friends)
     end)
 end
 local function EnableTraitorHighlights()
@@ -594,10 +613,11 @@ local function EnableTraitorHighlights()
             table.Add(detraitor_allies, monsters)
         end
 
-        OnPlayerHighlightEnabled(ROLE_TRAITOR, traitor_allies, true, true)
-        OnPlayerHighlightEnabled(ROLE_ASSASSIN, assassin_allies, true, true)
-        OnPlayerHighlightEnabled(ROLE_HYPNOTIST, hypnotist_allies, true, true)
-        OnPlayerHighlightEnabled(ROLE_DETRAITOR, detraitor_allies, true, true)
+        local showJester, showSwapper = ShouldHighlightJesterTeam(GetGlobalInt("ttt_traitors_jester_id_mode"))
+        OnPlayerHighlightEnabled(ROLE_TRAITOR, showJester, showSwapper, traitor_allies, true, true)
+        OnPlayerHighlightEnabled(ROLE_ASSASSIN, showJester, showSwapper, assassin_allies, true, true)
+        OnPlayerHighlightEnabled(ROLE_HYPNOTIST, showJester, showSwapper, hypnotist_allies, true, true)
+        OnPlayerHighlightEnabled(ROLE_DETRAITOR, showJester, showSwapper, detraitor_allies, true, true)
     end)
 end
 

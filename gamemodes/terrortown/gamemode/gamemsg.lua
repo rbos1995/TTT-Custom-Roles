@@ -67,14 +67,14 @@ local function RoleChatMsg(sender, msg)
         -- 4 - Show Swapper but don't show Jester
         local mode = GetGlobalInt("ttt_traitors_jester_id_mode")
         local filter
-        -- If nobody knows who the jesters are just send to jesters
-        if mode == 0 then
-            filter = GetJestersFilter()
         -- If the traitors know who the Jester, Swapper, or both are then send to jesters and traitors
-        elseif mode == 1 or mode == 2 or
+        if mode == 1 or mode == 2 or
             (mode == 3 and sender:IsJester()) or
             (mode == 4 and sender:IsSwapper()) then
             filter = GetTraitorsAndJestersFilter()
+        -- Default to just sending to the jester team
+        else
+            filter = GetJestersFilter()
         end
         net.Send(filter)
     else

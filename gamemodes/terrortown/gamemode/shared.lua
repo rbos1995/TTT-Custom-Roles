@@ -77,7 +77,24 @@ ROLE_STRINGS = {
     [ROLE_ASSASSIN] = "assassin",
     [ROLE_KILLER] = "killer",
     [ROLE_DETRAITOR] = "detraitor"
-};
+}
+
+ROLE_STRINGS_EXT = {
+    [ROLE_TRAITOR] = "a traitor",
+    [ROLE_INNOCENT] = "an innocent",
+    [ROLE_DETECTIVE] = "a detective",
+    [ROLE_MERCENARY] = "a mercenary",
+    [ROLE_HYPNOTIST] = "a hypnotist",
+    [ROLE_GLITCH] = "a glitch",
+    [ROLE_JESTER] = "a jester",
+    [ROLE_PHANTOM] = "a phantom",
+    [ROLE_ZOMBIE] = "a zombie",
+    [ROLE_VAMPIRE] = "a vampire",
+    [ROLE_SWAPPER] = "a swapper",
+    [ROLE_ASSASSIN] = "an assassin",
+    [ROLE_KILLER] = "a killer",
+    [ROLE_DETRAITOR] = "a detraitor"
+}
 
 -- Game event log defs
 EVENT_KILL = 1

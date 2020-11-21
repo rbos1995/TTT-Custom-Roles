@@ -169,7 +169,13 @@ CreateConVar("ttt_vampire_damage_reduction", "0.8", FCVAR_ARCHIVE + FCVAR_REPLIC
 CreateConVar("ttt_vampire_prime_death_mode", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_vampire_vision_enable", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_jester_win_by_traitors", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_jester_notify_mode", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The logic to use when notifying players than the Jester is killed", 0, 4)
+CreateConVar("ttt_jester_notify_sound", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_jester_notify_confetti", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_swapper_respawn_health", "100", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_swapper_notify_mode", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The logic to use when notifying players than the Swapper is killed", 0, 4)
+CreateConVar("ttt_swapper_notify_sound", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_swapper_notify_confetti", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_traitors_jester_id_mode", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The logic to use when a member of the traitor team is identifying a member of the Jester team", 0, 4)
 CreateConVar("ttt_monsters_jester_id_mode", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The logic to use when a member of the monsters team is identifying a member of the Jester team", 0, 4)
 CreateConVar("ttt_killers_jester_id_mode", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The logic to use when the Killer is identifying a member of the Jester team", 0, 4)
@@ -280,6 +286,7 @@ util.AddNetworkString("TTT_BuyableWeapon_Killer")
 util.AddNetworkString("TTT_LoadMonsterEquipment")
 util.AddNetworkString("TTT_PlayerFootstep")
 util.AddNetworkString("TTT_ClearPlayerFootsteps")
+util.AddNetworkString("TTT_JesterDeathCelebration")
 
 local jesterkilled = 0
 

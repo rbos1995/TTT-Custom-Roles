@@ -9,37 +9,10 @@ if CLIENT then
 
         -- Format the number role into a human readable role
         local col = ROLE_COLORS[role]
-        if role == ROLE_INNOCENT then
-            role = "innocent"
-        elseif role == ROLE_TRAITOR then
-            role = "a traitor"
-        elseif role == ROLE_DETECTIVE then
-            role = "a detective"
-        elseif role == ROLE_GLITCH then
-            role = "a glitch"
-        elseif role == ROLE_MERCENARY then
-            role = "a mercenary"
-        elseif role == ROLE_JESTER then
-            role = "a jester"
-        elseif role == ROLE_HYPNOTIST then
-            role = "a hypnotist"
-        elseif role == ROLE_PHANTOM then
-            role = "a phantom"
-        elseif role == ROLE_ZOMBIE then
-            role = "a zombie"
-        elseif role == ROLE_VAMPIRE then
-            role = "a vampire"
-        elseif role == ROLE_SWAPPER then
-            role = "a swapper"
-        elseif role == ROLE_ASSASSIN then
-            role = "an assassin"
-        elseif role == ROLE_KILLER then
-            role = "a killer"
-        elseif role == ROLE_DETRAITOR then
-            role = "a detraitor"
-        else
+        local role_string = ROLE_STRINGS_EXT[role]
+        if role == ROLE_NONE then
             col = COLOR_WHITE
-            role = "a hidden role"
+            role_string = "a hidden role"
         end
 
         -- Format the reason for their death
@@ -50,7 +23,7 @@ if CLIENT then
         elseif reason == "prop" then
             chat.AddText(COLOR_WHITE, "You were killed by a prop!")
         elseif reason == "ply" then
-            chat.AddText(COLOR_WHITE, "You were killed by ", col, name, COLOR_WHITE, ", they were ", col, role .. "!")
+            chat.AddText(COLOR_WHITE, "You were killed by ", col, name, COLOR_WHITE, ", they were ", col, role_string .. "!")
         elseif reason == "fell" then
             chat.AddText(COLOR_WHITE, "You fell to your death!")
         elseif reason == "water" then

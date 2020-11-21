@@ -173,12 +173,17 @@ GM.TTTBeginRound = PlaySoundCue
 GM.TTTEndRound = PlaySoundCue
 
 local confetti = Material("confetti.png")
-net.Receive("TTT_Birthday", function()
-    local ent = net.ReadEntity()
-    ent:EmitSound("birthday.wav")
-    local pos = ent:GetPos() + Vector(0, 0, ent:OBBMaxs().z)
-    if ent.GetShootPos then
-        pos = ent:GetShootPos()
+local function Celebrate(ply, play_sound, show_confetti)
+    if not IsValid(ply) then return end
+    if play_sound then
+        ply:EmitSound("birthday.wav")
+    end
+
+    if not show_confetti then return end
+
+    local pos = ply:GetPos() + Vector(0, 0, ply:OBBMaxs().z)
+    if ply.GetShootPos then
+        pos = ply:GetShootPos()
     end
 
     local velMax = 200
@@ -187,7 +192,7 @@ net.Receive("TTT_Birthday", function()
 
     --Handles particles
     local emitter = ParticleEmitter(pos, true)
-    for I = 1, 150 do
+    for _ = 1, 150 do
         local p = emitter:Add(confetti, pos)
         p:SetStartSize(math.random(6, 10))
         p:SetEndSize(0)
@@ -199,6 +204,18 @@ net.Receive("TTT_Birthday", function()
         p:SetGravity(gravity)
         p:SetAirResistance(125)
     end
+    emitter:Finish()
+end
+
+net.Receive("TTT_Birthday", function()
+    local ent = net.ReadEntity()
+    Celebrate(ent, true, true)
+end)
+net.Receive("TTT_JesterDeathCelebration", function()
+    local ent = net.ReadEntity()
+    local play_sound = net.ReadBool()
+    local show_confetti = net.ReadBool()
+    Celebrate(ent, play_sound, show_confetti)
 end)
 
 --- usermessages

@@ -110,8 +110,14 @@ ttt_zombie_damage_reduction    0.8 // The fraction an attacker's bullet damage w
 ttt_zombie_prime_only_weapons  1   // Whether only Prime Zombies (e.g. players who spawn as Zombies originally) are allowed to pick up weapons.
 
 // Jesters
-ttt_jester_win_by_traitors 1   // Whether the Jester will win the round if they are killed by a traitor
-ttt_swapper_respawn_health 100 // What amount of health to give the Swapper when they are killed and respawned
+ttt_jester_win_by_traitors  1   // Whether the Jester will win the round if they are killed by a traitor
+ttt_jester_notify_mode      1   // The logic to use when notifying players that a Jester is killed. 0 - Don't notify anyone. 1 - Only notify Traitors and Detective. 2 - Only notify Traitors. 3 - Only notify Detective. 4 - Notify everyone.
+ttt_jester_notify_sound     0   // Whether to play a cheering sound when a Jester is killed
+ttt_jester_notify_confetti  0   // Whether to throw confetti when a Jester is a killed
+ttt_swapper_respawn_health  100 // What amount of health to give the Swapper when they are killed and respawned
+ttt_swapper_notify_mode     1   // The logic to use when notifying players that a Swapper is killed. 0 - Don't notify anyone. 1 - Only notify Traitors and Detective. 2 - Only notify Traitors. 3 - Only notify Detective. 4 - Notify everyone.
+ttt_swapper_notify_sound    0   // Whether to play a cheering sound when a Swapper is killed
+ttt_swapper_notify_confetti 0   // Whether to throw confetti when a Swapper is a killed
 
 // Other
 ttt_traitor_vision_enable             0 // Whether members of the Traitor team can see other members of the Traitor team (including Glitches) through walls via a highlight effect.

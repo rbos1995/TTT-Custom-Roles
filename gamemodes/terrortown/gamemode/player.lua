@@ -906,7 +906,8 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
                 v:SetNWString("AssassinTarget", detectives[math.random(#detectives)])
             end
 
-            if #enemies + #detectives >= 1 then
+            -- Only show the message if the Assassin is still alive
+            if v:Alive() and #enemies + #detectives >= 1 then
                 local targetCount
                 if #enemies + #detectives > 1 then
                     targetCount = "next"

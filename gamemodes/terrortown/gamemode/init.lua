@@ -65,7 +65,7 @@ CreateConVar("ttt_posttime_seconds", "30", FCVAR_NOTIFY)
 CreateConVar("ttt_firstpreptime", "60")
 
 -- Haste mode
-local ttt_haste = CreateConVar("ttt_haste", "1", FCVAR_NOTIFY)
+local ttt_haste = CreateConVar("ttt_haste", "1", FCVAR_ARCHIVE + FCVAR_NOTIFY)
 CreateConVar("ttt_haste_starting_minutes", "5", FCVAR_NOTIFY)
 CreateConVar("ttt_haste_minutes_per_death", "0.5", FCVAR_NOTIFY)
 
@@ -197,7 +197,7 @@ CreateConVar("ttt_weapon_spawn_count", "0")
 CreateConVar("ttt_round_limit", "6", FCVAR_ARCHIVE + FCVAR_NOTIFY + FCVAR_REPLICATED)
 CreateConVar("ttt_time_limit_minutes", "75", FCVAR_NOTIFY + FCVAR_REPLICATED)
 
-CreateConVar("ttt_idle_limit", "180", FCVAR_NOTIFY)
+CreateConVar("ttt_idle_limit", "180", FCVAR_ARCHIVE + FCVAR_NOTIFY)
 
 CreateConVar("ttt_voice_drain", "0", FCVAR_NOTIFY)
 CreateConVar("ttt_voice_drain_normal", "0.2", FCVAR_NOTIFY)

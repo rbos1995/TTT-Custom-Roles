@@ -413,6 +413,11 @@ function plymeta:Spectate(type)
     if type == OBS_MODE_ROAMING then
         self:SetMoveType(MOVETYPE_NOCLIP)
     end
+
+    -- Strip all the weapons after a delay to work around some addons that force spectator but leave the magneto stick somehow
+    timer.Simple(0.5, function()
+        self:StripAll()
+    end)
 end
 
 local oldSpectateEntity = plymeta.SpectateEntity

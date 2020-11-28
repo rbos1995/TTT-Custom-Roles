@@ -248,10 +248,3 @@ end
 function EnumToWep(ammo)
     return EnumToSWEPKey(ammo, "PrintName")
 end
-
--- something cheap to send over the network
-function WepToEnum(wep)
-    if not IsValid(wep) then return end
-
-    return wep.WeaponID
-end

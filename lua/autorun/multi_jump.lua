@@ -29,7 +29,8 @@ local function GetMoveVector(mv)
 end
 
 hook.Add("SetupMove", "MultiJumpSetupMove", function(ply, mv)
-    if gmod.GetGamemode().Name ~= "Trouble in Terrorist Town" then return end
+    -- Only run this for Valid, Alive, Non-Spectators playing TTT
+    if gmod.GetGamemode().Name ~= "Trouble in Terrorist Town" or not IsValid(ply) or not ply:Alive() or ply:IsSpec() then return end
 
     -- Let the engine handle movement from the ground
     -- Only set the 'jumped' flag if that functionality is enabled

@@ -1164,7 +1164,7 @@ local function SwapperKilledNotification(attacker, victim)
 end
 
 function GM:PlayerDeath(victim, infl, attacker)
-    if not attacker:IsPlayer() then
+    if IsValid(attacker) and not attacker:IsPlayer() then
         if GetConVar("ttt_drinking_suicide"):GetString() == "drink" then
             DRINKS.AddDrink(victim)
         elseif GetConVar("ttt_drinking_suicide"):GetString() == "shot" then
@@ -1173,8 +1173,8 @@ function GM:PlayerDeath(victim, infl, attacker)
         DRINKS.AddPlayerAction("suicide", victim)
     end
 
-    local valid_kill = attacker:IsPlayer() and attacker ~= victim and GetRoundState() == ROUND_ACTIVE
-    if victim:IsPhantom() and valid_kill then
+    local valid_kill = IsValid(attacker) and attacker:IsPlayer() and attacker ~= victim and GetRoundState() == ROUND_ACTIVE
+    if valid_kill and victim:IsPhantom() then
         attacker:SetNWBool("Haunted", true)
 
         if GetConVar("ttt_phantom_killer_haunt"):GetBool() then
@@ -1212,16 +1212,16 @@ function GM:PlayerDeath(victim, infl, attacker)
         end
     end
 
-    if attacker:IsKiller() and valid_kill then
+    if valid_kill and attacker:IsKiller() then
         attacker:SetNWBool("KillerSmoke", false)
         ResetKillerKillCheckTimer()
     end
 
-    if victim:IsJester() and valid_kill then
+    if valid_kill and victim:IsJester() then
         JesterKilledNotification(attacker, victim)
     end
 
-    if victim:IsSwapper() and valid_kill then
+    if valid_kill and victim:IsSwapper() then
         SwapperKilledNotification(attacker, victim)
 
         net.Start("TTT_JesterKiller")
@@ -1255,7 +1255,7 @@ function GM:PlayerDeath(victim, infl, attacker)
     victim:Freeze(false)
 
     -- Haunt the attacker if that functionality is enabled
-    if victim:IsPhantom() and valid_kill and GetConVar("ttt_phantom_killer_haunt"):GetBool() then
+    if valid_kill and victim:IsPhantom() and GetConVar("ttt_phantom_killer_haunt"):GetBool() then
         timer.Simple(1, function()
             victim:Spectate(OBS_MODE_CHASE)
             victim:SpectateEntity(attacker)
@@ -1930,7 +1930,7 @@ concommand.Add("ttt_kill_from_random", function(ply, cmd, args)
 
     local killer = nil
     for _, v in RandomPairs(player.GetAll()) do
-        if IsValid(v) and v:Alive() and v ~= ply and not v:IsJesterTeam() then
+        if IsValid(v) and v:Alive() and not v:IsSpec() and v ~= ply and not v:IsJesterTeam() then
             killer = v
             break
         end

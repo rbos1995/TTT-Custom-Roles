@@ -188,7 +188,7 @@ CreateConVar("ttt_phantom_killer_haunt_power_rate", "5", FCVAR_ARCHIVE + FCVAR_R
 CreateConVar("ttt_phantom_killer_haunt_move_cost", "50", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_phantom_killer_haunt_attack_cost", "75", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_phantom_killer_haunt_jump_cost", "30", FCVAR_ARCHIVE + FCVAR_REPLICATED)
-CreateConVar("ttt_phantom_killer_haunt_drop_cost", "25", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_phantom_killer_haunt_drop_cost", "35", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_traitor_vision_enable", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 
 CreateConVar("ttt_use_weapon_spawn_scripts", "1")

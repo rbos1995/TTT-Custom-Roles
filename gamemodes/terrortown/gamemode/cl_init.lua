@@ -754,7 +754,6 @@ net.Receive("TTT_PlayerFootstep", function()
 end)
 
 net.Receive("TTT_ClearPlayerFootsteps", function()
-    print("Clearing Footsteps")
     table.Empty(footSteps)
 end)
 

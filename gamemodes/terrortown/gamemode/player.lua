@@ -832,6 +832,7 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
                 local deadPhantom = phantom.player
                 deadPhantom:SetNWBool("Haunting", false)
                 deadPhantom:SetNWInt("HauntingPower", 0)
+                timer.Remove(deadPhantom:Nick() .. "HauntingPower")
                 if deadPhantom:IsPhantom() and not deadPhantom:Alive() then
                     -- Find the Phantom's corpse
                     local phantomBody = deadPhantom.server_ragdoll or deadPhantom:GetRagdollEntity()
@@ -1181,6 +1182,12 @@ function GM:PlayerDeath(victim, infl, attacker)
             victim:SetNWBool("Haunting", true)
             victim:SetNWInt("HauntingPower", 0)
             timer.Create(victim:Nick() .. "HauntingPower", 1, 0, function()
+                -- Make sure the victim is still in the correct spectate mode
+                local spec_mode = victim:GetNWInt("SpecMode", OBS_MODE_ROAMING)
+                if spec_mode ~= OBS_MODE_CHASE and spec_mode ~= OBS_MODE_IN_EYE then
+                    victim:Spectate(OBS_MODE_CHASE)
+                end
+
                 local power = victim:GetNWInt("HauntingPower", 0)
                 local power_rate = GetConVar("ttt_phantom_killer_haunt_power_rate"):GetInt()
                 local new_power = math.Clamp(power + power_rate, 0, GetConVar("ttt_phantom_killer_haunt_power_max"):GetInt())

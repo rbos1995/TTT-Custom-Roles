@@ -567,7 +567,7 @@ function GM:TTTToggleDisguiser(ply, state)
 end
 
 local function SetDisguise(ply, cmd, args)
-    if not IsValid(ply) or not (player.IsTraitorTeam(ply) or ply:IsActiveKiller()) then return end
+    if not IsValid(ply) then return end
 
     if ply:HasEquipmentItem(EQUIP_DISGUISE) then
         local state = #args == 1 and tobool(args[1])

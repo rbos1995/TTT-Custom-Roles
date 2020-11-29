@@ -414,10 +414,12 @@ function plymeta:Spectate(type)
         self:SetMoveType(MOVETYPE_NOCLIP)
     end
 
-    -- Strip all the weapons after a delay to work around some addons that force spectator but leave the magneto stick somehow
-    timer.Simple(0.5, function()
-        self:StripAll()
-    end)
+    -- If this player is a Spectator then strip all the weapons after a delay to work around some addons that force spectator but leave the magneto stick somehow
+    if self:IsSpec() then
+        timer.Simple(0.5, function()
+            self:StripAll()
+        end)
+    end
 end
 
 local oldSpectateEntity = plymeta.SpectateEntity

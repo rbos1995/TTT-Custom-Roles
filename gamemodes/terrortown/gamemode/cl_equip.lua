@@ -341,6 +341,14 @@ local color_darkened = Color(255, 255, 255, 80)
 
 local eqframe = nil
 
+local function ForceCloseTraitorMenu(ply, cmd, args)
+    if IsValid(eqframe) then
+        eqframe:Close()
+    end
+end
+
+concommand.Add("ttt_cl_traitorpopup_close", ForceCloseTraitorMenu)
+
 local function TraitorMenuPopup()
     -- calculate dimensions
     local numCols = serverColsVar:GetInt()
@@ -365,15 +373,12 @@ local function TraitorMenuPopup()
     local h = dlisth + 75
 
     local ply = LocalPlayer()
-    if not IsValid(ply) or not ply:IsActiveSpecial() then
+    if not IsValid(ply) then
         return
     end
 
     -- Close any existing traitor menu
     if eqframe and IsValid(eqframe) then eqframe:Close() end
-
-    local credits = ply:GetCredits()
-    local can_order = credits > 0
 
     local dframe = vgui.Create("DFrame")
     dframe:SetSize(w, h)
@@ -397,377 +402,383 @@ local function TraitorMenuPopup()
 
     dsheet:SetPos(0, 0)
     dsheet:StretchToParent(m, m + 25, m, m)
-    local padding = dsheet:GetPadding()
 
-    local dequip = vgui.Create("DPanel", dsheet)
-    dequip:SetPaintBackground(false)
-    dequip:StretchToParent(padding, padding, padding, padding)
+    local credits = ply:GetCredits()
+    local show = false
+    if player.HasBuyMenu(ply, true) then
+        local can_order = credits > 0
 
-    -- Determine if we already have equipment
-    local owned_ids = {}
-    for _, wep in pairs(ply:GetWeapons()) do
-        if IsValid(wep) and wep:IsEquipment() then
-            table.insert(owned_ids, wep:GetClass())
-        end
-    end
+        local padding = dsheet:GetPadding()
 
-    -- Stick to one value for no equipment
-    if #owned_ids == 0 then
-        owned_ids = nil
-    end
+        local dequip = vgui.Create("DPanel", dsheet)
+        dequip:SetPaintBackground(false)
+        dequip:StretchToParent(padding, padding, padding, padding)
 
-    local dsearchheight = 25
-    local dsearchpadding = 5
-    local dsearch = vgui.Create("DTextEntry", dequip)
-    dsearch:SetPos(0, 0)
-    dsearch:SetSize(dlistw, dsearchheight)
-    dsearch:SetPlaceholderText("Search...")
-    dsearch:SetUpdateOnType(true)
-    dsearch.OnGetFocus = function() dframe:SetKeyboardInputEnabled(true) end
-    dsearch.OnLoseFocus = function() dframe:SetKeyboardInputEnabled(false) end
-
-    --- Construct icon listing
-    --- icon size = 64 x 64
-    local dlist = vgui.Create("EquipSelect", dequip)
-    -- local dlistw = 288
-    dlist:SetPos(0, dsearchheight + dsearchpadding)
-    dlist:SetSize(dlistw, dlisth - dsearchheight - dsearchpadding)
-    dlist:EnableVerticalScrollbar(true)
-    dlist:EnableHorizontal(true)
-
-    local bw, bh = 100, 25
-
-    -- Whole right column
-    local dih = h - bh - m * 5
-    -- local diw = w - dlistw - m*6 - 2
-    local dinfobg = vgui.Create("DPanel", dequip)
-    dinfobg:SetPaintBackground(false)
-    dinfobg:SetSize(diw - m, dih)
-    dinfobg:SetPos(dlistw + m, 0)
-
-    -- item info pane
-    local dinfo = vgui.Create("ColoredBox", dinfobg)
-    dinfo:SetColor(Color(90, 90, 95))
-    dinfo:SetPos(0, 0)
-    dinfo:StretchToParent(0, 0, m * 2, 105)
-
-    local dfields = {}
-    for _, k in pairs({ "name", "type", "desc" }) do
-        dfields[k] = vgui.Create("DLabel", dinfo)
-        dfields[k]:SetTooltip(GetTranslation("equip_spec_" .. k))
-        dfields[k]:SetPos(m * 3, m * 2)
-        dfields[k]:SetWidth(diw - m * 6)
-    end
-
-    dfields.name:SetFont("TabLarge")
-
-    dfields.type:SetFont("DermaDefault")
-    dfields.type:MoveBelow(dfields.name)
-
-    dfields.desc:SetFont("DermaDefaultBold")
-    dfields.desc:SetContentAlignment(7)
-    dfields.desc:MoveBelow(dfields.type, 1)
-
-    local dhelp = vgui.Create("DPanel", dinfobg)
-    dhelp:SetPaintBackground(false)
-    dhelp:SetSize(diw, 64)
-    dhelp:MoveBelow(dinfo, m)
-
-    local update_preqs = PreqLabels(dhelp, m * 7, m * 2)
-
-    local function FillEquipmentList(itemlist)
-        dlist:Clear()
-
-        -- temp table for sorting
-        local paneltablefav = {}
-        local paneltable = {}
-        for i = 1, 9 do
-            paneltablefav[i] = {}
-            paneltable[i] = {}
+        -- Determine if we already have equipment
+        local owned_ids = {}
+        for _, wep in pairs(ply:GetWeapons()) do
+            if IsValid(wep) and wep:IsEquipment() then
+                table.insert(owned_ids, wep:GetClass())
+            end
         end
 
-        for k, item in pairs(itemlist) do
-            local ic = nil
+        -- Stick to one value for no equipment
+        if #owned_ids == 0 then
+            owned_ids = nil
+        end
 
-            -- Create icon panel
-            if item.material then
-                ic = vgui.Create("LayeredIcon", dlist)
+        local dsearchheight = 25
+        local dsearchpadding = 5
+        local dsearch = vgui.Create("DTextEntry", dequip)
+        dsearch:SetPos(0, 0)
+        dsearch:SetSize(dlistw, dsearchheight)
+        dsearch:SetPlaceholderText("Search...")
+        dsearch:SetUpdateOnType(true)
+        dsearch.OnGetFocus = function() dframe:SetKeyboardInputEnabled(true) end
+        dsearch.OnLoseFocus = function() dframe:SetKeyboardInputEnabled(false) end
 
-                if item.custom and showCustomVar:GetBool() then
-                    -- Custom marker icon
-                    local marker = vgui.Create("DImage")
-                    marker:SetImage("vgui/ttt/custom_marker")
-                    marker.PerformLayout = function(s)
-                        s:AlignBottom(2)
-                        s:AlignRight(2)
-                        s:SetSize(16, 16)
+        --- Construct icon listing
+        --- icon size = 64 x 64
+        local dlist = vgui.Create("EquipSelect", dequip)
+        -- local dlistw = 288
+        dlist:SetPos(0, dsearchheight + dsearchpadding)
+        dlist:SetSize(dlistw, dlisth - dsearchheight - dsearchpadding)
+        dlist:EnableVerticalScrollbar(true)
+        dlist:EnableHorizontal(true)
+
+        local bw, bh = 100, 25
+
+        -- Whole right column
+        local dih = h - bh - m * 5
+        -- local diw = w - dlistw - m*6 - 2
+        local dinfobg = vgui.Create("DPanel", dequip)
+        dinfobg:SetPaintBackground(false)
+        dinfobg:SetSize(diw - m, dih)
+        dinfobg:SetPos(dlistw + m, 0)
+
+        -- item info pane
+        local dinfo = vgui.Create("ColoredBox", dinfobg)
+        dinfo:SetColor(Color(90, 90, 95))
+        dinfo:SetPos(0, 0)
+        dinfo:StretchToParent(0, 0, m * 2, 105)
+
+        local dfields = {}
+        for _, k in pairs({ "name", "type", "desc" }) do
+            dfields[k] = vgui.Create("DLabel", dinfo)
+            dfields[k]:SetTooltip(GetTranslation("equip_spec_" .. k))
+            dfields[k]:SetPos(m * 3, m * 2)
+            dfields[k]:SetWidth(diw - m * 6)
+        end
+
+        dfields.name:SetFont("TabLarge")
+
+        dfields.type:SetFont("DermaDefault")
+        dfields.type:MoveBelow(dfields.name)
+
+        dfields.desc:SetFont("DermaDefaultBold")
+        dfields.desc:SetContentAlignment(7)
+        dfields.desc:MoveBelow(dfields.type, 1)
+
+        local dhelp = vgui.Create("DPanel", dinfobg)
+        dhelp:SetPaintBackground(false)
+        dhelp:SetSize(diw, 64)
+        dhelp:MoveBelow(dinfo, m)
+
+        local update_preqs = PreqLabels(dhelp, m * 7, m * 2)
+
+        local function FillEquipmentList(itemlist)
+            dlist:Clear()
+
+            -- temp table for sorting
+            local paneltablefav = {}
+            local paneltable = {}
+            for i = 1, 9 do
+                paneltablefav[i] = {}
+                paneltable[i] = {}
+            end
+
+            for k, item in pairs(itemlist) do
+                local ic = nil
+
+                -- Create icon panel
+                if item.material then
+                    ic = vgui.Create("LayeredIcon", dlist)
+
+                    if item.custom and showCustomVar:GetBool() then
+                        -- Custom marker icon
+                        local marker = vgui.Create("DImage")
+                        marker:SetImage("vgui/ttt/custom_marker")
+                        marker.PerformLayout = function(s)
+                            s:AlignBottom(2)
+                            s:AlignRight(2)
+                            s:SetSize(16, 16)
+                        end
+                        marker:SetTooltip(GetTranslation("equip_custom"))
+
+                        ic:AddLayer(marker)
+
+                        ic:EnableMousePassthrough(marker)
                     end
-                    marker:SetTooltip(GetTranslation("equip_custom"))
 
-                    ic:AddLayer(marker)
-
-                    ic:EnableMousePassthrough(marker)
-                end
-
-                -- Favorites marker icon
-                ic.favorite = false
-                local favorites = GetFavorites(ply:SteamID(), ply:GetRole())
-                if favorites then
-                    if IsFavorite(favorites, item.id) then
-                        ic.favorite = true
-                        if showFavoriteVar:GetBool() then
-                            local star = vgui.Create("DImage")
-                            star:SetImage("icon16/star.png")
-                            star.PerformLayout = function(s)
-                                s:AlignTop(2)
-                                s:AlignRight(2)
-                                s:SetSize(12, 12)
+                    -- Favorites marker icon
+                    ic.favorite = false
+                    local favorites = GetFavorites(ply:SteamID(), ply:GetRole())
+                    if favorites then
+                        if IsFavorite(favorites, item.id) then
+                            ic.favorite = true
+                            if showFavoriteVar:GetBool() then
+                                local star = vgui.Create("DImage")
+                                star:SetImage("icon16/star.png")
+                                star.PerformLayout = function(s)
+                                    s:AlignTop(2)
+                                    s:AlignRight(2)
+                                    s:SetSize(12, 12)
+                                end
+                                star:SetTooltip("Favorite")
+                                ic:AddLayer(star)
+                                ic:EnableMousePassthrough(star)
                             end
-                            star:SetTooltip("Favorite")
-                            ic:AddLayer(star)
-                            ic:EnableMousePassthrough(star)
                         end
                     end
-                end
 
-                -- Slot marker icon
-                ic.slot = 1
-                if ItemIsWeapon(item) and showSlotVar:GetBool() then
-                    local slot = vgui.Create("SimpleIconLabelled")
-                    slot:SetIcon("vgui/ttt/sprite_slot_cap")
-                    slot:SetIconColor(ROLE_COLORS[ply:GetRole()] or COLOR_GRAY)
-                    slot:SetIconSize(16)
+                    -- Slot marker icon
+                    ic.slot = 1
+                    if ItemIsWeapon(item) and showSlotVar:GetBool() then
+                        local slot = vgui.Create("SimpleIconLabelled")
+                        slot:SetIcon("vgui/ttt/sprite_slot_cap")
+                        slot:SetIconColor(ROLE_COLORS[ply:GetRole()] or COLOR_GRAY)
+                        slot:SetIconSize(16)
 
-                    slot:SetIconText(item.slot)
-                    ic.slot = item.slot
+                        slot:SetIconText(item.slot)
+                        ic.slot = item.slot
 
-                    -- Credit to @Angela and @Technofrood on the Lonely Yogs Discord for the fix!
-                    -- Clamp the item slot within the correct limits
-                    if ic.slot ~= nil then
-                        ic.slot = math.Clamp(ic.slot, 1, #paneltable)
+                        -- Credit to @Angela and @Technofrood on the Lonely Yogs Discord for the fix!
+                        -- Clamp the item slot within the correct limits
+                        if ic.slot ~= nil then
+                            ic.slot = math.Clamp(ic.slot, 1, #paneltable)
+                        end
+
+                        slot:SetIconProperties(COLOR_WHITE,
+                            "DefaultBold",
+                            { opacity = 220, offset = 1 },
+                            { 9, 8 })
+
+                        ic:AddLayer(slot)
+                        ic:EnableMousePassthrough(slot)
                     end
 
-                    slot:SetIconProperties(COLOR_WHITE,
-                        "DefaultBold",
-                        { opacity = 220, offset = 1 },
-                        { 9, 8 })
-
-                    ic:AddLayer(slot)
-                    ic:EnableMousePassthrough(slot)
+                    ic:SetIconSize(itemSize)
+                    ic:SetIcon(item.material)
+                elseif item.model then
+                    ic = vgui.Create("SpawnIcon", dlist)
+                    ic:SetModel(item.model)
+                else
+                    ErrorNoHalt("Equipment item does not have model or material specified: " .. tostring(item) .. "\n")
                 end
 
-                ic:SetIconSize(itemSize)
-                ic:SetIcon(item.material)
-            elseif item.model then
-                ic = vgui.Create("SpawnIcon", dlist)
-                ic:SetModel(item.model)
+                ic.item = item
+
+                local tip = SafeTranslate(item.name) .. " (" .. SafeTranslate(item.type) .. ")"
+                ic:SetTooltip(tip)
+
+                -- If we cannot order this item, darken it
+                local orderable = update_preqs(item)
+                if ((not orderable) or
+                        -- already owned
+                        table.HasValue(owned_ids, item.id) or
+                        (tonumber(item.id) and ply:HasEquipmentItem(tonumber(item.id))) or
+                        -- already carrying a weapon for this slot
+                        (ItemIsWeapon(item) and (not CanCarryWeapon(item))) or
+                        -- already bought the item before
+                        (item.limited and ply:HasBought(tostring(item.id)))) then
+                    ic:SetIconColor(color_darkened)
+                end
+
+                if ic.favorite then
+                    paneltablefav[ic.slot or 1][k] = ic
+                else
+                    paneltable[ic.slot or 1][k] = ic
+                end
+            end
+
+            -- add favorites first
+            for i = 1, 9 do
+                for _, panel in pairs(paneltablefav[i]) do
+                    dlist:AddPanel(panel)
+                end
+            end
+            -- non favorites second
+            for i = 1, 9 do
+                for _, panel in pairs(paneltable[i]) do
+                    dlist:AddPanel(panel)
+                end
+            end
+
+            -- select first
+            dlist:SelectPanel(dlist:GetItems()[1])
+        end
+        dsearch.OnValueChange = function(box, value)
+            local roleitems = GetEquipmentForRole(ply:GetRole())
+            local filtered = {}
+            for _, v in pairs(roleitems) do
+                if v and v["name"] and string.find(SafeTranslate(v["name"]):lower(), value:lower()) then
+                    table.insert(filtered, v)
+                end
+            end
+            FillEquipmentList(filtered)
+        end
+
+        dhelp:SizeToContents()
+
+        local dconfirm = vgui.Create("DButton", dinfobg)
+        dconfirm:SetPos(0, dih - bh * 2)
+        dconfirm:SetSize(bw, bh)
+        dconfirm:SetDisabled(true)
+        dconfirm:SetText(GetTranslation("equip_confirm"))
+
+        dsheet:AddSheet(GetTranslation("equip_tabtitle"), dequip, "icon16/bomb.png", false, false, "Traitor equipment menu")
+
+        -- couple panelselect with info
+        dlist.OnActivePanelChanged = function(self, _, new)
+            can_order = false
+            if new and new.item then
+                for k, v in pairs(new.item) do
+                    if dfields[k] then
+                        dfields[k]:SetText(SafeTranslate(v))
+                        dfields[k]:SetAutoStretchVertical(true)
+                        dfields[k]:SetWrap(true)
+                    end
+                end
+
+                -- Trying to force everything to update to
+                -- the right size is a giant pain, so just
+                -- force a good size.
+                dfields.desc:SetTall(70)
+
+                can_order = update_preqs(new.item)
             else
-                ErrorNoHalt("Equipment item does not have model or material specified: " .. tostring(item) .. "\n")
+                for _, v in pairs(dfields) do
+                    if v then
+                        v:SetText("---")
+                        v:SetAutoStretchVertical(true)
+                        v:SetWrap(true)
+                    end
+                end
             end
 
-            ic.item = item
+            dconfirm:SetDisabled(not can_order)
+        end
 
-            local tip = SafeTranslate(item.name) .. " (" .. SafeTranslate(item.type) .. ")"
-            ic:SetTooltip(tip)
+        -- prep confirm action
+        dconfirm.DoClick = function()
+            local pnl = dlist.SelectedPanel
+            if not pnl or not pnl.item then return end
+            local choice = pnl.item
+            RunConsoleCommand("ttt_order_equipment", choice.id)
+            dframe:Close()
+        end
 
-            -- If we cannot order this item, darken it
-            local orderable = update_preqs(item)
-            if ((not orderable) or
-                    -- already owned
-                    table.HasValue(owned_ids, item.id) or
-                    (tonumber(item.id) and ply:HasEquipmentItem(tonumber(item.id))) or
-                    -- already carrying a weapon for this slot
-                    (ItemIsWeapon(item) and (not CanCarryWeapon(item))) or
-                    -- already bought the item before
-                    (item.limited and ply:HasBought(tostring(item.id)))) then
-                ic:SetIconColor(color_darkened)
+        -- update some basic info, may have changed in another tab
+        -- specifically the number of credits in the preq list
+        dsheet.OnTabChanged = function(s, old, new)
+            if not IsValid(new) then return end
+
+            if new:GetPanel() == dequip then
+                can_order = update_preqs(dlist.SelectedPanel.item)
+                dconfirm:SetDisabled(not can_order)
             end
+        end
 
-            if ic.favorite then
-                paneltablefav[ic.slot or 1][k] = ic
+        local dcancel = vgui.Create("DButton", dframe)
+        dcancel:SetPos(w - 13 - bw, h - bh - 16)
+        dcancel:SetSize(bw, bh)
+        dcancel:SetDisabled(false)
+        dcancel:SetText(GetTranslation("close"))
+        dcancel.DoClick = function()
+            dframe:Close()
+        end
+
+        function file.AppendLine(filename, addme)
+            local data = file.Read(filename)
+            if data then
+                file.Write(filename, data .. "\n" .. tostring(addme))
             else
-                paneltable[ic.slot or 1][k] = ic
+                file.Write(filename, tostring(addme))
             end
         end
 
-        -- add favorites first
-        for i = 1, 9 do
-            for _, panel in pairs(paneltablefav[i]) do
-                dlist:AddPanel(panel)
-            end
-        end
-        -- non favorites second
-        for i = 1, 9 do
-            for _, panel in pairs(paneltable[i]) do
-                dlist:AddPanel(panel)
+        --add as favorite button
+        local dfav = vgui.Create("DButton", dinfobg)
+        dfav:SetPos(0, dih - bh * 2)
+        dfav:MoveRightOf(dconfirm)
+        dfav:SetSize(bh, bh)
+        dfav:SetDisabled(false)
+        dfav:SetText("")
+        dfav:SetImage("icon16/star.png")
+        dfav.DoClick = function()
+            local local_ply = LocalPlayer()
+            local role = local_ply:GetRole()
+            local guid = local_ply:SteamID()
+            local pnl = dlist.SelectedPanel
+            if not pnl or not pnl.item then return end
+            local choice = pnl.item
+            local weapon = choice.id
+            CreateFavTable()
+            if pnl.favorite then
+                RemoveFavorite(guid, role, weapon)
+            else
+                AddFavorite(guid, role, weapon)
             end
         end
 
-        -- select first
-        dlist:SelectPanel(dlist:GetItems()[1])
+        FillEquipmentList(GetEquipmentForRole(ply:GetRole()))
+        show = true
     end
-    dsearch.OnValueChange = function(box, value)
-        local roleitems = GetEquipmentForRole(ply:GetRole())
-        local filtered = {}
-        for _, v in pairs(roleitems) do
-            if v and v["name"] and string.find(SafeTranslate(v["name"]):lower(), value:lower()) then
-                table.insert(filtered, v)
-            end
-        end
-        FillEquipmentList(filtered)
-    end
-
-    dhelp:SizeToContents()
-
-    local dconfirm = vgui.Create("DButton", dinfobg)
-    dconfirm:SetPos(0, dih - bh * 2)
-    dconfirm:SetSize(bw, bh)
-    dconfirm:SetDisabled(true)
-    dconfirm:SetText(GetTranslation("equip_confirm"))
-
-    dsheet:AddSheet(GetTranslation("equip_tabtitle"), dequip, "icon16/bomb.png", false, false, "Traitor equipment menu")
 
     -- Item control
     if ply:HasEquipmentItem(EQUIP_RADAR) then
         local dradar = RADAR.CreateMenu(dsheet, dframe)
         dsheet:AddSheet(GetTranslation("radar_name"), dradar, "icon16/magnifier.png", false, false, "Radar control")
+        show = true
     end
 
     if ply:HasEquipmentItem(EQUIP_DISGUISE) then
         local ddisguise = DISGUISE.CreateMenu(dsheet)
         dsheet:AddSheet(GetTranslation("disg_name"), ddisguise, "icon16/user.png", false, false, "Disguise control")
+        show = true
     end
 
     -- Weapon/item control
     if IsValid(ply.radio) or ply:HasWeapon("weapon_ttt_radio") then
         local dradio = TRADIO.CreateMenu(dsheet)
         dsheet:AddSheet(GetTranslation("radio_name"), dradio, "icon16/transmit.png", false, false, "Radio control")
+        show = true
     end
 
     -- Credit transferring
     if credits > 0 and (ply:GetRole() ~= ROLE_MERCENARY or ply:GetRole() ~= ROLE_KILLER) then
         local dtransfer = CreateTransferMenu(dsheet)
         dsheet:AddSheet(GetTranslation("xfer_name"), dtransfer, "icon16/group_gear.png", false, false, "Transfer credits")
+        show = true
     end
 
     hook.Run("TTTEquipmentTabs", dsheet)
-
-    -- couple panelselect with info
-    dlist.OnActivePanelChanged = function(self, _, new)
-        can_order = false
-        if new and new.item then
-            for k, v in pairs(new.item) do
-                if dfields[k] then
-                    dfields[k]:SetText(SafeTranslate(v))
-                    dfields[k]:SetAutoStretchVertical(true)
-                    dfields[k]:SetWrap(true)
-                end
-            end
-
-            -- Trying to force everything to update to
-            -- the right size is a giant pain, so just
-            -- force a good size.
-            dfields.desc:SetTall(70)
-
-            can_order = update_preqs(new.item)
-        else
-            for _, v in pairs(dfields) do
-                if v then
-                    v:SetText("---")
-                    v:SetAutoStretchVertical(true)
-                    v:SetWrap(true)
-                end
-            end
-        end
-
-        dconfirm:SetDisabled(not can_order)
-    end
-
-    -- prep confirm action
-    dconfirm.DoClick = function()
-        local pnl = dlist.SelectedPanel
-        if not pnl or not pnl.item then return end
-        local choice = pnl.item
-        RunConsoleCommand("ttt_order_equipment", choice.id)
-        dframe:Close()
-    end
-
-    -- update some basic info, may have changed in another tab
-    -- specifically the number of credits in the preq list
-    dsheet.OnTabChanged = function(s, old, new)
-        if not IsValid(new) then return end
-
-        if new:GetPanel() == dequip then
-            can_order = update_preqs(dlist.SelectedPanel.item)
-            dconfirm:SetDisabled(not can_order)
-        end
-    end
-
-    local dcancel = vgui.Create("DButton", dframe)
-    dcancel:SetPos(w - 13 - bw, h - bh - 16)
-    dcancel:SetSize(bw, bh)
-    dcancel:SetDisabled(false)
-    dcancel:SetText(GetTranslation("close"))
-    dcancel.DoClick = function()
-        dframe:Close()
-    end
-
-    function file.AppendLine(filename, addme)
-        local data = file.Read(filename)
-        if data then
-            file.Write(filename, data .. "\n" .. tostring(addme))
-        else
-            file.Write(filename, tostring(addme))
-        end
-    end
-
-    --add as favorite button
-    local dfav = vgui.Create("DButton", dinfobg)
-    dfav:SetPos(0, dih - bh * 2)
-    dfav:MoveRightOf(dconfirm)
-    dfav:SetSize(bh, bh)
-    dfav:SetDisabled(false)
-    dfav:SetText("")
-    dfav:SetImage("icon16/star.png")
-    dfav.DoClick = function()
-        local local_ply = LocalPlayer()
-        local role = local_ply:GetRole()
-        local guid = local_ply:SteamID()
-        local pnl = dlist.SelectedPanel
-        if not pnl or not pnl.item then return end
-        local choice = pnl.item
-        local weapon = choice.id
-        CreateFavTable()
-        if pnl.favorite then
-            RemoveFavorite(guid, role, weapon)
-        else
-            AddFavorite(guid, role, weapon)
-        end
-    end
-
-    FillEquipmentList(GetEquipmentForRole(ply:GetRole()))
 
     dframe:MakePopup()
     dframe:SetKeyboardInputEnabled(false)
 
     eqframe = dframe
+
+    if not show then
+        ForceCloseTraitorMenu()
+    end
 end
 
 concommand.Add("ttt_cl_traitorpopup", TraitorMenuPopup)
 
-local function ForceCloseTraitorMenu(ply, cmd, args)
-    if IsValid(eqframe) then
-        eqframe:Close()
-    end
-end
-
-concommand.Add("ttt_cl_traitorpopup_close", ForceCloseTraitorMenu)
-
 function GM:OnContextMenuOpen()
     local r = GetRoundState()
-    if r == ROUND_ACTIVE and not player.HasBuyMenu(LocalPlayer()) then
-        return
-    elseif r == ROUND_POST or r == ROUND_PREP then
+    if r == ROUND_POST or r == ROUND_PREP then
         CLSCORE:Toggle()
         return
     end

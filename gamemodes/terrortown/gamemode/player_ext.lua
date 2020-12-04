@@ -350,6 +350,11 @@ function plymeta:SpawnForRound(dead_only, round_start)
 
     self:StripAll()
     self:SetTeam(TEAM_TERROR)
+    -- Disable Phantom haunting
+    self:SetNWBool("Haunting", false)
+    self:SetNWString("HauntingTarget", nil)
+    self:SetNWInt("HauntingPower", 0)
+    timer.Remove(self:Nick() .. "HauntingPower")
     self:Spawn()
 
     if round_start then

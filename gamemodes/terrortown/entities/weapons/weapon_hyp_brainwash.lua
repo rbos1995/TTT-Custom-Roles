@@ -194,6 +194,12 @@ if SERVER then
         net.WriteString(ply:Nick())
         net.Broadcast()
 
+        -- Un-haunt the Hypnotist if the target was the Phantom
+        local owner = self:GetOwner()
+        if ply:IsPhantom() and ply:GetNWString("HauntingTarget", nil) == owner:UniqueID() then
+            owner:SetNWBool("Haunted", false)
+        end
+
         ply:SpawnForRound(true)
         ply:SetCredits(credits)
         ply:SetPos(self.Location or body:GetPos())
@@ -208,7 +214,7 @@ if SERVER then
 
         SendFullStateUpdate()
 
-        self:GetOwner():ConCommand("lastinv")
+        owner:ConCommand("lastinv")
         self:Remove()
     end
 

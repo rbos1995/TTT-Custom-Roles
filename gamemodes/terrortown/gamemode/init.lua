@@ -633,6 +633,7 @@ function PrepareRound()
     for _, v in pairs(player.GetAll()) do
         v:SetNWBool("Haunted", false)
         v:SetNWBool("Haunting", false)
+        v:SetNWString("HauntingTarget", nil)
         v:SetNWInt("HauntingPower", 0)
         timer.Remove(v:Nick() .. "HauntingPower")
         v:SetNWBool("KillerSmoke", false)

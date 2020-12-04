@@ -831,6 +831,7 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
             if phantom.attacker == ply:UniqueID() and IsValid(phantom.player) then
                 local deadPhantom = phantom.player
                 deadPhantom:SetNWBool("Haunting", false)
+                deadPhantom:SetNWString("HauntingTarget", nil)
                 deadPhantom:SetNWInt("HauntingPower", 0)
                 timer.Remove(deadPhantom:Nick() .. "HauntingPower")
                 if deadPhantom:IsPhantom() and not deadPhantom:Alive() then
@@ -1180,6 +1181,7 @@ function GM:PlayerDeath(victim, infl, attacker)
 
         if GetConVar("ttt_phantom_killer_haunt"):GetBool() then
             victim:SetNWBool("Haunting", true)
+            victim:SetNWString("HauntingTarget", attacker:UniqueID())
             victim:SetNWInt("HauntingPower", 0)
             timer.Create(victim:Nick() .. "HauntingPower", 1, 0, function()
                 -- Make sure the victim is still in the correct spectate mode

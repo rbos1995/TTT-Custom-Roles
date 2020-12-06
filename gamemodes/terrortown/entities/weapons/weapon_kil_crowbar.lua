@@ -45,11 +45,6 @@ SWEP.AllowDrop = true
 
 local sound_single = Sound("Weapon_Crowbar.Single")
 
-if SERVER then
-    CreateConVar("ttt_crowbar_unlocks", "1", FCVAR_ARCHIVE)
-    CreateConVar("ttt_crowbar_pushforce", "395", FCVAR_NOTIFY)
-end
-
 function SWEP:Initialize()
     self:SetWeaponHoldType(self.HoldType)
     self.CanFire = true

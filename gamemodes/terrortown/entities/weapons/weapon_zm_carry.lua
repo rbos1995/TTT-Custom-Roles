@@ -528,6 +528,7 @@ function SWEP:SetupDataTables()
     -- we've got these dt slots anyway, might as well use them instead of a
     -- globalvar, probably cheaper
     self:DTVar("Bool", 0, "can_rag_pin")
+    self:DTVar("Bool", 1, "can_rag_pin_inno")
 
     -- client actually has no idea what we're holding, and almost never needs to
     -- know
@@ -538,6 +539,7 @@ end
 if SERVER then
     function SWEP:Initialize()
         self.dt.can_rag_pin = pin_rag:GetBool()
+        self.dt.can_rag_pin_inno = pin_rag_inno:GetBool()
         self.dt.carried_rag = nil
 
         return self.BaseClass.Initialize(self)
@@ -576,7 +578,7 @@ if CLIENT then
         self.BaseClass.DrawHUD(self)
 
         local client = LocalPlayer()
-        if self.dt.can_rag_pin and IsValid(self.dt.carried_rag) and not client:IsSpec() and player.IsTraitorTeam(client) then
+        if self.dt.can_rag_pin and IsValid(self.dt.carried_rag) and not client:IsSpec() and (self.dt.can_rag_pin_inno or player.IsTraitorTeam(client)) then
             local tr = util.TraceLine({
                 start = client:EyePos(),
                 endpos = client:EyePos() + (client:GetAimVector() * PIN_RAG_RANGE),

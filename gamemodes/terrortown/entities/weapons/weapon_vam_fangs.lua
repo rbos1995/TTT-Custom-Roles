@@ -239,6 +239,8 @@ function SWEP:Think()
             if self:GetState() == STATE_CONVERT and CanConvert(self:GetOwner()) then
                 local ply = self.TargetEntity
                 ply:StripWeapon("weapon_hyp_brainwash")
+                ply:StripWeapon("weapon_kil_knife")
+                ply:StripWeapon("weapon_zom_claws")
                 ply:StripWeapon("weapon_ttt_wtester")
                 ply:SetVampirePreviousRole(ply:GetRole())
                 ply:SetRole(ROLE_VAMPIRE)

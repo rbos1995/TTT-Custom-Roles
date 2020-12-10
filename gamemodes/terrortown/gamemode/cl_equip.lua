@@ -22,89 +22,37 @@ include("favorites_db.lua")
 include("shared.lua")
 
 -- Buyable weapons are loaded automatically. Buyable items are defined in
--- equip_items_shd.luaslotnumber
+-- equip_items_shd.lua
 
-local BuyableWeapons = {
-    [ROLE_DETECTIVE] = {},
-    [ROLE_MERCENARY] = {},
-    [ROLE_VAMPIRE] = {},
-    [ROLE_ZOMBIE] = {},
-    [ROLE_TRAITOR] = {},
-    [ROLE_ASSASSIN] = {},
-    [ROLE_HYPNOTIST] = {},
-    [ROLE_KILLER] = {},
-    [ROLE_DETRAITOR] = {}
-}
+local BuyableWeapons = {}
+local Equipment = { }
 
-net.Receive("TTT_BuyableWeapon_Detective", function()
+net.Receive("TTT_BuyableWeapons", function()
+    local role = net.ReadInt(16)
+    -- Initialize the weapons list for this role
+    if not BuyableWeapons[role] then
+        BuyableWeapons[role] = {}
+    end
+    -- Initialize the weapons list for the Detraitor too if we're loading things for the Detective
+    if role == ROLE_DETECTIVE and not BuyableWeapons[ROLE_DETRAITOR] then
+        BuyableWeapons[ROLE_DETRAITOR] = {}
+    end
+
     for _, v in pairs(net.ReadTable()) do
-        if not table.HasValue(BuyableWeapons[ROLE_DETECTIVE], v) then
-            table.insert(BuyableWeapons[ROLE_DETECTIVE], v)
+        if not table.HasValue(BuyableWeapons[role], v) then
+            table.insert(BuyableWeapons[role], v)
+            -- Clear the weapon cache
+            Equipment[role] = nil
         end
         -- Detraitor can use all Detective weapons too
-        if not table.HasValue(BuyableWeapons[ROLE_DETRAITOR], v) then
+        if role == ROLE_DETECTIVE and not table.HasValue(BuyableWeapons[ROLE_DETRAITOR], v) then
             table.insert(BuyableWeapons[ROLE_DETRAITOR], v)
-        end
-    end
-end)
-net.Receive("TTT_BuyableWeapon_Detraitor", function()
-    for _, v in pairs(net.ReadTable()) do
-        if not table.HasValue(BuyableWeapons[ROLE_DETRAITOR], v) then
-            table.insert(BuyableWeapons[ROLE_DETRAITOR], v)
-        end
-    end
-end)
-net.Receive("TTT_BuyableWeapon_Mercenary", function()
-    for _, v in pairs(net.ReadTable()) do
-        if not table.HasValue(BuyableWeapons[ROLE_MERCENARY], v) then
-            table.insert(BuyableWeapons[ROLE_MERCENARY], v)
-        end
-    end
-end)
-net.Receive("TTT_BuyableWeapon_Vampire", function()
-    for _, v in pairs(net.ReadTable()) do
-        if not table.HasValue(BuyableWeapons[ROLE_VAMPIRE], v) then
-            table.insert(BuyableWeapons[ROLE_VAMPIRE], v)
-        end
-    end
-end)
-net.Receive("TTT_BuyableWeapon_Zombie", function()
-    for _, v in pairs(net.ReadTable()) do
-        if not table.HasValue(BuyableWeapons[ROLE_ZOMBIE], v) then
-            table.insert(BuyableWeapons[ROLE_ZOMBIE], v)
-        end
-    end
-end)
-net.Receive("TTT_BuyableWeapon_Traitor", function()
-    for _, v in pairs(net.ReadTable()) do
-        if not table.HasValue(BuyableWeapons[ROLE_TRAITOR], v) then
-            table.insert(BuyableWeapons[ROLE_TRAITOR], v)
-        end
-    end
-end)
-net.Receive("TTT_BuyableWeapon_Assassin", function()
-    for _, v in pairs(net.ReadTable()) do
-        if not table.HasValue(BuyableWeapons[ROLE_ASSASSIN], v) then
-            table.insert(BuyableWeapons[ROLE_ASSASSIN], v)
-        end
-    end
-end)
-net.Receive("TTT_BuyableWeapon_Hypnotist", function()
-    for _, v in pairs(net.ReadTable()) do
-        if not table.HasValue(BuyableWeapons[ROLE_HYPNOTIST], v) then
-            table.insert(BuyableWeapons[ROLE_HYPNOTIST], v)
-        end
-    end
-end)
-net.Receive("TTT_BuyableWeapon_Killer", function()
-    for _, v in pairs(net.ReadTable()) do
-        if not table.HasValue(BuyableWeapons[ROLE_KILLER], v) then
-            table.insert(BuyableWeapons[ROLE_KILLER], v)
+            -- Clear the weapon cache
+            Equipment[ROLE_DETRAITOR] = nil
         end
     end
 end)
 
-local Equipment = { }
 function GetEquipmentForRole(role)
     local mercmode = GetGlobalInt("ttt_shop_merc_mode")
 

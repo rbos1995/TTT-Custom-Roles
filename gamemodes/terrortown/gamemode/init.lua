@@ -274,19 +274,11 @@ util.AddNetworkString("TTT_SpawnedPlayers")
 util.AddNetworkString("TTT_Defibrillated")
 util.AddNetworkString("TTT_RoleChanged")
 util.AddNetworkString("TTT_PlayerHighlightOff")
-util.AddNetworkString("TTT_BuyableWeapon_Detective")
-util.AddNetworkString("TTT_BuyableWeapon_Detraitor")
-util.AddNetworkString("TTT_BuyableWeapon_Mercenary")
-util.AddNetworkString("TTT_BuyableWeapon_Vampire")
-util.AddNetworkString("TTT_BuyableWeapon_Zombie")
-util.AddNetworkString("TTT_BuyableWeapon_Traitor")
-util.AddNetworkString("TTT_BuyableWeapon_Assassin")
-util.AddNetworkString("TTT_BuyableWeapon_Hypnotist")
-util.AddNetworkString("TTT_BuyableWeapon_Killer")
 util.AddNetworkString("TTT_LoadMonsterEquipment")
 util.AddNetworkString("TTT_PlayerFootstep")
 util.AddNetworkString("TTT_ClearPlayerFootsteps")
 util.AddNetworkString("TTT_JesterDeathCelebration")
+util.AddNetworkString("TTT_BuyableWeapons")
 
 local jesterkilled = 0
 
@@ -1722,9 +1714,8 @@ concommand.Add("ttt_roundrestart", ForceRoundRestart)
 
 -- If this logic or the list of roles who can buy is changed, it must also be updated in weaponry.lua and cl_equip.lua
 function ReadRoleEquipment()
-    local rolenames = { "Detective", "Detraitor", "Mercenary", "Vampire", "Zombie", "Traitor", "Assassin", "Hypnotist", "Killer" }
-    for _, role in pairs(rolenames) do
-        local rolefiles, _ = file.Find("roleweapons/" .. role:lower() .. "/*.txt", "DATA")
+    for id, name in pairs(ROLE_STRINGS) do
+        local rolefiles, _ = file.Find("roleweapons/" .. name .. "/*.txt", "DATA")
         local roleweapons = { }
         for _, v in pairs(rolefiles) do
             local lastdotpos = v:find("%.")
@@ -1732,9 +1723,12 @@ function ReadRoleEquipment()
             table.insert(roleweapons, weaponname)
         end
 
-        net.Start("TTT_BuyableWeapon_" .. role)
-        net.WriteTable(roleweapons)
-        net.Broadcast()
+        if #roleweapons > 0 then
+            net.Start("TTT_BuyableWeapons")
+            net.WriteInt(id, 16)
+            net.WriteTable(roleweapons)
+            net.Broadcast()
+        end
     end
 end
 

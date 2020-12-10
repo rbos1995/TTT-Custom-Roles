@@ -24,32 +24,39 @@ include("shared.lua")
 -- Buyable weapons are loaded automatically. Buyable items are defined in
 -- equip_items_shd.lua
 
-local BuyableWeapons = {}
+local BuyableWeapons = { }
+local ExcludeWeapons = { }
 local Equipment = { }
 
-net.Receive("TTT_BuyableWeapons", function()
-    local role = net.ReadInt(16)
-    -- Initialize the weapons list for this role
+local function PrepWeaponsLists(role)
+    -- Initialize the lists for this role
     if not BuyableWeapons[role] then
         BuyableWeapons[role] = {}
     end
-    -- Initialize the weapons list for the Detraitor too if we're loading things for the Detective
-    if role == ROLE_DETECTIVE and not BuyableWeapons[ROLE_DETRAITOR] then
-        BuyableWeapons[ROLE_DETRAITOR] = {}
+    if not ExcludeWeapons[role] then
+        ExcludeWeapons[role] = {}
     end
+end
 
-    for _, v in pairs(net.ReadTable()) do
-        if not table.HasValue(BuyableWeapons[role], v) then
-            table.insert(BuyableWeapons[role], v)
-            -- Clear the weapon cache
-            Equipment[role] = nil
-        end
-        -- Detraitor can use all Detective weapons too
-        if role == ROLE_DETECTIVE and not table.HasValue(BuyableWeapons[ROLE_DETRAITOR], v) then
-            table.insert(BuyableWeapons[ROLE_DETRAITOR], v)
-            -- Clear the weapon cache
-            Equipment[ROLE_DETRAITOR] = nil
-        end
+local function UpdateWeaponList(role, list, weapon)
+    if not table.HasValue(list[role], weapon) then
+        table.insert(list[role], weapon)
+        -- Clear the weapon cache
+        Equipment[role] = nil
+    end
+end
+
+net.Receive("TTT_BuyableWeapons", function()
+    local role = net.ReadInt(16)
+    PrepWeaponsLists(role)
+
+    local roleweapons = net.ReadTable()
+    for _, v in pairs(roleweapons) do
+        UpdateWeaponList(role, BuyableWeapons, v)
+    end
+    local excludeweapons = net.ReadTable()
+    for _, v in pairs(excludeweapons) do
+        UpdateWeaponList(role, ExcludeWeapons, v)
     end
 end)
 
@@ -64,7 +71,7 @@ function GetEquipmentForRole(role)
             GetEquipmentForRole(ROLE_TRAITOR)
         end
     end
-    if mercmode > 0 and role == ROLE_MERCENARY then
+    if (mercmode > 0 and role == ROLE_MERCENARY) or role == ROLE_DETRAITOR then
         if not Equipment[ROLE_DETECTIVE] then
             GetEquipmentForRole(ROLE_DETECTIVE)
         end
@@ -131,6 +138,12 @@ function GetEquipmentForRole(role)
                 -- If the player is a detraitor they should have all the weapons of a detective
                 if role == ROLE_DETRAITOR and not table.HasValue(v.CanBuy, role) and table.HasValue(v.CanBuy, ROLE_DETECTIVE) then
                     table.insert(v.CanBuy, role)
+                end
+
+                -- After all that, make sure each of the excluded weapons is NOT in the role's equipment list
+                local excludetable = ExcludeWeapons[role]
+                if excludetable and table.HasValue(v.CanBuy, role) and table.HasValue(excludetable, id) then
+                    table.RemoveByValue(v.CanBuy, role)
                 end
 
                 local data = v.EquipMenuData or {}

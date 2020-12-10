@@ -1717,16 +1717,37 @@ function ReadRoleEquipment()
     for id, name in pairs(ROLE_STRINGS) do
         local rolefiles, _ = file.Find("roleweapons/" .. name .. "/*.txt", "DATA")
         local roleweapons = { }
+        local roleexcludes = { }
         for _, v in pairs(rolefiles) do
+            local exclude = false
+            -- Extract the weapon name from the file name
             local lastdotpos = v:find("%.")
             local weaponname = v:sub(0, lastdotpos - 1)
-            table.insert(roleweapons, weaponname)
+
+            -- Check that there isn't a two-part extension (e.g. "something.exclude.txt")
+            local extension = v:sub(lastdotpos + 1, string.len(v))
+            lastdotpos = extension:find("%.")
+
+            -- If there is, check if it equals "exclude"
+            if lastdotpos ~= nil then
+                extension = extension:sub(0, lastdotpos - 1)
+                if extension:lower() == "exclude" then
+                    exclude = true
+                end
+            end
+
+            if exclude then
+                table.insert(roleexcludes, weaponname)
+            else
+                table.insert(roleweapons, weaponname)
+            end
         end
 
-        if #roleweapons > 0 then
+        if #roleweapons > 0 or #roleexcludes > 0 then
             net.Start("TTT_BuyableWeapons")
             net.WriteInt(id, 16)
             net.WriteTable(roleweapons)
+            net.WriteTable(roleexcludes)
             net.Broadcast()
         end
     end

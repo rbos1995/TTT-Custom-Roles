@@ -56,9 +56,10 @@
 # Additions
 ## General
 - Ported ability to load weapons into role weapon shops from Town of Terror. See [Configuration](CONVARS.md).
+- Added ability to exclude weapons from role weapon shops. See [Configuration](CONVARS.md).
 
 ## Round Summary
-- Updated end-of-round summary to merge the old tabs and buttons with the new interface
+- Updated end-of-round summary to merge the old tabs and buttons with the new interface.
 - Added new events for the new roles to the end-of-round summary Events tab. Thanks to [exp111](https://github.com/exp111/TTT-Custom-Roles/) on GitHub
 
 ## Sprint

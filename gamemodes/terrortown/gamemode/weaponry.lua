@@ -343,41 +343,53 @@ function GM:TTTCanOrderEquipment(ply, id, is_item)
     return true
 end
 
-local BuyableWeapons = {
-    [ROLE_DETECTIVE] = {},
-    [ROLE_MERCENARY] = {},
-    [ROLE_VAMPIRE] = {},
-    [ROLE_ZOMBIE] = {},
-    [ROLE_TRAITOR] = {},
-    [ROLE_ASSASSIN] = {},
-    [ROLE_HYPNOTIST] = {},
-    [ROLE_KILLER] = {},
-    [ROLE_DETRAITOR] = {}
-}
--- If this logic or the list of roles who can buy is changed, it must also be updated in init.lua and cl_equip.lua
-local function ReadRoleEquipment(role, rolename)
-    local rolefiles, _ = file.Find("roleweapons/" .. rolename:lower() .. "/*.txt", "DATA")
-    for _, v in pairs(rolefiles) do
-        local lastdotpos = v:find("%.")
-        local weaponname
-        if lastdotpos == nil then
-            weaponname = v
-        else
-            weaponname = v:sub(0, lastdotpos - 1)
-        end
-        table.insert(BuyableWeapons[role], weaponname)
+local BuyableWeapons = { }
+local ExcludeWeapons = { }
+
+local function PrepWeaponsLists(role)
+    -- Initialize the lists for this role
+    if not BuyableWeapons[role] then
+        BuyableWeapons[role] = {}
+    end
+    if not ExcludeWeapons[role] then
+        ExcludeWeapons[role] = {}
     end
 end
 
-ReadRoleEquipment(ROLE_DETECTIVE, "Detective")
-ReadRoleEquipment(ROLE_MERCENARY, "Mercenary")
-ReadRoleEquipment(ROLE_VAMPIRE, "Vampire")
-ReadRoleEquipment(ROLE_ZOMBIE, "Zombie")
-ReadRoleEquipment(ROLE_TRAITOR, "Traitor")
-ReadRoleEquipment(ROLE_ASSASSIN, "Assassin")
-ReadRoleEquipment(ROLE_HYPNOTIST, "Hypnotist")
-ReadRoleEquipment(ROLE_KILLER, "Killer")
-ReadRoleEquipment(ROLE_DETRAITOR, "Detraitor")
+-- If this logic or the list of roles who can buy is changed, it must also be updated in init.lua and cl_equip.lua
+local function ReadRoleEquipment(role, rolename)
+    PrepWeaponsLists(role)
+
+    local rolefiles, _ = file.Find("roleweapons/" .. rolename .. "/*.txt", "DATA")
+    for _, v in pairs(rolefiles) do
+        local exclude = false
+        -- Extract the weapon name from the file name
+        local lastdotpos = v:find("%.")
+        local weaponname = v:sub(0, lastdotpos - 1)
+
+        -- Check that there isn't a two-part extension (e.g. "something.exclude.txt")
+        local extension = v:sub(lastdotpos + 1, string.len(v))
+        lastdotpos = extension:find("%.")
+
+        -- If there is, check if it equals "exclude"
+        if lastdotpos ~= nil then
+            extension = extension:sub(0, lastdotpos - 1)
+            if extension:lower() == "exclude" then
+                exclude = true
+            end
+        end
+
+        if exclude then
+            table.insert(ExcludeWeapons[role], weaponname)
+        else
+            table.insert(BuyableWeapons[role], weaponname)
+        end
+    end
+end
+
+for id, name in pairs(ROLE_STRINGS) do
+    ReadRoleEquipment(id, name)
+end
 
 local function HandleRoleWeapons(role, roletable, swep_table, id)
     if roletable and table.HasValue(roletable, id) and not table.HasValue(swep_table.CanBuy, role) then
@@ -466,6 +478,12 @@ local function OrderEquipment(ply, cmd, args)
             if not table.HasValue(swep_table.CanBuy, role) and table.HasValue(swep_table.CanBuy, ROLE_DETECTIVE) then
                 table.insert(swep_table.CanBuy, role)
             end
+        end
+
+        -- After all that, make sure each of the excluded weapons is NOT in the role's equipment list
+        local excludetable = ExcludeWeapons[role]
+        if excludetable and table.HasValue(excludetable, id) and table.HasValue(swep_table.CanBuy, role) then
+            table.RemoveByValue(swep_table.CanBuy, role)
         end
     end
 

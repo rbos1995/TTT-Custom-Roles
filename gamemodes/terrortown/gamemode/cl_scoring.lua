@@ -647,6 +647,20 @@ function CLSCORE:BuildSummaryPanel(dpanel)
             local wintype = e.win
             if wintype == WIN_TIMELIMIT then wintype = WIN_INNOCENT end
             title = wintitle[wintype]
+
+            -- If this was a monster win, check that both roles are part of the monsters team still
+            if wintype == WIN_MONSTER then
+                -- If Zombies are traitors then Vampires win
+                if GetGlobalBool("ttt_zombies_are_traitors") then
+                    title.txt = "hilite_win_vampires"
+                -- And vice versa
+                elseif GetGlobalBool("ttt_vampires_are_traitors") then
+                    title.txt = "hilite_win_zombies"
+                -- If neither are traitors then the monsters legit win
+                else
+                    title.txt = "hilite_win_monster"
+                end
+            end
             break
         end
     end

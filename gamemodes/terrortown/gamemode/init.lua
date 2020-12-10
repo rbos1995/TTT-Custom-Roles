@@ -1062,7 +1062,7 @@ function PrintResultMessage(type)
     ServerLog("Round ended.\n")
     if type == WIN_TIMELIMIT then
         LANG.Msg("win_time")
-        ServerLog("Result: Timelimit reached, innocent win.\n")
+        ServerLog("Result: Timelimit reached, innocents win.\n")
     elseif type == WIN_TRAITOR then
         LANG.Msg("win_traitor")
         ServerLog("Result: Traitors win.\n")
@@ -1076,8 +1076,19 @@ function PrintResultMessage(type)
         LANG.Msg("win_killer")
         ServerLog("Result: Killer wins.\n")
     elseif type == WIN_MONSTER then
-        LANG.Msg("win_monster")
-        ServerLog("Result: Monsters win.\n")
+        -- If Zombies are traitors then Vampires win
+        if GetGlobalBool("ttt_zombies_are_traitors") then
+            LANG.Msg("win_vampires")
+            ServerLog("Result: Vampires win.\n")
+        -- And vice versa
+        elseif GetGlobalBool("ttt_vampires_are_traitors") then
+            LANG.Msg("win_zombies")
+            ServerLog("Result: Zombies win.\n")
+        -- If neither are traitors then the monsters legit win
+        else
+            LANG.Msg("win_monster")
+            ServerLog("Result: Monsters win.\n")
+        end
     else
         ServerLog("Result: Unknown victory condition!\n")
     end

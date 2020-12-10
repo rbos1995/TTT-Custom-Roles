@@ -48,7 +48,7 @@ local function CopyDmg(dmg)
 end
 
 local function GetPlayerMonsterOrTraitor(ply)
-    local is_traitor = ply:IsTraitorTeam()
+    local is_traitor = player.IsTraitorTeam(ply)
     local is_monster = ply:IsMonsterTeam() and not player.IsMonsterTraitorAlly(ply)
     return is_traitor, is_monster
 end

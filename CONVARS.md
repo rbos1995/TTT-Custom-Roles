@@ -169,3 +169,11 @@ At the same time, there are some workshop weapons that are given to multiple rol
 
 To remove weapons from a role's shop, create a .exclude.txt file with the weapon class (e.g. weapon_ttt_somethingcool.exclude.txt) in the garrysmod/data/roleweapons/{rolename} folder.\
 **NOTE**: The name of the role must be all lowercase for cross-operating system compatibility. For example: garrysmod/data/roleweapons/detective/weapon_ttt_somethingcool.exclude.txt
+
+## Finding a Weapon's Class
+
+To find the class name of a weapon to use above, follow the steps below
+1. Start a local server with TTT as the selected gamemode
+2. Spawn 1 bot by using the _bot_ command in console
+3. Obtain the weapon whose class you want. If it is already available to buy from a certain role's shop, either force yourself to be that role via the _ttt\_force\_*_ commands or via a ULX plugin.
+4. Run the following command in console to get a list of all of your weapon classes: _lua\_run PrintTable(player.GetHumans()[1]:GetWeapons())_

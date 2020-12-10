@@ -223,8 +223,13 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
     end
 
     local was_traitor = rag.was_role == ROLE_TRAITOR or rag.was_role == ROLE_ASSASSIN or rag.was_role == ROLE_HYPNOTIST or rag.was_role == ROLE_DETRAITOR
-    if GetGlobalBool("ttt_monsters_are_traitors") then
-        was_traitor = was_traitor or (rag.was_role == ROLE_ZOMBIE) or (rag.was_role == ROLE_VAMPIRE)
+    local was_zombie = (rag.was_role == ROLE_ZOMBIE)
+    local was_vampire = (rag.was_role == ROLE_VAMPIRE)
+    if (was_zombie or was_vampire) and
+        (GetGlobalBool("ttt_monsters_are_traitors") or
+        (GetGlobalBool("ttt_zombies_are_traitors") and was_zombie) or
+        (GetGlobalBool("ttt_vampires_are_traitors") and was_vampire)) then
+        was_traitor = true
     end
     if not hook.Run("TTTCanSearchCorpse", ply, rag, covert, long_range, was_traitor) then
         return

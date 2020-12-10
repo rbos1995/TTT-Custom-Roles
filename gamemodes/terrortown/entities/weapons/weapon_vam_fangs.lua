@@ -120,7 +120,7 @@ function SWEP:PrimaryAttack()
         elseif ent:IsPlayer() and vampire_convert:GetBool() then
             if ent:IsJesterTeam() then
                 self:Error("TARGET IS A JESTER")
-            elseif ent:IsMonsterAlly() then
+            elseif ent:IsVampireAlly() then
                 self:Error("TARGET IS AN ALLY")
             else
                 self:Drain(ent)

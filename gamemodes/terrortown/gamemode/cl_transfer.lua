@@ -37,11 +37,17 @@ function CreateTransferMenu(parent)
 				-- Local player is a traitor team member
 				ply:IsTraitorTeam() and
 				-- and target is a traitor team member (or a glitch). Also include monsters if Monsters-as-Traitors is enabled
-				(p:IsTraitorTeam() or p:IsActiveGlitch() or (ply:IsMonsterAlly() and p:IsMonsterTeam()))
+				(p:IsTraitorTeam() or p:IsActiveGlitch() or player.IsMonsterTraitorAlly(p))
 			) or
             (
-                -- Local player is a monster and target is a monster or an ally if Monsters-as-Traitors is enabled
-                ply:IsMonsterTeam() and (p:IsMonsterTeam() or (GetGlobalBool("ttt_monsters_are_traitors") and (p:IsTraitorTeam() or p:IsActiveGlitch())))
+                -- Local player is a monster
+                ply:IsMonsterTeam() and
+                (
+                    -- and target is a monster ally
+                    (ply:IsZombieAlly() and p:IsZombie()) or (ply:IsVampireAlly() and p:IsVampire()) or
+                    -- or a Glitch if this monster player is a traitor ally
+                    player.IsMonsterTraitorAlly(ply) and p:IsGlitch()
+                )
             )) then
 			dpick:AddChoice(p:Nick(), p:UniqueID())
 		end

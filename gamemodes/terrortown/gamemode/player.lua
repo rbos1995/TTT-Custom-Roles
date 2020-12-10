@@ -656,12 +656,7 @@ local function CheckCreditAward(victim, attacker)
 
             -- If size is 0, awards are off
             if amt > 0 then
-                local rf = nil
-                if GetGlobalBool("ttt_monsters_are_traitors") then
-                    rf = GetTraitorsAndMonstersFilter(true)
-                else
-                    rf = GetTraitorsFilter(true)
-                end
+                local rf = GetTraitorAndMonsterFilter(true)
                 LANG.Msg(rf, "credit_tr_all", { num = amt })
 
                 for _, ply in pairs(player.GetAll()) do
@@ -677,13 +672,13 @@ local function CheckCreditAward(victim, attacker)
     end
 
     -- VAMPIRE AWARD
-    if not GetGlobalBool("ttt_monsters_are_traitors") and attacker:IsActiveVampire() and (not (victim:IsMonsterTeam() or victim:IsJesterTeam())) and (not GAMEMODE.AwardedVampireCredits or GetConVar("ttt_credits_award_repeat"):GetBool()) then
+    if not GetGlobalBool("ttt_monsters_are_traitors") and not GetGlobalBool("ttt_vampires_are_traitors") and attacker:IsActiveVampire() and (not (victim:IsMonsterTeam() or victim:IsJesterTeam())) and (not GAMEMODE.AwardedVampireCredits or GetConVar("ttt_credits_award_repeat"):GetBool()) then
         local ply_alive = 0
         local ply_dead = 0
         local ply_total = 0
 
         for _, ply in pairs(player.GetAll()) do
-            if not ply:IsMonsterTeam() then
+            if not ply:IsVampireAlly() then
                 if ply:IsTerror() then
                     ply_alive = ply_alive + 1
                 elseif ply:IsDeadTerror() then
@@ -894,7 +889,7 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
                     if p:IsInnocent() or p:IsPhantom() or p:IsMercenary() or p:IsKiller() then
                         table.insert(enemies, p:Nick())
                     -- Count monsters as enemies if Monsters-as-Traitors is not enabled
-                    elseif not GetGlobalBool("ttt_monsters_are_traitors") and (p:IsZombie() or p:IsVampire()) then
+                    elseif player.IsMonsterTraitorAlly(p) then
                         table.insert(enemies, p:Nick())
                     elseif p:IsDetective() then
                         table.insert(detectives, p:Nick())
@@ -998,7 +993,7 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
                         DRINKS.AddPlayerAction("death", ply)
                     end
                 elseif ply:IsTraitorTeam() then
-                    if attacker:IsTraitorTeam() or (attacker:IsMonsterTeam() and ply:IsMonsterAlly()) then
+                    if attacker:IsTraitorTeam() or (attacker:IsZombie() and ply:IsZombieAlly()) or (attacker:IsVampire() and ply:IsVampireAlly()) then
                         if GetConVar("ttt_drinking_team_kill"):GetString() == "drink" then
                             DRINKS.AddDrink(attacker)
                         elseif GetConVar("ttt_drinking_team_kill"):GetString() == "shot" then
@@ -1014,7 +1009,7 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
                         DRINKS.AddPlayerAction("death", ply)
                     end
                 elseif ply:IsMonsterTeam() then
-                    if attacker:IsMonsterTeam() or attacker:IsMonsterAlly() then
+                    if (ply:IsZombie() and attacker:IsZombieAlly()) or (ply:IsVampire() and attacker:IsVampireAlly()) then
                         if GetConVar("ttt_drinking_team_kill"):GetString() == "drink" then
                             DRINKS.AddDrink(attacker)
                         elseif GetConVar("ttt_drinking_team_kill"):GetString() == "shot" then
@@ -1547,7 +1542,7 @@ function GM:EntityTakeDamage(ent, dmginfo)
             end
         -- No zombie team killing
         -- This can be funny, but it can also be used by frustrated players who didn't appreciate being zombified
-        elseif ent:IsPlayer() and ent:IsZombie() and att:IsPlayer() and att:IsMonsterAlly() then
+        elseif ent:IsPlayer() and ent:IsZombie() and att:IsPlayer() and att:IsZombieAlly() then
             dmginfo:ScaleDamage(0)
             dmginfo:SetDamage(0)
         elseif dmginfo:GetAttacker() ~= ent then

@@ -118,6 +118,8 @@ CreateConVar("ttt_killer_required_innos", "3", FCVAR_ARCHIVE)
 
 CreateConVar("ttt_monster_pct", "0.33", FCVAR_ARCHIVE)
 CreateConVar("ttt_monsters_are_traitors", "0", FCVAR_ARCHIVE)
+CreateConVar("ttt_zombies_are_traitors", "0", FCVAR_ARCHIVE)
+CreateConVar("ttt_vampires_are_traitors", "0", FCVAR_ARCHIVE)
 
 -- Traitor credits
 CreateConVar("ttt_credits_starting", "2", FCVAR_ARCHIVE)
@@ -388,6 +390,8 @@ function GM:SyncGlobals()
     SetGlobalBool("ttt_shop_hypnotist_sync", GetConVar("ttt_shop_hypnotist_sync"):GetBool())
 
     SetGlobalBool("ttt_monsters_are_traitors", GetConVar("ttt_monsters_are_traitors"):GetBool())
+    SetGlobalBool("ttt_zombies_are_traitors", GetConVar("ttt_zombies_are_traitors"):GetBool())
+    SetGlobalBool("ttt_vampires_are_traitors", GetConVar("ttt_vampires_are_traitors"):GetBool())
     SetGlobalInt("ttt_traitors_jester_id_mode", GetConVar("ttt_traitors_jester_id_mode"):GetInt())
     SetGlobalInt("ttt_monsters_jester_id_mode", GetConVar("ttt_monsters_jester_id_mode"):GetInt())
     SetGlobalInt("ttt_killers_jester_id_mode", GetConVar("ttt_killers_jester_id_mode"):GetInt())
@@ -956,7 +960,7 @@ function BeginRound()
                     if p:IsInnocent() or p:IsPhantom() or p:IsMercenary() or p:IsKiller() then
                         table.insert(enemies, p:Nick())
                     -- Count monsters as enemies if Monsters-as-Traitors is not enabled
-                    elseif not GetGlobalBool("ttt_monsters_are_traitors") and (p:IsZombie() or p:IsVampire()) then
+                    elseif not player.IsMonsterTraitorAlly(p) then
                         table.insert(enemies, p:Nick())
                     elseif p:IsDetective() then
                         table.insert(detectives, p:Nick())
@@ -1033,10 +1037,13 @@ function BeginRound()
     GAMEMODE.RoundStartTime = CurTime()
 
     local monsters_are_traitors = GetGlobalBool("ttt_monsters_are_traitors")
-    LoadMonsterEquipment(monsters_are_traitors)
+    local zombies_are_traitors = monsters_are_traitors or GetGlobalBool("ttt_zombies_are_traitors")
+    local vampires_are_traitors = monsters_are_traitors or GetGlobalBool("ttt_vampires_are_traitors")
+    LoadMonsterEquipment(zombies_are_traitors, vampires_are_traitors)
     -- Send the status to the client because at this point the globals haven't synced
     net.Start("TTT_LoadMonsterEquipment")
-    net.WriteBool(monsters_are_traitors)
+    net.WriteBool(zombies_are_traitors)
+    net.WriteBool(vampires_are_traitors)
     net.Broadcast()
 
     -- Sound start alarm
@@ -1106,7 +1113,6 @@ function CheckForMapSwitch()
 end
 
 function LogScore(type)
-
     local playerStats = {}
     if file.Exists("stats/playerStats.txt", "DATA") then
         playerStats = util.JSONToTable(file.Read("stats/playerStats.txt", "DATA"))
@@ -1121,13 +1127,11 @@ function LogScore(type)
     local roleNames = { "Innocent", "Traitor", "Detective", "Mercenary", "Jester", "Phantom", "Hypnotist", "Glitch", "Zombie", "Vampire", "Swapper", "Assassin", "Killer", "Detraitor" }
 
     for _, v in pairs(player.GetAll()) do
-        local traitor_win = type == WIN_TRAITOR and v:IsTraitorTeam()
+        local traitor_win = type == WIN_TRAITOR and player.IsTraitorTeam(v)
         local monster_win = false
-        -- Count Monsters if Monsters-as-Traitors is enabled
-        if GetGlobalBool("ttt_monsters_are_traitors") then
-            traitor_win = traitor_win or (type == WIN_TRAITOR and v:IsMonsterTeam())
-        else
-            monster_win = type == WIN_MONSTER and v:IsMonsterTeam()
+        -- Count this as a monster win for the player if they are not considered a traitor right now
+        if v:IsMonsterTeam() and not player.IsMonsterTraitorAlly(v) then
+            monster_win = type == WIN_MONSTER
         end
         local didWin = ((type == WIN_INNOCENT or type == WIN_TIMELIMIT) and v:IsInnocentTeam()) or traitor_win or monster_win or (type == WIN_JESTER and v:IsJesterTeam()) or (type == WIN_KILLER and v:IsKiller())
 
@@ -1226,9 +1230,12 @@ function GM:TTTCheckForWin()
     for _, v in pairs(player.GetAll()) do
         if (v:Alive() and v:IsTerror()) or v:GetPData("IsZombifying", 0) == 1 then
             -- Check for zombification first so Monsters can win in weird circumstances where everyone dies by someone is coming back as a zombie in a second
-            if v:IsMonsterTeam() or v:GetPData("IsZombifying", 0) == 1 then
-                -- If Monsters-as-Traitors is enabled, don't ever mark Monsters as being alive
-                if GetGlobalBool("ttt_monsters_are_traitors") then
+            local is_zombie = v:IsZombie() or v:GetPData("IsZombifying", 0) == 1
+            if is_zombie or v:IsVampire() then
+                -- Don't mark monsters as being alive if that monster role is counted as a traitor right now
+                if GetGlobalBool("ttt_monsters_are_traitors") or
+                    (GetGlobalBool("ttt_zombies_are_traitors") and is_zombie) or
+                    (GetGlobalBool("ttt_vampires_are_traitors") and v:IsVampire()) then
                     traitor_alive = true
                 else
                     monster_alive = true
@@ -1425,8 +1432,8 @@ function SelectRoles()
                     ms = ms + 1
                     hasMonster = true
                     hasZombie = true
-                    hasSpecial = hasSpecial or GetGlobalBool("ttt_monsters_are_traitors")
-                    hasTraitor = hasTraitor or GetGlobalBool("ttt_monsters_are_traitors")
+                    hasSpecial = hasSpecial or GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_zombies_are_traitors")
+                    hasTraitor = hasTraitor or GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_zombies_are_traitors")
                     PrintRole(v, "Zombie")
                     v:SetZombiePrime(true)
                 elseif role == ROLE_HYPNOTIST then
@@ -1436,8 +1443,8 @@ function SelectRoles()
                 elseif role == ROLE_VAMPIRE then
                     ms = ms + 1
                     hasMonster = true
-                    hasSpecial = hasSpecial or GetGlobalBool("ttt_monsters_are_traitors")
-                    hasTraitor = hasTraitor or GetGlobalBool("ttt_monsters_are_traitors")
+                    hasSpecial = hasSpecial or GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_vampires_are_traitors")
+                    hasTraitor = hasTraitor or GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_vampires_are_traitors")
                     PrintRole(v, "Vampire")
                     v:SetVampirePrime(true)
                 elseif role == ROLE_ASSASSIN then
@@ -1475,7 +1482,7 @@ function SelectRoles()
     PrintRoleText("-----RANDOMLY PICKING REMAINING ROLES-----")
 
     -- If monsters are traitors, run the old zombie check logic
-    if GetGlobalBool("ttt_monsters_are_traitors") and (GetConVar("ttt_zombie_enabled"):GetBool() and math.random() <= zombie_chance and not hasTraitor and not hasSpecial) or hasZombie then
+    if (GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_zombies_are_traitors")) and (GetConVar("ttt_zombie_enabled"):GetBool() and math.random() <= zombie_chance and not hasTraitor and not hasSpecial) or hasZombie then
         while ts < monster_count and #choices > 0 do
             -- select random index in choices table
             local pply, pick = GetRandomPlayer(choices)
@@ -1500,6 +1507,10 @@ function SelectRoles()
             local wasTraitor = WasRole(prev_roles, pply, ROLE_TRAITOR, ROLE_ASSASSIN, ROLE_HYPNOTIST, ROLE_DETRAITOR)
             if GetGlobalBool("ttt_monsters_are_traitors") then
                 wasTraitor = wasTraitor or WasRole(prev_roles, pply, ROLE_ZOMBIE, ROLE_VAMPIRE)
+            elseif GetGlobalBool("ttt_zombies_are_traitors") then
+                wasTraitor = wasTraitor or WasRole(prev_roles, pply, ROLE_ZOMBIE)
+            elseif GetGlobalBool("ttt_vampires_are_traitors") then
+                wasTraitor = wasTraitor or WasRole(prev_roles, pply, ROLE_VAMPIRE)
             end
 
             -- make this guy traitor if he was not one last time, or if he makes a roll
@@ -1513,7 +1524,7 @@ function SelectRoles()
                     pply:SetRole(ROLE_HYPNOTIST)
                     hasSpecial = true
                 -- Include Vampires only if Monsters are considered traitors
-                elseif GetGlobalBool("ttt_monsters_are_traitors") and ts >= GetConVar("ttt_vampire_required_traitors"):GetInt() and GetConVar("ttt_vampire_enabled"):GetBool() and math.random() <= vampire_chance and not hasSpecial then
+                elseif (GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_vampires_are_traitors")) and ts >= GetConVar("ttt_vampire_required_traitors"):GetInt() and GetConVar("ttt_vampire_enabled"):GetBool() and math.random() <= vampire_chance and not hasSpecial then
                     PrintRole(pply, "Vampire")
                     pply:SetRole(ROLE_VAMPIRE)
                     pply:SetVampirePrime(true)
@@ -1541,13 +1552,13 @@ function SelectRoles()
 
             -- make this guy monster if he was not one last time, or if he makes a roll
             if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_ZOMBIE, ROLE_VAMPIRE) or math.random(1, 3) == 2) then
-                if ts >= GetConVar("ttt_zombie_required_traitors"):GetInt() and GetConVar("ttt_zombie_enabled"):GetBool() and math.random() <= zombie_chance and not hasMonster then
+                if not GetGlobalBool("ttt_zombies_are_traitors") and ts >= GetConVar("ttt_zombie_required_traitors"):GetInt() and GetConVar("ttt_zombie_enabled"):GetBool() and math.random() <= zombie_chance and not hasMonster then
                     PrintRole(pply, "Zombie")
                     pply:SetRole(ROLE_ZOMBIE)
                     pply:SetZombiePrime(true)
                     table.remove(choices, pick)
                     hasMonster = true
-                elseif ts >= GetConVar("ttt_vampire_required_traitors"):GetInt() and GetConVar("ttt_vampire_enabled"):GetBool() and math.random() <= vampire_chance and not hasMonster then
+                elseif not GetGlobalBool("ttt_vampires_are_traitors") and ts >= GetConVar("ttt_vampire_required_traitors"):GetInt() and GetConVar("ttt_vampire_enabled"):GetBool() and math.random() <= vampire_chance and not hasMonster then
                     PrintRole(pply, "Vampire")
                     pply:SetRole(ROLE_VAMPIRE)
                     pply:SetVampirePrime(true)

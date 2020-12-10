@@ -121,7 +121,8 @@ end
 
 local function ShouldReduceKarma(attacker, victim)
     return (attacker:IsTraitorTeam() and victim:IsTraitorTeam()) or
-            (attacker:IsMonsterAlly() and victim:IsMonsterAlly()) or
+            (attacker:IsZombie() and victim:IsZombieAlly()) or
+            (attacker:IsVampire() and victim:IsVampireAlly()) or
             (attacker:IsInnocentTeam() and victim:IsInnocentTeam())
 end
 

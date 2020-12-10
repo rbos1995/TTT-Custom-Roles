@@ -73,34 +73,37 @@ function plymeta:SetDefaultCredits()
     if self:IsTraitorTeam() then
         local c
         if self:IsTraitor() then
-            c = GetConVar("ttt_credits_starting"):GetFloat()
+            c = GetConVar("ttt_credits_starting"):GetInt()
         elseif self:IsDetraitor() then
-            c = GetConVar("ttt_der_credits_starting"):GetFloat()
+            c = GetConVar("ttt_der_credits_starting"):GetInt()
         elseif self:IsAssassin() then
-            c = GetConVar("ttt_asn_credits_starting"):GetFloat()
+            c = GetConVar("ttt_asn_credits_starting"):GetInt()
         elseif self:IsHypnotist() then
-            c = GetConVar("ttt_hyp_credits_starting"):GetFloat()
+            c = GetConVar("ttt_hyp_credits_starting"):GetInt()
         end
 
         if CountTraitors() == 1 then
-            c = c + GetConVar("ttt_credits_alonebonus"):GetFloat()
+            c = c + GetConVar("ttt_credits_alonebonus"):GetInt()
         end
         self:SetCredits(math.ceil(c))
     elseif self:IsDetective() then
-        self:SetCredits(math.ceil(GetConVar("ttt_det_credits_starting"):GetFloat()))
+        self:SetCredits(math.ceil(GetConVar("ttt_det_credits_starting"):GetInt()))
     elseif self:IsMercenary() then
-        self:SetCredits(math.ceil(GetConVar("ttt_mer_credits_starting"):GetFloat()))
+        self:SetCredits(math.ceil(GetConVar("ttt_mer_credits_starting"):GetInt()))
     elseif self:IsKiller() then
-        self:SetCredits(math.ceil(GetConVar("ttt_kil_credits_starting"):GetFloat()))
+        self:SetCredits(math.ceil(GetConVar("ttt_kil_credits_starting"):GetInt()))
     elseif self:IsMonsterTeam() then
         local c
+        local is_traitor = GetGlobalBool("ttt_monsters_are_traitors")
         if self:IsZombie() then
-            c = GetConVar("ttt_zom_credits_starting"):GetFloat()
+            c = GetConVar("ttt_zom_credits_starting"):GetInt()
+            is_traitor = is_traitor or GetGlobalBool("ttt_zombies_are_traitors")
         elseif self:IsVampire() then
-            c = GetConVar("ttt_vam_credits_starting"):GetFloat()
+            c = GetConVar("ttt_vam_credits_starting"):GetInt()
+            is_traitor = is_traitor or GetGlobalBool("ttt_vampires_are_traitors")
         end
-        if GetGlobalBool("ttt_monsters_are_traitors") and CountTraitors() == 1 then
-            c = c + GetConVar("ttt_credits_alonebonus"):GetFloat()
+        if is_traitor and CountTraitors() == 1 then
+            c = c + GetConVar("ttt_credits_alonebonus"):GetInt()
         end
         self:SetCredits(math.ceil(c))
     else

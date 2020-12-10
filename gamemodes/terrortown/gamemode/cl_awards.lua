@@ -615,12 +615,16 @@ local function TeamKiller(events, scores, players, innocents, traitors, detectiv
     for id, s in pairs(scores) do
         local kills = s.innos
         local team = num_inno - 1
+        local was_zombie = table.HasValue(zombies, id)
+        local was_vampire = table.HasValue(vampires, id)
         if table.HasValue(traitors, id) or table.HasValue(hypnotists, id) or table.HasValue(assassins, id) or table.HasValue(detraitors, id) then
             kills = s.traitors
             team = num_traitors - 1
-        elseif table.HasValue(zombies, id) or table.HasValue(vampires, id) then
-            -- Count Traitors if Monsters-as-Traitors is enabled
-            if GetGlobalBool("ttt_monsters_are_traitors") then
+        elseif was_zombie or was_vampire then
+            -- Count traitors if this monster type is a traitor
+            if GetGlobalBool("ttt_monsters_are_traitors") or
+                (was_zombie and GetGlobalBool("ttt_zombies_are_traitors")) or
+                (was_vampire and GetGlobalBool("ttt_vampires_are_traitors")) then
                 kills = s.traitors
                 team = num_traitors - 1
             else
@@ -646,12 +650,17 @@ local function TeamKiller(events, scores, players, innocents, traitors, detectiv
     if not nick then return nil end
 
     local was_traitor = table.HasValue(traitors, tker) or table.HasValue(hypnotists, tker) or table.HasValue(assassins, tker) or table.HasValue(detraitors, tker)
+    local was_zombie = table.HasValue(zombies, tker)
+    local was_vampire = table.HasValue(vampires, tker)
     local was_monster = false
     -- Count Monsters if Monsters-as-Traitors is enabled
-    if GetGlobalBool("ttt_monsters_are_traitors") then
-        was_traitor = was_traitor or table.HasValue(zombies, tker) or table.HasValue(vampires, tker)
+    if (was_zombie or was_vampire) and
+        (GetGlobalBool("ttt_monsters_are_traitors") or
+        (was_zombie and GetGlobalBool("ttt_zombies_are_traitors")) or
+        (was_vampire and GetGlobalBool("ttt_vampires_are_traitors"))) then
+        was_traitor = true
     else
-        was_monster = table.HasValue(zombies, tker) or table.HasValue(vampires, tker)
+        was_monster = was_zombie or was_vampire
     end
 
     local kills = (was_traitor and scores[tker].traitors > 0 and scores[tker].traitors) or (was_monster and scores[tker].monsters > 0 and scores[tker].monsters) or (scores[tker].innos > 0 and scores[tker].innos) or 0

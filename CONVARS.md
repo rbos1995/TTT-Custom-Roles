@@ -91,7 +91,9 @@ ttt_killer_damage_reduction 0.55 // The fraction an attacker's bullet damage wil
 ttt_killer_warn_all         0    // Whether to warn all players if there is a Killer. If 0, only traitors will be warned
 
 // Monsters
-ttt_monsters_are_traitors      0   // Whether Monsters (Zombie and Vampire) should be treated as members of the Traitors team. If enabled, ttt_monster_pct is not used.
+ttt_monsters_are_traitors      0   // Whether Monsters (Zombies and Vampires) should be treated as members of the Traitors team. If enabled, ttt_monster_pct is not used.
+ttt_zombies_are_traitors       0   // Whether Zombies should be treated as members of the Traitors team.
+ttt_vampires_are_traitors      0   // Whether Vampires should be treated as members of the Traitors team.
 ttt_vampire_vision_enable      1   // Whether Vampires have their special vision highlights enabled
 ttt_vampire_convert_enable     1   // Whether Vampires have the ability to drain other players' blood using their fangs
 ttt_vampire_show_target_icon   1   // Whether Vampires have an icon over other players' heads showing who to kill. Server or round must be restarted for changes to take effect.

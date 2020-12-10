@@ -239,20 +239,22 @@ function GM:PostDrawTranslucentRenderables()
                         ShowTraitorIcon(v, pos, dir)
                     elseif v:IsJesterTeam() then
                         ShowJesterIcon(client, v, pos, dir)
-                    -- If Monsters-as-Traitors is enabled and the target is a Monster, show icons
-                    elseif client:IsMonsterAlly() and v:IsMonsterTeam() then
+                    -- Show icons if we are allied with the target player's role
+                    elseif (client:IsZombieAlly() and v:IsZombie()) or
+                            (client:IsVampireAlly() and v:IsVampire()) then
                         ShowMonsterIcon(v, pos, dir)
                     elseif showkillicon then
                         render.SetMaterial(indicator_mat_target)
                         render.DrawQuadEasy(pos, dir, 8, 8, indicator_col, 180)
                     end
                 elseif client:IsMonsterTeam() then
-                    if v:IsMonsterTeam() then
+                    if (client:IsZombieAlly() and v:IsZombie()) or
+                        (client:IsVampireAlly() and v:IsVampire()) then
                         ShowMonsterIcon(v, pos, dir)
                     elseif v:IsJesterTeam() then
                         ShowJesterIcon(client, v, pos, dir)
                     -- Since Zombie and Vampire were already handled above, this will only cover the traitor team and only if Monsters-as-Traitors is enabled
-                    elseif GetGlobalBool("ttt_monsters_are_traitors") and (v:IsTraitorTeam() or v:IsGlitch()) then
+                    elseif player.IsMonsterTraitorAlly(client) and (v:IsTraitorTeam() or v:IsGlitch()) then
                         ShowTraitorIcon(v, pos, dir)
                     elseif showkillicon then
                         render.SetMaterial(indicator_mat_target)
@@ -483,22 +485,24 @@ function GM:HUDDrawTargetID()
                 target_detraitor = ent:IsDetraitor()
                 target_jester, target_swapper = GetIsJesterTeam(GetGlobalInt("ttt_traitors_jester_id_mode"), ent)
 
-                -- Show monster icons if Monsters-as-Traitors is enabled
-                if client:IsMonsterAlly() and ent:IsMonsterTeam() then
-                    target_vampire = ent:IsVampire()
+                -- Show monster icons if the target is an ally
+                if client:IsZombieAlly() then
                     target_zombie = ent:IsZombie()
+                end
+                if client:IsVampireAlly() then
+                    target_vampire = ent:IsVampire()
                 end
             elseif client:IsMonsterTeam() then
                 if client:IsZombie() then
                     target_fellow_zombie = ent:IsZombie()
                 else
-                    target_zombie = ent:IsZombie()
+                    target_zombie = ent:IsZombie() and client:IsZombieAlly()
                 end
-                target_vampire = ent:IsVampire()
+                target_vampire = ent:IsVampire() and client:IsVampireAlly()
                 target_jester, target_swapper = GetIsJesterTeam(GetGlobalInt("ttt_monsters_jester_id_mode"), ent)
 
                 -- Show traitor icons if Monsters-as-Traitors is enabled
-                if GetGlobalBool("ttt_monsters_are_traitors") then
+                if player.IsMonsterTraitorAlly(client) then
                     target_glitch = ent:IsGlitch()
                     target_traitor = ent:IsTraitor() or target_glitch
                     target_hypnotist = ent:IsHypnotist()

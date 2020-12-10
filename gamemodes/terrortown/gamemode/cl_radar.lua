@@ -201,7 +201,9 @@ function RADAR:Draw(client)
             role = tgt.role
             if player.IsTraitorTeam(client) then
                 local showJester, showSwapper = ShouldMarkJesterTeam(GetGlobalInt("ttt_traitors_jester_id_mode"))
-                if role == ROLE_TRAITOR or role == ROLE_HYPNOTIST or role == ROLE_ASSASSIN or role == ROLE_GLITCH or (GetGlobalBool("ttt_monsters_are_traitors") and (role == ROLE_VAMPIRE or role == ROLE_ZOMBIE)) then
+                local showZombie = (GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_zombies_are_traitors")) and role == ROLE_ZOMBIE
+                local showVampire = (GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_vampires_are_traitors")) and role == ROLE_VAMPIRE
+                if role == ROLE_TRAITOR or role == ROLE_HYPNOTIST or role == ROLE_ASSASSIN or role == ROLE_GLITCH or showZombie or showVampire then
                     surface.SetDrawColor(255, 0, 0, alpha)
                     surface.SetTextColor(255, 0, 0, alpha)
                 elseif (role == ROLE_JESTER and showJester) or (role == ROLE_SWAPPER and showSwapper) then

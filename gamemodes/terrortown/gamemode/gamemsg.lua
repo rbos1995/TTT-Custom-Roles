@@ -47,6 +47,46 @@ function TraitorMsg(ply_or_rfilter, msg)
     PlayerMsg(ply_or_rfilter, msg, true)
 end
 
+function GetTraitorAndMonsterFilter(alive)
+    local zombies_are_traitors = GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_zombies_are_traitors")
+    local vampires_are_traitors = GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_vampires_are_traitors")
+
+    if zombies_are_traitors and vampires_are_traitors then
+        return GetTraitorsAndMonstersFilter(alive)
+    elseif zombies_are_traitors then
+        return GetTraitorsAndZombiesFilter(alive)
+    elseif vampires_are_traitors then
+        return GetTraitorsAndVampiresFilter(alive)
+    else
+        return GetTraitorsFilter(alive)
+    end
+end
+
+function GetMonstersAndAlliesFilter(sender)
+    local zombies_are_traitors = GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_zombies_are_traitors")
+    local vampires_are_traitors = GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_vampires_are_traitors")
+
+    -- If both types of monster are traitors, send to all monsters and traitors
+    if zombies_are_traitors and vampires_are_traitors then
+        return GetTraitorsAndMonstersFilter()
+    -- If we're a Zombie and just Zombies are traitors, send to just Zombies and traitors
+    elseif sender:IsZombie() and zombies_are_traitors then
+        return GetTraitorsAndZombiesFilter()
+    -- If we're a Vampire and just Vampires are traitors, send to just Vampires and traitors
+    elseif sender:IsVampire() and vampires_are_traitors then
+        return GetTraitorsAndVampiresFilter()
+    -- If we're a Zombie who isn't a traitor but Vampires are traitors, send to just other Zombies
+    elseif sender:IsZombie() and vampires_are_traitors then
+        return GetZombieFilter()
+    -- If we're a Vampire who isn't a traitor but Zombies are traitors, send to just other Vampires
+    elseif sender:IsVampire() and zombies_are_traitors then
+        return GetVampireFilter()
+    -- Otherwise we know that all monsters are our friends, so send to all other monsters
+    else
+        return GetMonstersFilter()
+    end
+end
+
 -- Traitorchat
 local function RoleChatMsg(sender, msg)
     net.Start("TTT_RoleChat")
@@ -54,11 +94,10 @@ local function RoleChatMsg(sender, msg)
     net.WriteEntity(sender)
     net.WriteString(msg)
 
-    local monstersAsTraitors = GetGlobalBool("ttt_monsters_are_traitors")
     if sender:IsTraitorTeam() then
-        net.Send(monstersAsTraitors and GetTraitorsAndMonstersFilter() or GetTraitorsFilter())
+        net.Send(GetTraitorAndMonsterFilter(false))
     elseif sender:IsMonsterTeam() then
-        net.Send(monstersAsTraitors and GetTraitorsAndMonstersFilter() or GetMonstersFilter())
+        net.Send(GetMonstersAndAlliesFilter(sender))
     elseif sender:IsJesterTeam() then
         -- 0 - Don't show either Jester or Swapper
         -- 1 - Show both as Jester
@@ -163,7 +202,7 @@ end
 
 -- Anyone not part of the Traitor team
 function GetNonTraitorFilter(alive_only)
-    return GetPlayerFilter(function(p) return (p:IsInnocentTeam() or p:IsJesterTeam() or p:IsKiller() or (not GetGlobalBool("ttt_monsters_are_traitors") and p:IsMonsterTeam())) and (not alive_only or p:IsTerror()) end)
+    return GetPlayerFilter(function(p) return not player.IsTraitorTeam(p) and (not alive_only or p:IsTerror()) end)
 end
 
 function GetInnocentsFilter(alive_only)
@@ -171,11 +210,19 @@ function GetInnocentsFilter(alive_only)
 end
 
 function GetTraitorsAndJestersFilter(alive_only)
-    return GetPlayerFilter(function(p) return (p:IsTraitorTeam() or p:IsJesterTeam() or (GetGlobalBool("ttt_monsters_are_traitors") and p:IsMonsterTeam())) and (not alive_only or p:IsTerror()) end)
+    return GetPlayerFilter(function(p) return (player.IsTraitorTeam(p) or p:IsJesterTeam()) and (not alive_only or p:IsTerror()) end)
 end
 
 function GetTraitorsAndMonstersFilter(alive_only)
     return GetPlayerFilter(function(p) return (p:IsTraitorTeam() or p:IsMonsterTeam()) and (not alive_only or p:IsTerror()) end)
+end
+
+function GetTraitorsAndZombiesFilter(alive_only)
+    return GetPlayerFilter(function(p) return (p:IsTraitorTeam() or p:IsZombie()) and (not alive_only or p:IsTerror()) end)
+end
+
+function GetTraitorsAndVampiresFilter(alive_only)
+    return GetPlayerFilter(function(p) return (p:IsTraitorTeam() or p:IsVampire()) and (not alive_only or p:IsTerror()) end)
 end
 
 function GetMonstersFilter(alive_only)
@@ -320,12 +367,7 @@ end
 
 local function SendTraitorVoiceState(speaker, state)
     -- send umsg to living traitors that this is traitor-only talk
-    local rf = nil
-    if GetGlobalBool("ttt_monsters_are_traitors") then
-        rf = GetTraitorsAndMonstersFilter(true)
-    else
-        rf = GetTraitorsFilter(true)
-    end
+    local rf = GetTraitorAndMonsterFilter(true)
 
     -- make it as small as possible, to get there as fast as possible
     -- we can fit it into a mere byte by being cheeky.

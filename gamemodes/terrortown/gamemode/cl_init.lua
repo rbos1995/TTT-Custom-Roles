@@ -593,10 +593,17 @@ local function EnableKillerHighlights()
 end
 local function EnableZombieHighlights()
     hook.Add("PreDrawHalos", "AddPlayerHighlights", function()
-        local allies = {ROLE_VAMPIRE}
-        local traitors_are_friends = GetGlobalBool("ttt_monsters_are_traitors")
+        local allies = {}
+        local traitors_are_friends = GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_zombies_are_traitors")
+        -- Add all traitor roles if we are a traitor
         if traitors_are_friends then
             table.Add(allies, {ROLE_TRAITOR, ROLE_ASSASSIN, ROLE_HYPNOTIST, ROLE_DETRAITOR})
+        end
+
+        -- If we are a traitor and the other monsters are a traitor or neither us nor the other monsters are traitors then add them too
+        if traitors_are_friends and GetGlobalBool("ttt_vampires_are_traitors") or
+            (not traitors_are_friends and not GetGlobalBool("ttt_vampires_are_traitors")) then
+            table.insert(allies, ROLE_VAMPIRE)
         end
 
         local showJester, showSwapper = ShouldHighlightJesterTeam(GetGlobalInt("ttt_monsters_jester_id_mode"))
@@ -605,10 +612,17 @@ local function EnableZombieHighlights()
 end
 local function EnableVampireHighlights()
     hook.Add("PreDrawHalos", "AddPlayerHighlights", function()
-        local allies = {ROLE_ZOMBIE}
-        local traitors_are_friends = GetGlobalBool("ttt_monsters_are_traitors")
+        local allies = {}
+        local traitors_are_friends = GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_vampires_are_traitors")
+        -- Add all traitor roles if we are a traitor
         if traitors_are_friends then
             table.Add(allies, {ROLE_TRAITOR, ROLE_ASSASSIN, ROLE_HYPNOTIST, ROLE_DETRAITOR})
+        end
+
+        -- If we are a traitor and the other monsters are a traitor or neither us nor the other monsters are traitors then add them too
+        if traitors_are_friends and GetGlobalBool("ttt_zombies_are_traitors") or
+            (not traitors_are_friends and not GetGlobalBool("ttt_zombies_are_traitors")) then
+            table.insert(allies, ROLE_ZOMBIE)
         end
 
         local showJester, showSwapper = ShouldHighlightJesterTeam(GetGlobalInt("ttt_monsters_jester_id_mode"))
@@ -617,13 +631,21 @@ local function EnableVampireHighlights()
 end
 local function EnableTraitorHighlights()
     hook.Add("PreDrawHalos", "AddPlayerHighlights", function()
-        local monsters_are_friends = GetGlobalBool("ttt_monsters_are_traitors")
+        local zombies_are_friends = GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_zombies_are_traitors")
+        local vampires_are_friends = GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_vampires_are_traitors")
         local traitor_allies = {ROLE_ASSASSIN, ROLE_HYPNOTIST, ROLE_GLITCH, ROLE_DETRAITOR}
         local assassin_allies = {ROLE_TRAITOR, ROLE_HYPNOTIST, ROLE_GLITCH, ROLE_DETRAITOR}
         local hypnotist_allies = {ROLE_TRAITOR, ROLE_ASSASSIN, ROLE_GLITCH, ROLE_DETRAITOR}
         local detraitor_allies = {ROLE_TRAITOR, ROLE_HYPNOTIST, ROLE_ASSASSIN, ROLE_GLITCH}
-        if monsters_are_friends then
-            local monsters = {ROLE_ZOMBIE, ROLE_VAMPIRE}
+        if zombies_are_friends then
+            local monsters = {ROLE_ZOMBIE}
+            table.Add(traitor_allies, monsters)
+            table.Add(assassin_allies, monsters)
+            table.Add(hypnotist_allies, monsters)
+            table.Add(detraitor_allies, monsters)
+        end
+        if vampires_are_friends then
+            local monsters = {ROLE_VAMPIRE}
             table.Add(traitor_allies, monsters)
             table.Add(assassin_allies, monsters)
             table.Add(hypnotist_allies, monsters)
@@ -676,8 +698,9 @@ end
 -- Monster-as-traitors equipment
 
 net.Receive("TTT_LoadMonsterEquipment", function()
-    local monsters_are_traitors = net.ReadBool()
-    LoadMonsterEquipment(monsters_are_traitors)
+    local zombies_are_traitors = net.ReadBool()
+    local vampires_are_traitors = net.ReadBool()
+    LoadMonsterEquipment(zombies_are_traitors, vampires_are_traitors)
 end)
 
 -- Footsteps

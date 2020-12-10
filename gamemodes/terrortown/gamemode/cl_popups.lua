@@ -37,9 +37,11 @@ local function GetTextForLocalPlayer()
         local allies = {}
         local glitches = {}
         for _, ply in pairs(player.GetAll()) do
-            if ply:IsMonsterTeam() or ply:IsMonsterAlly() then
+            if ply:IsMonsterTeam() or
+                (client:IsZombie() and ply:IsZombieAlly()) or
+                (client:IsVampire() and ply:IsVampireAlly()) then
                 table.insert(allies, ply)
-            elseif GetGlobalBool("ttt_monsters_are_traitors") and ply:IsGlitch() then
+            elseif player.IsMonsterTraitorAlly(client) and ply:IsGlitch() then
                 table.insert(allies, ply)
                 table.insert(glitches, ply)
             end
@@ -92,7 +94,8 @@ local function GetTextForLocalPlayer()
             elseif ply:IsGlitch() then
                 table.insert(traitors, ply)
                 table.insert(glitches, ply)
-            elseif ply:IsMonsterTeam() and client:IsMonsterAlly() then
+            elseif (ply:IsZombie() and client:IsZombieAlly()) or
+                    (ply:IsVampire() and client:IsVampireAlly()) then
                 table.insert(traitors, ply)
             end
         end

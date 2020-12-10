@@ -47,6 +47,12 @@ local function CopyDmg(dmg)
     return d
 end
 
+local function GetPlayerMonsterOrTraitor(ply)
+    local is_traitor = ply:IsTraitorTeam()
+    local is_monster = ply:IsMonsterTeam() and not player.IsMonsterTraitorAlly(ply)
+    return is_traitor, is_monster
+end
+
 function SCORE:HandleKill(victim, attacker, dmginfo)
     if not (IsValid(victim) and victim:IsPlayer()) then return end
 
@@ -61,14 +67,8 @@ function SCORE:HandleKill(victim, attacker, dmginfo)
     e.dmg.h = victim.was_headshot
 
     e.vic.role = victim:GetRole()
-    e.vic.tr = victim:IsTraitorTeam()
     e.vic.inno = victim:IsInnocentTeam()
-    -- If Monsters-as-Traitors is enabled, count the victim as a traitor
-    if GetGlobalBool("ttt_monsters_are_traitors") then
-        e.vic.tr = e.vic.tr or victim:IsMonsterTeam()
-    else
-        e.vic.mon = victim:IsMonsterTeam()
-    end
+    e.vic.tr, e.vic.mon = GetPlayerMonsterOrTraitor(victim)
     e.vic.jes = victim:IsJesterTeam()
     e.vic.kil = victim:IsKiller()
 
@@ -77,14 +77,8 @@ function SCORE:HandleKill(victim, attacker, dmginfo)
         e.att.sid = attacker:SteamID()
         e.att.uid = attacker:UniqueID()
         e.att.role = attacker:GetRole()
-        e.att.tr = attacker:IsTraitorTeam()
         e.att.inno = attacker:IsInnocentTeam()
-        -- If Monsters-as-Traitors is enabled, count the attacker as a traitor
-        if GetGlobalBool("ttt_monsters_are_traitors") then
-            e.att.tr = e.att.tr or attacker:IsMonsterTeam()
-        else
-            e.att.mon = attacker:IsMonsterTeam()
-        end
+        e.att.tr, e.att.mon = GetPlayerMonsterOrTraitor(attacker)
         e.att.jes = attacker:IsJesterTeam()
         e.att.kil = attacker:IsKiller()
         e.tk = (e.att.tr and e.vic.tr) or (e.att.inno and e.vic.inno) or (e.att.mon and e.vic.mon) or (e.att.jes and e.vic.jes) or (e.att.kil and e.vic.kil)
@@ -255,14 +249,7 @@ function SCORE:ApplyEventLogScores(wintype)
     for uid, s in pairs(scored_log) do
         ply = Player(uid)
         if IsValid(ply) and ply:ShouldScore() then
-            local was_traitor = ply:IsTraitorTeam()
-            local was_monster = false
-            -- Count Monsters if Monsters-as-Traitors is enabled
-            if GetGlobalBool("ttt_monsters_are_traitors") then
-                was_traitor = was_traitor or ply:IsMonsterTeam()
-            else
-                was_monster = ply:IsMonsterTeam()
-            end
+            local was_traitor, was_monster = GetPlayerMonsterOrTraitor(ply)
             ply:AddFrags(KillsToPoints(s, was_traitor, was_monster, ply:IsKiller(), ply:IsInnocentTeam()))
         end
     end
@@ -277,8 +264,9 @@ function SCORE:ApplyEventLogScores(wintype)
             if ply:IsTraitorTeam() then
                 points_team = bonus.traitors
             elseif ply:IsMonsterTeam() then
-                -- Use the traitor's team bonus is Monsters-as-Traitors is enabled
-                if GetGlobalBool("ttt_monsters_are_traitors") then
+                local was_traitor, _ = GetPlayerMonsterOrTraitor(ply)
+                -- Use the traitor's team bonus if Monsters-as-Traitors is enabled
+                if was_traitor then
                     points_team = bonus.traitors
                 else
                     points_team = bonus.monsters

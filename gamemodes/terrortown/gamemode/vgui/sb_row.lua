@@ -179,17 +179,19 @@ function GM:TTTScoreboardRowColorForPlayer(ply)
             return GetTraitorTeamColor(ply)
         elseif ply:IsJesterTeam() then
             return player.GetJesterValueByRoleAndMode(client, ply:GetRole(), rolecolor.jester, rolecolor.swapper, rolecolor.default)
-        -- If Monsters-as-Traitors is enabled and the target is a Monster, show their colors
-        elseif client:IsMonsterAlly() and ply:IsMonsterTeam() then
+        -- If the target is monster of some sort and the local player is a monster ally, show their colors
+        elseif (client:IsZombieAlly() and ply:IsZombie()) or
+                (client:IsVampireAlly() and ply:IsVampire()) then
             return GetMonsterTeamColor(ply)
         end
     elseif client:IsMonsterTeam() then
-        if ply:IsMonsterTeam() then
+        if (client:IsZombieAlly() and ply:IsZombie()) or
+            (client:IsVampireAlly() and ply:IsVampire()) then
             return GetMonsterTeamColor(ply)
         elseif ply:IsJesterTeam() then
             return player.GetJesterValueByRoleAndMode(client, ply:GetRole(), rolecolor.jester, rolecolor.swapper, rolecolor.default)
-        -- Since Zombie and Vampire were already handled above, this will only cover the traitor team and only if Monsters-as-Traitors is enabled
-        elseif GetGlobalBool("ttt_monsters_are_traitors") and (ply:IsTraitorTeam() or ply:IsGlitch()) then
+        -- Show traitor player colors if the target is a traitor or a Glitch and Monsters are traitor allies
+        elseif player.IsMonsterTraitorAlly(client) and (ply:IsTraitorTeam() or ply:IsGlitch()) then
             return GetTraitorTeamColor(ply)
         end
     elseif client:IsKiller() then

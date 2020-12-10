@@ -18,7 +18,8 @@
 
 # Monsters
 - Created new "Monsters" team with Zombie and Vampire to ensure they fight against all players, rather than allied with Traitors
-  - This change is disablable via the _ttt_monsters_are_traitors_ ConVar. See [Configuration](CONVARS.md) for more information.
+  - This change is disablable by enabling the _ttt\_monsters\_are\_traitors_ ConVar. See [Configuration](CONVARS.md) for more information.
+  - You can also decide individually whether Zombies or Vampires should be traitors by enabling the _ttt\_zombies\_are\_traitors_ or _ttt\_vampires\_are\_traitors_ ConVars. See [Configuration](CONVARS.md) for more information.
 - Created new icons to handle previously-unexpected zombification and hypnotization cases
 - Ported the following from Town of Terror. See [Configuration](CONVARS.md) to disable.
   - "Zombie Vision" for both Zombie and Vampire

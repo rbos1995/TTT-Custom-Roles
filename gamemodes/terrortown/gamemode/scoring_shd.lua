@@ -122,7 +122,9 @@ function ScoreTeamBonus(scores, wintype)
         if sc.was_traitor or sc.was_hypnotist or sc.was_assassin or sc.was_detraitor then
             state.traitors = state.traitors + 1
         elseif sc.was_zombie or sc.was_vampire then
-            if GetGlobalBool("ttt_monsters_are_traitors") then
+            if GetGlobalBool("ttt_monsters_are_traitors") or
+                (GetGlobalBool("ttt_zombies_are_traitors") and sc.was_zombie) or
+                (GetGlobalBool("ttt_vampires_are_traitors") and sc.was_vampire) then
                 state.traitors = state.traitors + 1
             else
                 state.monsters = state.monsters + 1

@@ -51,7 +51,39 @@ function plymeta:GetInnocentTeam() return self:GetDetective() or self:GetInnocen
 
 function plymeta:GetMonsterTeam() return self:GetZombie() or self:GetVampire() end
 
-function plymeta:GetMonsterAlly() return self:GetMonsterTeam() or (GetGlobalBool("ttt_monsters_are_traitors") and self:GetTraitorTeam()) end
+function plymeta:GetZombieAlly()
+    -- The same role is always an ally
+    local is_ally = self:GetZombie()
+    -- If all monsters are traitors then all monsters and traitors are allies
+    if GetGlobalBool("ttt_monsters_are_traitors") then
+        is_ally = is_ally or self:GetTraitorTeam() or self:GetMonsterTeam()
+    -- If we are explicitly traitors then traitors are always allies but the other kind of monster is only our allies if they are also traitors
+    elseif GetGlobalBool("ttt_zombies_are_traitors") then
+        is_ally = is_ally or self:GetTraitorTeam() or (GetGlobalBool("ttt_vampires_are_traitors") and self:GetVampire())
+    -- If we're not traitors then the other kind of monster is only our allies when they are also not traitors
+    elseif not GetGlobalBool("ttt_vampires_are_traitors") then
+        is_ally = is_ally or self:GetVampire()
+    end
+
+    return is_ally
+end
+
+function plymeta:GetVampireAlly()
+    -- The same role is always an ally
+    local is_ally = self:GetVampire()
+    -- If all monsters are traitors then all monsters and traitors are allies
+    if GetGlobalBool("ttt_monsters_are_traitors") then
+        is_ally = is_ally or self:GetTraitorTeam() or self:GetMonsterTeam()
+    -- If we are explicitly traitors then traitors are always allies but the other kind of monster is only our allies if they are also traitors
+    elseif GetGlobalBool("ttt_vampires_are_traitors") then
+        is_ally = is_ally or self:GetTraitorTeam() or (GetGlobalBool("ttt_zombies_are_traitors") and self:GetZombie())
+    -- If we're not traitors then the other kind of monster is only our allies when they are also not traitors
+    elseif not GetGlobalBool("ttt_zombies_are_traitors") then
+        is_ally = is_ally or self:GetZombie()
+    end
+
+    return is_ally
+end
 
 function plymeta:GetJesterTeam() return self:GetJester() or self:GetSwapper() end
 
@@ -75,7 +107,8 @@ plymeta.IsTraitorTeam = plymeta.GetTraitorTeam
 plymeta.IsInnocentTeam = plymeta.GetInnocentTeam
 plymeta.IsMonsterTeam = plymeta.GetMonsterTeam
 plymeta.IsJesterTeam = plymeta.GetJesterTeam
-plymeta.IsMonsterAlly = plymeta.GetMonsterAlly
+plymeta.IsZombieAlly = plymeta.GetZombieAlly
+plymeta.IsVampireAlly = plymeta.GetVampireAlly
 
 function plymeta:IsSpecial() return self:GetRole() ~= ROLE_INNOCENT end
 
@@ -330,20 +363,19 @@ function player.HasBuyMenu(ply, active)
     return hasMenu and ((not (active == true)) or ply:IsActive())
 end
 
-function player.IsActiveTraitorTeam(ply)
-    local is_traitor = ply:IsActiveTraitorTeam()
-    if GetGlobalBool("ttt_monsters_are_traitors") then
-        is_traitor = is_traitor or ply:IsActiveMonsterTeam()
-    end
-    return is_traitor
+function player.IsTraitorTeam(ply)
+    return ply:IsTraitorTeam() or player.IsMonsterTraitorAlly(ply)
 end
 
-function player.IsTraitorTeam(ply)
-    local is_traitor = ply:IsTraitorTeam()
-    if GetGlobalBool("ttt_monsters_are_traitors") then
-        is_traitor = is_traitor or ply:IsMonsterTeam()
-    end
-    return is_traitor
+function player.IsActiveTraitorTeam(ply)
+    return player.IsTraitorTeam(ply) and ply:IsActive()
+end
+
+function player.IsMonsterTraitorAlly(ply)
+    return ply:IsMonsterTeam() and
+            (GetGlobalBool("ttt_monsters_are_traitors") or
+            (GetGlobalBool("ttt_zombies_are_traitors") and ply:IsZombie()) or
+            (GetGlobalBool("ttt_vampires_are_traitors") and ply:IsVampire()))
 end
 
 function player.GetJesterValueByRoleAndMode(ply, role, jester_value, swapper_value, default_value)

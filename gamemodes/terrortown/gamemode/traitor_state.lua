@@ -146,11 +146,15 @@ local function request_rolelist(ply)
         SendSwapperList(ply)
         SendKillerList(ply)
 
-        if GetGlobalBool("ttt_monsters_are_traitors") and ply:IsTraitorTeam() then
+        if (GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_zombies_are_traitors")) and ply:IsTraitorTeam() then
             SendZombieList(ply)
-            SendVampireList(ply)
         else
             SendConfirmedZombieList(ply)
+        end
+
+        if (GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_vampires_are_traitors")) and ply:IsTraitorTeam() then
+            SendVampireList(ply)
+        else
             SendConfirmedVampireList(ply)
         end
 

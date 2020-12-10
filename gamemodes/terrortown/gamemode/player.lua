@@ -1800,14 +1800,12 @@ function HandleRoleForcedWeapons(ply)
             ply:Give("weapon_kil_knife")
         end
     elseif ply:IsZombie() then
-        if ply.GetActiveWeapon and IsValid(ply:GetActiveWeapon()) then
-            if ply:GetActiveWeapon():GetClass() == "weapon_zom_claws" then
-                ply:SetColor(Color(70, 100, 25, 255))
-                ply:SetRenderMode(RENDERMODE_NORMAL)
-            else
-                ply:SetColor(Color(255, 255, 255, 255))
-                ply:SetRenderMode(RENDERMODE_TRANSALPHA)
-            end
+        if ply.GetActiveWeapon and IsValid(ply:GetActiveWeapon()) and ply:GetActiveWeapon():GetClass() == "weapon_zom_claws" then
+            ply:SetColor(Color(70, 100, 25, 255))
+            ply:SetRenderMode(RENDERMODE_NORMAL)
+        else
+            ply:SetColor(Color(255, 255, 255, 255))
+            ply:SetRenderMode(RENDERMODE_TRANSALPHA)
         end
 
         -- Strip all non-claw weapons for non-prime zombies if that feature is enabled
@@ -1830,6 +1828,9 @@ function HandleRoleForcedWeapons(ply)
         if ply:HasWeapon("weapon_vam_fangs") == false then
             ply:Give("weapon_vam_fangs")
         end
+    else
+        ply:SetColor(Color(255, 255, 255, 255))
+        ply:SetRenderMode(RENDERMODE_TRANSALPHA)
     end
 end
 

@@ -397,7 +397,7 @@ function CLSCORE:BuildScorePanel(dpanel)
             local was_monster = false
             -- Count Monsters if Monsters-as-Traitors is enabled
             if (GetGlobalBool("ttt_monsters_are_traitors") and (s.was_zombie or s.was_vampire)) or
-                (GetGlobalBool("ttt_zombies_are_traitors") and s.was_zombie)
+                (GetGlobalBool("ttt_zombies_are_traitors") and s.was_zombie) or
                 (GetGlobalBool("ttt_vampires_are_traitors") and s.was_vampire) then
                 was_traitor = true
             else

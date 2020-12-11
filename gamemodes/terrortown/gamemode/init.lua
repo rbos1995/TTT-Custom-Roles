@@ -960,7 +960,7 @@ function BeginRound()
                     if p:IsInnocent() or p:IsPhantom() or p:IsMercenary() or p:IsKiller() then
                         table.insert(enemies, p:Nick())
                     -- Count monsters as enemies if Monsters-as-Traitors is not enabled
-                    elseif not player.IsMonsterTraitorAlly(p) then
+                    elseif p:IsMonsterTeam() and not player.IsMonsterTraitorAlly(p) then
                         table.insert(enemies, p:Nick())
                     elseif p:IsDetective() then
                         table.insert(detectives, p:Nick())

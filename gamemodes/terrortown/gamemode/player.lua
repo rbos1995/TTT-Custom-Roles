@@ -889,7 +889,7 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
                     if p:IsInnocent() or p:IsPhantom() or p:IsMercenary() or p:IsKiller() then
                         table.insert(enemies, p:Nick())
                     -- Count monsters as enemies if Monsters-as-Traitors is not enabled
-                    elseif player.IsMonsterTraitorAlly(p) then
+                    elseif not player.IsMonsterTraitorAlly(p) then
                         table.insert(enemies, p:Nick())
                     elseif p:IsDetective() then
                         table.insert(detectives, p:Nick())

@@ -492,6 +492,10 @@ function GM:HUDDrawTargetID()
                 if client:IsVampireAlly() then
                     target_vampire = ent:IsVampire()
                 end
+
+                if client:IsAssassin() then
+                    target_current_target = (ent:Nick() == client:GetNWString("AssassinTarget", ""))
+                end
             elseif client:IsMonsterTeam() then
                 if client:IsZombie() then
                     target_fellow_zombie = ent:IsZombie()
@@ -509,8 +513,6 @@ function GM:HUDDrawTargetID()
                     target_assassin = ent:IsAssassin()
                     target_detraitor = ent:IsDetraitor()
                 end
-            elseif client:IsAssassin() then
-                target_current_target = (ent:Nick() == client:GetNWString("AssassinTarget", ""))
             elseif client:IsKiller() then
                 target_jester, target_swapper = GetIsJesterTeam(GetGlobalInt("ttt_killers_jester_id_mode"), ent)
             end

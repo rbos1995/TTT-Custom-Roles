@@ -143,7 +143,7 @@ net.Receive("TTT_JesterKiller", function(len)
     jesterkiller = net.ReadString()
     jestervictim = net.ReadString()
     jesterkillerrole = net.ReadInt(6)
-    if jesterkillerrole >= 0 then
+    if jesterkillerrole >= ROLE_INNOCENT then
         InsertRevivedPlayer(jestervictim)
     end
 end)
@@ -769,29 +769,31 @@ function CLSCORE:BuildSummaryPanel(dpanel)
                     end
                 end
 
+                local wasHyped = false
+                local wasZomed = false
+                local waVamped = false
+
                 -- Convert the person who killed the original Swapper to a swapper role
+                -- And ignore they Hyped, Zombified, and Vamped states
                 if playerName == jesterkiller and jesterkillerrole >= ROLE_INNOCENT then
                     role = "swa"
-                end
-
-                local wasHyped = false
-                for _, v in pairs(hypnotised) do
-                    if v == nicks[id] then
-                        wasHyped = true
+                else
+                    for _, v in pairs(hypnotised) do
+                        if v == nicks[id] then
+                            wasHyped = true
+                        end
                     end
-                end
 
-                local wasZomed = false
-                for _, v in pairs(zombified) do
-                    if v == nicks[id] then
-                        wasZomed = true
+                    for _, v in pairs(zombified) do
+                        if v == nicks[id] then
+                            wasZomed = true
+                        end
                     end
-                end
 
-                local waVamped = false
-                for _, v in pairs(vampified) do
-                    if v == nicks[id] then
-                        waVamped = true
+                    for _, v in pairs(vampified) do
+                        if v == nicks[id] then
+                            waVamped = true
+                        end
                     end
                 end
 

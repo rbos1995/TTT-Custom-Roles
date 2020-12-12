@@ -1786,7 +1786,7 @@ function GM:Tick()
 end
 
 function HandleRoleForcedWeapons(ply)
-    if not IsValid(ply) or GetRoundState() ~= ROUND_ACTIVE then return end
+    if not IsValid(ply) or ply:IsSpec() or GetRoundState() ~= ROUND_ACTIVE then return end
 
     if ply:IsKiller() then
         -- Ensure the Killer has their knife, if its enabled
@@ -1816,16 +1816,26 @@ function HandleRoleForcedWeapons(ply)
         end
 
         -- If this zombie doesn't have claws, give them claws
-        if ply:HasWeapon("weapon_zom_claws") == false then
+        if not ply:HasWeapon("weapon_zom_claws") then
             ply:Give("weapon_zom_claws")
         end
     elseif ply:IsVampire() then
-        if ply:HasWeapon("weapon_vam_fangs") == false then
+        if not ply:HasWeapon("weapon_vam_fangs") then
             ply:Give("weapon_vam_fangs")
         end
     else
         ply:SetColor(Color(255, 255, 255, 255))
         ply:SetRenderMode(RENDERMODE_TRANSALPHA)
+
+        if not ply:HasWeapon("weapon_ttt_unarmed") then
+            ply:Give("weapon_ttt_unarmed")
+        end
+        if not ply:HasWeapon("weapon_zm_carry") then
+            ply:Give("weapon_zm_carry")
+        end
+        if not ply:HasWeapon("weapon_zm_improvised") then
+            ply:Give("weapon_zm_improvised")
+        end
     end
 end
 
@@ -1930,6 +1940,31 @@ timer.Create("KillerKillCheckTimer", 1, 0, function()
     end
 end)
 
+local function KillFromPlayer(victim, killer, remove_body)
+    if not IsValid(victim) or not victim:Alive() then return end
+    if not IsValid(killer) or not killer:Alive() then return end
+
+    print("Killing " .. victim:Nick() .. " by " .. killer:Nick())
+
+    -- Kill the player with a "bullet"
+    local dmginfo = DamageInfo()
+    dmginfo:SetDamage(1000)
+    dmginfo:SetAttacker(killer)
+    dmginfo:SetInflictor(killer)
+    dmginfo:SetDamageType(DMG_BULLET)
+    victim:TakeDamageInfo(dmginfo)
+
+    if remove_body then
+        timer.Simple(0.25, function()
+            local body = victim.server_ragdoll or victim:GetRagdollEntity()
+            if IsValid(body) then
+                print("and removing body")
+                body:Remove()
+            end
+        end)
+    end
+end
+
 concommand.Add("ttt_kill_from_random", function(ply, cmd, args)
     if not IsValid(ply) or not ply:Alive() then return end
 
@@ -1941,23 +1976,28 @@ concommand.Add("ttt_kill_from_random", function(ply, cmd, args)
         end
     end
 
-    print("Killing " .. ply:Nick() .. " by " .. killer:Nick())
+    local remove_body = #args > 0 and tobool(args[1])
+    KillFromPlayer(ply, killer, remove_body)
+end, nil, nil, FCVAR_CHEAT)
 
-    -- Kill the player with a "bullet"
-    local dmginfo = DamageInfo()
-    dmginfo:SetDamage(1000)
-    dmginfo:SetAttacker(killer)
-    dmginfo:SetInflictor(killer)
-    dmginfo:SetDamageType(DMG_BULLET)
-    ply:TakeDamageInfo(dmginfo)
+concommand.Add("ttt_kill_from_player", function(ply, cmd, args)
+    if not IsValid(ply) or not ply:Alive() then return end
+    if #args == 0 then return end
 
-    if #args > 0 and tobool(args[1]) then
-        timer.Simple(0.25, function()
-            local body = ply.server_ragdoll or ply:GetRagdollEntity()
-            if IsValid(body) then
-                print("and removing body")
-                body:Remove()
-            end
-        end)
+    local killer_name = args[1]
+    local killer = nil
+    for _, v in RandomPairs(player.GetAll()) do
+        if IsValid(v) and v:Alive() and not v:IsSpec() and v ~= ply and not v:IsJesterTeam() and v:Nick() == killer_name then
+            killer = v
+            break
+        end
     end
+
+    if killer == nil then
+        print("No player named " .. killer_name .. " found")
+        return
+    end
+
+    local remove_body = #args > 1 and tobool(args[2])
+    KillFromPlayer(ply, killer, remove_body)
 end, nil, nil, FCVAR_CHEAT)

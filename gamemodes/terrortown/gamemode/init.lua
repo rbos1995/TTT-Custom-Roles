@@ -281,6 +281,7 @@ util.AddNetworkString("TTT_PlayerFootstep")
 util.AddNetworkString("TTT_ClearPlayerFootsteps")
 util.AddNetworkString("TTT_JesterDeathCelebration")
 util.AddNetworkString("TTT_BuyableWeapons")
+util.AddNetworkString("TTT_LogInfo")
 
 local jesterkilled = 0
 

@@ -225,6 +225,13 @@ net.Receive("TTT_SpawnedPlayers", function(len)
     })
 end)
 
+net.Receive("TTT_LogInfo", function(len)
+    AddEvent({
+        id = EVENT_LOG,
+        txt = net.ReadString()
+    })
+end)
+
 net.Receive("TTT_RoleChanged", function(len)
     local uid = net.ReadString()
     local role = net.ReadUInt(8)

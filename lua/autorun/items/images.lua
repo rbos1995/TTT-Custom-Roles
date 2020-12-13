@@ -255,4 +255,5 @@ if SERVER then
     resource.AddFile("materials/vgui/ttt/sprite_slot_cap.vmt")
     resource.AddFile("materials/vgui/ttt/tele_mark.vmt")
 	resource.AddFile("materials/thieves/footprint.vmt")
+	resource.AddFile("materials/icon16/info.png")
 end

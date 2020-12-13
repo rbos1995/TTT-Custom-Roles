@@ -40,6 +40,7 @@ local zombie_icon = Material("icon16/user_green.png")
 local vampire_icon = Material("icon16/user_gray.png")
 local traitor_icon = Material("icon16/user_red.png")
 local disconnect_icon = Material("icon16/disconnect.png")
+local info_icon = Material("icon16/info.png")
 
 -- Shorter name, using it lots
 local Event = CLSCORE.DeclareEventDisplay
@@ -306,28 +307,28 @@ Event(EVENT_KILL,
 
 
 Event(EVENT_HYPNOTISED, {
-		text = function(e)
+        text = function(e)
                   return PT("ev_hypno", {victim = e.vic})
                end,
-		icon = function(e)
-					return traitor_icon, "Hypnotised"
-				end})
+        icon = function(e)
+                    return traitor_icon, "Hypnotised"
+                end})
 
 Event(EVENT_DEFIBRILLATED, {
-		text = function(e)
+        text = function(e)
                   return PT("ev_defi", {victim = e.vic})
                end,
-		icon = function(e)
-					return star_icon, "Defibrillated"
-				end})
+        icon = function(e)
+                    return star_icon, "Defibrillated"
+                end})
 
 Event(EVENT_ZOMBIFIED, {
-		text = function(e)
+        text = function(e)
                   return PT("ev_zombi", {victim = e.vic})
                end,
-		icon = function(e)
-					return zombie_icon, "Zombified"
-				end})
+        icon = function(e)
+                    return zombie_icon, "Zombified"
+                end})
 
 Event(EVENT_VAMPIFIED, {
         text = function(e)
@@ -338,9 +339,17 @@ Event(EVENT_VAMPIFIED, {
                 end})
 
 Event(EVENT_DISCONNECTED, {
-		text = function(e)
+        text = function(e)
                   return PT("ev_disco", {victim = e.vic})
                end,
-		icon = function(e)
-					return disconnect_icon, "Disconnected"
-				end})
+        icon = function(e)
+                    return disconnect_icon, "Disconnected"
+                end})
+
+Event(EVENT_LOG, {
+        text = function(e)
+                    return e.txt
+                end,
+        icon = function(e)
+                    return info_icon, "Information"
+                end})

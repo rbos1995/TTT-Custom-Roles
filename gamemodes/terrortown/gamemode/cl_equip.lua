@@ -716,8 +716,8 @@ local function TraitorMenuPopup()
         show = true
     end
 
-    -- Credit transferring
-    if credits > 0 and (ply:GetRole() ~= ROLE_MERCENARY or ply:GetRole() ~= ROLE_KILLER) then
+    -- Credit transferring for those roles that have a buy menu
+    if credits > 0 and player.HasBuyMenu(ply, false) and not (ply:IsMercenary() or ply:IsKiller()) then
         local dtransfer = CreateTransferMenu(dsheet)
         dsheet:AddSheet(GetTranslation("xfer_name"), dtransfer, "icon16/group_gear.png", false, false, "Transfer credits")
         show = true

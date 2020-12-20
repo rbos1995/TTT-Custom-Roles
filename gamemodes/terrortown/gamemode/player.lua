@@ -847,9 +847,6 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
                         end
                         deadPhantom:SetHealth(health)
                         phantomBody:Remove()
-                        net.Start("TTT_Defibrillated")
-                        net.WriteString(deadPhantom:Nick())
-                        net.Broadcast()
                         deadPhantom:PrintMessage(HUD_PRINTCENTER, "Your attacker died and you have been respawned.")
                         respawn = true
                     else
@@ -1826,16 +1823,6 @@ function HandleRoleForcedWeapons(ply)
     else
         ply:SetColor(Color(255, 255, 255, 255))
         ply:SetRenderMode(RENDERMODE_TRANSALPHA)
-
-        if not ply:HasWeapon("weapon_ttt_unarmed") then
-            ply:Give("weapon_ttt_unarmed")
-        end
-        if not ply:HasWeapon("weapon_zm_carry") then
-            ply:Give("weapon_zm_carry")
-        end
-        if not ply:HasWeapon("weapon_zm_improvised") then
-            ply:Give("weapon_zm_improvised")
-        end
     end
 end
 

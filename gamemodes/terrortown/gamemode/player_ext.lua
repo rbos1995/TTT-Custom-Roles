@@ -373,6 +373,18 @@ function plymeta:SpawnForRound(dead_only, round_start)
         net.Broadcast()
     end
 
+    timer.Simple(1, function()
+        if not self:HasWeapon("weapon_ttt_unarmed") then
+            self:Give("weapon_ttt_unarmed")
+        end
+        if not self:HasWeapon("weapon_zm_carry") then
+            self:Give("weapon_zm_carry")
+        end
+        if not self:HasWeapon("weapon_zm_improvised") then
+            self:Give("weapon_zm_improvised")
+        end
+    end)
+
     -- tell caller that we spawned
     return true
 end

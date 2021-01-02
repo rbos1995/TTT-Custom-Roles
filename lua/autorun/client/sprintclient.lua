@@ -118,18 +118,18 @@ hook.Add("TTTPrepareRound", "TTTSprint4TTTPrepareRound", function()
     hook.Add("Think", "TTTSprint4Think", function()
         if not enabled then return end
         local client = LocalPlayer()
-
-        if client:KeyReleased(IN_FORWARD) and doubleTapEnabled:GetBool() then
+        local forward_key = hook.Call("TTTSprintKey", GAMEMODE, client) or IN_FORWARD
+        if client:KeyReleased(forward_key) and doubleTapEnabled:GetBool() then
             -- Double tap
             lastReleased = CurTime()
         end
 
-        if doubleTapEnabled:GetBool() and client:KeyDown(IN_FORWARD) and (lastReleased + math.min(math.max(doubleTapTime:GetFloat(), 0.001), 1) >= CurTime() or doubleTapActivated) then
+        if doubleTapEnabled:GetBool() and client:KeyDown(forward_key) and (lastReleased + math.min(math.max(doubleTapTime:GetFloat(), 0.001), 1) >= CurTime() or doubleTapActivated) then
             SprintFunction()
 
             doubleTapActivated = true
             timerReg = CurTime()
-        elseif client:KeyDown(IN_FORWARD) and SprintKey() then
+        elseif client:KeyDown(forward_key) and SprintKey() then
             -- forward + selected key
             SprintFunction()
 

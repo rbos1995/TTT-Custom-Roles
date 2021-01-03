@@ -433,13 +433,6 @@ function plymeta:Spectate(type)
     if type == OBS_MODE_ROAMING then
         self:SetMoveType(MOVETYPE_NOCLIP)
     end
-
-    -- If this player is a Spectator then strip all the weapons after a delay to work around some addons that force spectator but leave the magneto stick somehow
-    if self:IsSpec() then
-        timer.Simple(0.5, function()
-            self:StripAll()
-        end)
-    end
 end
 
 local oldSpectateEntity = plymeta.SpectateEntity
@@ -455,6 +448,18 @@ local oldUnSpectate = plymeta.UnSpectate
 function plymeta:UnSpectate()
     oldUnSpectate(self)
     self:SetNoTarget(false)
+end
+
+local oldSetTeam = plymeta.SetTeam
+function plymeta:SetTeam(team)
+    oldSetTeam(self, team)
+
+    -- If this player is a Spectator then strip all the weapons after a delay to work around some addons that force spectator but leave the magneto stick somehow
+    if team == TEAM_SPEC then
+        timer.Simple(0.5, function()
+            self:StripAll()
+        end)
+    end
 end
 
 function plymeta:GetAvoidDetective()

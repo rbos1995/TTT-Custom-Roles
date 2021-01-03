@@ -417,6 +417,9 @@ local function OrderEquipment(ply, cmd, args)
     local swep_table = (not is_item) and weapons.GetStored(id) or nil
 
     local role = ply:GetRole()
+    local mercmode = GetGlobalInt("ttt_shop_merc_mode")
+    local sync_assassin = GetGlobalBool("ttt_shop_assassin_sync") and role == ROLE_ASSASSIN
+    local sync_hypnotist = GetGlobalBool("ttt_shop_hypnotist_sync") and role == ROLE_HYPNOTIST
     -- If this role has a table of additional weapons and that table includes this weapon
     -- and this weapon is not currently buyable by the role then mark this weapon as buyable
     if swep_table then
@@ -424,7 +427,6 @@ local function OrderEquipment(ply, cmd, args)
         HandleRoleWeapons(role, BuyableWeapons[role], swep_table, id)
 
         -- If the player is a mercenary and mercenaries should have all weapons that traitors and detectives have
-        local mercmode = GetGlobalInt("ttt_shop_merc_mode")
         if mercmode > 0 and role == ROLE_MERCENARY then
             -- Traitor OR Detective or Detective only modes
             if mercmode == 1 or mercmode == 3 then
@@ -460,8 +462,7 @@ local function OrderEquipment(ply, cmd, args)
             end
         end
         -- If the player is a non-vanilla traitor and they should have all weapons that vanilla traitors have
-        if (GetGlobalBool("ttt_shop_assassin_sync") and role == ROLE_ASSASSIN) or
-            (GetGlobalBool("ttt_shop_hypnotist_sync") and role == ROLE_HYPNOTIST) then
+        if sync_assassin or sync_hypnotist then
             -- Add the loaded weapons for Traitor
             HandleRoleWeapons(role, BuyableWeapons[ROLE_TRAITOR], swep_table, id)
 
@@ -501,6 +502,30 @@ local function OrderEquipment(ply, cmd, args)
 
         -- item whitelist check
         local allowed = GetEquipmentItem(role, id)
+        -- Check for the syncing options
+        if not allowed then
+            if role == ROLE_MERCENARY then
+                -- Traitor OR Detective
+                if mercmode == 1 then
+                    allowed = GetEquipmentItem(ROLE_TRAITOR, id) or GetEquipmentItem(ROLE_DETECTIVE, id)
+                -- Traitor AND Detective
+                elseif mercmode == 2 then
+                    allowed = GetEquipmentItem(ROLE_TRAITOR, id) and GetEquipmentItem(ROLE_DETECTIVE, id)
+                -- Detective only
+                elseif mercmode == 3 then
+                    allowed = GetEquipmentItem(ROLE_DETECTIVE, id)
+                -- Traitor only
+                elseif mercmode == 4 then
+                    allowed = GetEquipmentItem(ROLE_TRAITOR, id)
+                end
+            -- Traitor -> (Assassin || Hypnotist)
+            elseif sync_hypnotist or sync_hypnotist then
+                allowed = GetEquipmentItem(ROLE_TRAITOR, id)
+            -- Detective -> Detraitor
+            elseif role == ROLE_DETRAITOR then
+                allowed = GetEquipmentItem(ROLE_DETECTIVE, id)
+            end
+        end
 
         if not allowed then
             print(ply, "tried to buy item not buyable for his class:", id)

@@ -60,8 +60,12 @@ net.Receive("TTT_BuyableWeapons", function()
     end
 end)
 
+local function ItemIsWeapon(item) return not tonumber(item.id) end
+
 function GetEquipmentForRole(role)
     local mercmode = GetGlobalInt("ttt_shop_merc_mode")
+    local sync_assassin = GetGlobalBool("ttt_shop_assassin_sync") and role == ROLE_ASSASSIN
+    local sync_hypnotist = GetGlobalBool("ttt_shop_hypnotist_sync") and role == ROLE_HYPNOTIST
 
     -- Prime traitor and detective lists to make sure the sync works
     if (mercmode > 0 and role == ROLE_MERCENARY) or
@@ -127,7 +131,7 @@ function GetEquipmentForRole(role)
                 end
 
                 -- If the player is a non-vanilla traitor and they should have all weapons that vanilla traitors have
-                if ((GetGlobalBool("ttt_shop_assassin_sync") and role == ROLE_ASSASSIN) or (GetGlobalBool("ttt_shop_hypnotist_sync") and role == ROLE_HYPNOTIST)) and
+                if (sync_assassin or sync_hypnotist) and
                     -- and they can't already buy this weapon
                     not table.HasValue(v.CanBuy, role) and
                     -- and vanilla traitors CAN buy this weapon, let this player buy it too
@@ -176,11 +180,55 @@ function GetEquipmentForRole(role)
             end
         end
 
-        -- mark custom items
+        local traitor_equipment = {}
+        local traitor_equipment_ids = {}
+        local detective_equipment = {}
+        local detective_equipment_ids = {}
         for r, is in pairs(tbl) do
             for _, i in pairs(is) do
-                if i and i.id then
+                if i then
+                    -- Mark custom items
                     i.custom = not table.HasValue(DefaultEquipment[r], i.id)
+
+                    -- Run through this again to make sure non-custom equipment is saved to be synced below
+                    if not ItemIsWeapon(i) and i.custom then
+                        if r == ROLE_TRAITOR then
+                            table.insert(traitor_equipment, i)
+                            table.insert(traitor_equipment_ids, i.id)
+                        elseif r == ROLE_DETECTIVE then
+                            table.insert(detective_equipment, i)
+                            table.insert(detective_equipment_ids, i.id)
+                        end
+                    end
+                end
+            end
+        end
+
+        -- Sync the equipment from above
+        if role == ROLE_MERCENARY and mercmode == 2 then
+            for idx, i in pairs(traitor_equipment_ids) do
+                -- Traitor AND Detective mode, (Detective && Traitor) -> Mercenary
+                if table.HasValue(detective_equipment_ids, i) then
+                    table.insert(tbl[role], traitor_equipment[idx])
+                end
+            end
+        else
+            for _, i in pairs(traitor_equipment) do
+                -- Traitor -> Assassin
+                if sync_assassin or
+                    -- Traitor -> Hypnotist
+                    sync_hypnotist or
+                    -- Traitor OR Detective or Traitor only modes, Traitor -> Mercenary
+                    (role == ROLE_MERCENARY and (mercmode == 1 or mercmode == 4)) then
+                    table.insert(tbl[role], i)
+                end
+            end
+            for _, i in pairs(detective_equipment) do
+                -- Detective -> Detraitor
+                if role == ROLE_DETRAITOR or
+                    -- Traitor OR Detective or Detective only modes, Detective -> Mercenary
+                    (role == ROLE_MERCENARY and (mercmode == 1 or mercmode == 3)) then
+                    table.insert(tbl[role], i)
                 end
             end
         end
@@ -190,8 +238,6 @@ function GetEquipmentForRole(role)
 
     return Equipment and Equipment[role] or {}
 end
-
-local function ItemIsWeapon(item) return not tonumber(item.id) end
 
 local function CanCarryWeapon(item) return LocalPlayer():CanCarryType(item.kind) end
 

@@ -1256,7 +1256,7 @@ function GM:PlayerDeath(victim, infl, attacker)
     victim:Freeze(false)
 
     -- Haunt the attacker if that functionality is enabled
-    if valid_kill and victim:IsPhantom() and GetConVar("ttt_phantom_killer_haunt"):GetBool() then
+    if valid_kill and victim:IsPhantom() and not attacker:IsSwapper() and GetConVar("ttt_phantom_killer_haunt"):GetBool() then
         timer.Simple(1, function()
             victim:Spectate(OBS_MODE_CHASE)
             victim:SpectateEntity(attacker)

@@ -387,6 +387,9 @@ local function TraitorMenuPopup()
     -- Close any existing traitor menu
     if eqframe and IsValid(eqframe) then eqframe:Close() end
 
+    -- Dead players can't do anything with equipment
+    if not ply:Alive() then return end
+
     local dframe = vgui.Create("DFrame")
     dframe:SetSize(w, h)
     dframe:Center()

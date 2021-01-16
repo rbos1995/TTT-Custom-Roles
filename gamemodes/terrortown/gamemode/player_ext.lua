@@ -358,6 +358,7 @@ function plymeta:SpawnForRound(dead_only, round_start)
     self:SetNWString("HauntingTarget", nil)
     self:SetNWInt("HauntingPower", 0)
     timer.Remove(self:Nick() .. "HauntingPower")
+    timer.Remove(self:Nick() .. "HauntingSpectate")
     self:Spawn()
 
     if round_start then

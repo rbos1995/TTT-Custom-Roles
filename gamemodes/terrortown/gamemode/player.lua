@@ -829,6 +829,7 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
                 deadPhantom:SetNWString("HauntingTarget", nil)
                 deadPhantom:SetNWInt("HauntingPower", 0)
                 timer.Remove(deadPhantom:Nick() .. "HauntingPower")
+                timer.Remove(deadPhantom:Nick() .. "HauntingSpectate")
                 if deadPhantom:IsPhantom() and not deadPhantom:Alive() then
                     -- Find the Phantom's corpse
                     local phantomBody = deadPhantom.server_ragdoll or deadPhantom:GetRagdollEntity()
@@ -1257,7 +1258,8 @@ function GM:PlayerDeath(victim, infl, attacker)
 
     -- Haunt the attacker if that functionality is enabled
     if valid_kill and victim:IsPhantom() and not attacker:IsSwapper() and GetConVar("ttt_phantom_killer_haunt"):GetBool() then
-        timer.Simple(1, function()
+        timer.Create(victim:Nick() .. "HauntingSpectate", 1, 1, function()
+            timer.Remove(victim:Nick() .. "HauntingSpectate")
             victim:Spectate(OBS_MODE_CHASE)
             victim:SpectateEntity(attacker)
         end)

@@ -161,6 +161,7 @@ In TTT some roles have shops where they are allowed to purchase weapons. Given t
 ## Adding Weapons
 
 To add weapons to a role (that already has a shop), create a .txt file with the weapon class (e.g. weapon_ttt_somethingcool.txt) in the garrysmod/data/roleweapons/{rolename} folder.\
+**NOTE**: If the _roleweapons_ folder does not already exist in garrysmod/data, create it.\
 **NOTE**: The name of the role must be all lowercase for cross-operating system compatibility. For example: garrysmod/data/roleweapons/detective/weapon_ttt_somethingcool.txt
 
 Also note the ttt_shop_* ConVars that are available above which can help control some of the role weapon shop lists.
@@ -170,6 +171,7 @@ Also note the ttt_shop_* ConVars that are available above which can help control
 At the same time, there are some workshop weapons that are given to multiple roles that maybe you don't want to be available to certain roles. In order to handle that case, the ability to exclude weapons from a role's weapon shop has been added.
 
 To remove weapons from a role's shop, create a .exclude.txt file with the weapon class (e.g. weapon_ttt_somethingcool.exclude.txt) in the garrysmod/data/roleweapons/{rolename} folder.\
+**NOTE**: If the _roleweapons_ folder does not already exist in garrysmod/data, create it.\
 **NOTE**: The name of the role must be all lowercase for cross-operating system compatibility. For example: garrysmod/data/roleweapons/detective/weapon_ttt_somethingcool.exclude.txt
 
 ## Finding a Weapon's Class
@@ -179,3 +181,17 @@ To find the class name of a weapon to use above, follow the steps below
 2. Spawn 1 bot by using the _bot_ command in console
 3. Obtain the weapon whose class you want. If it is already available to buy from a certain role's shop, either force yourself to be that role via the _ttt\_force\_*_ commands or via a ULX plugin.
 4. Run the following command in console to get a list of all of your weapon classes: _lua\_run PrintTable(player.GetHumans()[1]:GetWeapons())_
+
+## Adding Equipment
+
+Equipment are items that a role can use that do not take up an equipment slot, such as the body armor or radar. To add equipment items to a role (that already has a shop), create a .txt file with the equipment item's name (e.g. "bruh bunker.txt") in the garrysmod/data/roleweapons/{rolename} folder.\
+**NOTE**: If the _roleweapons_ folder does not already exist in garrysmod/data, create it.\
+**NOTE**: The name of the role must be all lowercase for cross-operating system compatibility. For example: garrysmod/data/roleweapons/detective/bruh bunker.txt
+
+## Finding an Equipment Item's Name
+
+To find the name of an equipment item to use above, follow the steps below
+1. Start a local server with TTT as the selected gamemode
+2. Spawn 1 bot by using the _bot_ command in console
+3. Obtain the equipment item whose name you want. If it is already available to buy from a certain role's shop, either force yourself to be that role via the _ttt\_force\_*_ commands or via a ULX plugin.
+4. Run the following command in console to get a full list of your equipment item names: _lua\_run GetEquipmentItemById(EQUIP\_RADAR); lua\_run for id, e in pairs(EquipmentCache) do if player.GetHumans()[1]:HasEquipmentItem(id) then print(id .. " = " .. e.name) end end_

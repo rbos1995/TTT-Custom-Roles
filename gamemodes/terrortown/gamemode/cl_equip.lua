@@ -63,6 +63,8 @@ end)
 local function ItemIsWeapon(item) return not tonumber(item.id) end
 
 function GetEquipmentForRole(role)
+    PrepWeaponsLists(role)
+
     local mercmode = GetGlobalInt("ttt_shop_merc_mode")
     local sync_assassin = GetGlobalBool("ttt_shop_assassin_sync") and role == ROLE_ASSASSIN
     local sync_hypnotist = GetGlobalBool("ttt_shop_hypnotist_sync") and role == ROLE_HYPNOTIST
@@ -229,6 +231,18 @@ function GetEquipmentForRole(role)
                     -- Traitor OR Detective or Detective only modes, Detective -> Mercenary
                     (role == ROLE_MERCENARY and (mercmode == 1 or mercmode == 3)) then
                     table.insert(tbl[role], i)
+                end
+            end
+        end
+
+        -- Also check the extra buyable equipment
+        for _, v in pairs(BuyableWeapons[role]) do
+            -- If this isn't a weapon, get its information from one of the roles and compare that to the ID we have
+            if not weapons.GetStored(v) then
+                local equip = GetEquipmentItemByName(v)
+                if equip ~= nil then
+                    table.insert(tbl[role], equip)
+                    break
                 end
             end
         end

@@ -423,6 +423,13 @@ local function OrderEquipment(ply, cmd, args)
     -- If this role has a table of additional weapons and that table includes this weapon
     -- and this weapon is not currently buyable by the role then mark this weapon as buyable
     if swep_table then
+        -- some weapons can only be bought once per player per round, this used to be
+        -- defined in a table here, but is now in the SWEP's table
+        if swep_table.LimitedStock and ply:HasBought(id) then
+            LANG.Msg(ply, "buy_no_stock")
+            return
+        end
+
         -- Add the loaded weapons for this role
         HandleRoleWeapons(role, BuyableWeapons[role], swep_table, id)
 
@@ -488,15 +495,7 @@ local function OrderEquipment(ply, cmd, args)
         end
     end
 
-    -- some weapons can only be bought once per player per round, this used to be
-    -- defined in a table here, but is now in the SWEP's table
-    if swep_table and swep_table.LimitedStock and ply:HasBought(id) then
-        LANG.Msg(ply, "buy_no_stock")
-        return
-    end
-
     local received = false
-
     if is_item then
         id = tonumber(id)
 
@@ -524,6 +523,20 @@ local function OrderEquipment(ply, cmd, args)
             -- Detective -> Detraitor
             elseif role == ROLE_DETRAITOR then
                 allowed = GetEquipmentItem(ROLE_DETECTIVE, id)
+            end
+        end
+
+        -- If it's still not allowed, check the extra buyable equipment
+        if not allowed then
+            for _, v in pairs(BuyableWeapons[role]) do
+                -- If this isn't a weapon, get its information from one of the roles and compare that to the ID we have
+                if not weapons.GetStored(v) then
+                    local equip = GetEquipmentItemById(id)
+                    if equip ~= nil then
+                        allowed = true
+                        break
+                    end
+                end
             end
         end
 

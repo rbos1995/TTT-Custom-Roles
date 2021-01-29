@@ -143,9 +143,6 @@ net.Receive("TTT_JesterKiller", function(len)
     jesterkiller = net.ReadString()
     jestervictim = net.ReadString()
     jesterkillerrole = net.ReadInt(6)
-    if jesterkillerrole >= ROLE_INNOCENT then
-        InsertRevivedPlayer(jestervictim)
-    end
 end)
 
 net.Receive("TTT_Hypnotised", function(len)

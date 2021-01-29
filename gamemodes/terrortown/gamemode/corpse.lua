@@ -105,6 +105,7 @@ local function IdentifyBody(ply, rag)
         if deadply then
             deadply:SetNWBool("body_searched", true)
             deadply:SetNWBool("body_found", true)
+            deadply:SetNWBool("RoleRevealed", true)
 
             if traitor then
                 -- update innocent's list of traitors

@@ -1548,11 +1548,6 @@ function GM:EntityTakeDamage(ent, dmginfo)
         end
     end
 
-    if att:IsPlayer() and att:IsJesterTeam() and GetRoundState() == ROUND_ACTIVE then
-        dmginfo:ScaleDamage(0)
-        dmginfo:SetDamage(0)
-    end
-
     if not GAMEMODE:AllowPVP() then
         -- if player vs player damage, or if damage versus a prop, then zero
         if ent:IsExplosive() or (ent:IsPlayer() and IsValid(att) and att:IsPlayer()) then

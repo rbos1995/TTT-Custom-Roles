@@ -141,7 +141,7 @@ end
 function GM:TTTScoreboardRowColorForPlayer(ply)
     if not IsValid(ply) or GetRoundState() == ROUND_WAIT or GetRoundState() == ROUND_PREP then return rolecolor.default end
 
-    if (ScoreGroup(ply) == GROUP_SEARCHED and ply.search_result) or ply == LocalPlayer() or (ply:GetNWBool('RoleRevealed', false) and LocalPlayer():IsRole(ROLE_DETECTIVE)) then
+    if (ScoreGroup(ply) == GROUP_SEARCHED and ply.search_result) or ply == LocalPlayer() or (ply:GetNWBool("RoleRevealed", false) and LocalPlayer():IsRole(ROLE_DETECTIVE)) then
         if ply:IsTraitor() then
             return rolecolor.traitor
         elseif ply:IsDetective() then

@@ -178,7 +178,7 @@ function GM:PostDrawTranslucentRenderables()
         if v:IsActive() and v ~= client and not hidden then
             local pos = v:GetPos()
             pos.z = pos.z + 74
-            local revealed = v:GetNWBool('RoleRevealed', false)
+            local revealed = v:GetNWBool("RoleRevealed", false)
             -- Only show the "KILL" target if the setting is enabled
             local showkillicon = (client:IsZombie() and GetGlobalBool("ttt_zombie_show_target_icon")) or
                 (client:IsVampire() and GetGlobalBool("ttt_vampire_show_target_icon")) or
@@ -456,7 +456,7 @@ function GM:HUDDrawTargetID()
         if minimal then
             _, color = util.HealthToString(ent:Health(), ent:GetMaxHealth())
         end
-        local revealed = ent:GetNWBool('RoleRevealed', false)
+        local revealed = ent:GetNWBool("RoleRevealed", false)
         if GetRoundState() == ROUND_ACTIVE and client:IsDetective() and revealed then
             target_innocent = ent:IsInnocent()
             target_glitch = ent:IsGlitch()

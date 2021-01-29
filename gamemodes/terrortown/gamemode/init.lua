@@ -1419,6 +1419,7 @@ function SelectRoles()
     local hasGlitch = false
     local hasKiller = false
     local hasDetraitor = false
+    local repeatMax = 6
 
     PrintRoleText("-----CHECKING EXTERNALLY CHOSEN ROLES-----")
     for _, v in pairs(player.GetAll()) do
@@ -1501,7 +1502,7 @@ function SelectRoles()
             local pply, pick = GetRandomPlayer(choices)
 
             -- make this guy zombie if he was not a traitor last time, or if he makes a roll
-            if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_TRAITOR, ROLE_ASSASSIN, ROLE_HYPNOTIST, ROLE_ZOMBIE, ROLE_VAMPIRE) or (math.random(1, 3) == 2)) then
+            if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_TRAITOR, ROLE_ASSASSIN, ROLE_HYPNOTIST, ROLE_ZOMBIE, ROLE_VAMPIRE) or (math.random(1, repeatMax) == 1)) then
                 PrintRole(pply, "Zombie")
                 pply:SetRole(ROLE_ZOMBIE)
                 pply:SetZombiePrime(true)
@@ -1527,7 +1528,7 @@ function SelectRoles()
             end
 
             -- make this guy traitor if he was not one last time, or if he makes a roll
-            if IsValid(pply) and (not wasTraitor or math.random(1, 3) == 2) then
+            if IsValid(pply) and (not wasTraitor or math.random(1, repeatMax) == 1) then
                 if ts >= GetConVar("ttt_detraitor_required_traitors"):GetInt() and GetConVar("ttt_detraitor_enabled"):GetBool() and math.random() <= detraitor_chance and ds == 0 and not hasDetraitor then
                     PrintRole(pply, "Detraitor")
                     pply:SetRole(ROLE_DETRAITOR)
@@ -1564,7 +1565,7 @@ function SelectRoles()
             local pply, pick = GetRandomPlayer(choices)
 
             -- make this guy monster if he was not one last time, or if he makes a roll
-            if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_ZOMBIE, ROLE_VAMPIRE) or math.random(1, 3) == 2) then
+            if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_ZOMBIE, ROLE_VAMPIRE) or math.random(1, repeatMax) == 1) then
                 if not GetGlobalBool("ttt_zombies_are_traitors") and ts >= GetConVar("ttt_zombie_required_traitors"):GetInt() and GetConVar("ttt_zombie_enabled"):GetBool() and math.random() <= zombie_chance and not hasMonster then
                     PrintRole(pply, "Zombie")
                     pply:SetRole(ROLE_ZOMBIE)
@@ -1608,7 +1609,7 @@ function SelectRoles()
         local pply, pick = GetRandomPlayer(choices)
 
         -- we are less likely to be a detective unless we were innocent last round
-        if (IsValid(pply) and (pply:GetBaseKarma() >= min_karma and WasRole(prev_roles, pply, ROLE_INNOCENT, ROLE_GLITCH, ROLE_PHANTOM, ROLE_MERCENARY) or math.random(1, 3) == 2)) then
+        if (IsValid(pply) and (pply:GetBaseKarma() >= min_karma and WasRole(prev_roles, pply, ROLE_INNOCENT, ROLE_GLITCH, ROLE_PHANTOM, ROLE_MERCENARY) or math.random(1, repeatMax) == 1)) then
             -- if a player has specified he does not want to be detective, we skip
             -- him here (he might still get it if we don't have enough
             -- alternatives)
@@ -1625,7 +1626,7 @@ function SelectRoles()
     local pply, pick = GetRandomPlayer(choices)
 
     -- make this guy jester if he was not one last time, or if he makes a roll
-    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_JESTER, ROLE_SWAPPER) or math.random(1, 3) == 2) then
+    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_JESTER, ROLE_SWAPPER) or math.random(1, repeatMax) == 1) then
         if GetConVar("ttt_jester_enabled"):GetBool() and #choices >= GetConVar("ttt_jester_required_innos"):GetInt() and math.random() <= jester_chance and not hasJester then
             if IsValid(pply) then
                 PrintRole(pply, "Jester")
@@ -1646,7 +1647,7 @@ function SelectRoles()
     -- select random index in choices table
     pply, pick = GetRandomPlayer(choices)
     -- make this guy killer if he was not one last time, or if he makes a roll
-    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_KILLER) or math.random(1, 3) == 2) then
+    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_KILLER) or math.random(1, repeatMax) == 1) then
         if GetConVar("ttt_killer_enabled"):GetBool() and #choices >= GetConVar("ttt_killer_required_innos"):GetInt() and math.random() <= killer_chance and not hasKiller then
             if IsValid(pply) then
                 PrintRole(pply, "Killer")
@@ -1661,7 +1662,7 @@ function SelectRoles()
 
     -- select random index in choices table
     pply, pick = GetRandomPlayer(choices)
-    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_MERCENARY) or math.random(1, 3) == 2) then
+    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_MERCENARY) or math.random(1, repeatMax) == 1) then
         if GetConVar("ttt_mercenary_enabled"):GetBool() and #choices >= GetConVar("ttt_mercenary_required_innos"):GetInt() and math.random() <= mercenary_chance and not hasMercenary then
             if IsValid(pply) then
                 PrintRole(pply, "Mercenary")
@@ -1674,7 +1675,7 @@ function SelectRoles()
 
     -- select random index in choices table
     pply, pick = GetRandomPlayer(choices)
-    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_PHANTOM) or math.random(1, 3) == 2) then
+    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_PHANTOM) or math.random(1, repeatMax) == 1) then
         if GetConVar("ttt_phantom_enabled"):GetBool() and #choices >= GetConVar("ttt_phantom_required_innos"):GetInt() and math.random() <= phantom_chance and not hasPhantom then
             if IsValid(pply) then
                 PrintRole(pply, "Phantom")
@@ -1687,7 +1688,7 @@ function SelectRoles()
 
     -- select random index in choices table
     pply, pick = GetRandomPlayer(choices)
-    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_GLITCH) or math.random(1, 3) == 2) then
+    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_GLITCH) or math.random(1, repeatMax) == 1) then
         -- Only spawn a glitch if we have multiple vanilla Traitors since otherwise the role doesn't do anything
         if GetConVar("ttt_glitch_enabled"):GetBool() and #choices >= GetConVar("ttt_glitch_required_innos"):GetInt() and math.random() <= glitch_chance and not hasGlitch and vanilla_ts > 1 then
             if IsValid(pply) then

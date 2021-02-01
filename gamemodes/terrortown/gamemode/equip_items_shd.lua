@@ -307,7 +307,7 @@ function GetEquipmentItemByName(name)
         end
     end
 
-    return nill
+    return nil
 end
 
 -- Utility function to register a new Equipment ID

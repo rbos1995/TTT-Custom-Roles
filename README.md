@@ -55,6 +55,7 @@ Goal: Work on your own to win the round by playing your role carefully\
 - [GengarDC](https://steamcommunity.com/id/GengarDC) for his [TTT_Double_Jump_Nerfed](https://steamcommunity.com/sharedfiles/filedetails/?id=1962801891) mod whose functionality was integrated via a setting.
 - [KuMaGR](https://steamcommunity.com/id/kuma96) for his [TTT Glowing Traitors](https://steamcommunity.com/sharedfiles/filedetails/?id=690007939) mod which was the basis for the idea behind the Traitor team highlight feature.
 - [LeBroomer](https://steamcommunity.com/id/LeBroomer) for his [TTT Demonic Possession](https://steamcommunity.com/sharedfiles/filedetails/?id=1403395766) mod which was used for the basis of the Phantom haunting UI.
+- The Stig for providing feedback and helping to verify bug fixes.
 
 # Changes from the Original Version
 See [here](CHANGES.md)

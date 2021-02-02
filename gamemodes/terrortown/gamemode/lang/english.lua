@@ -521,6 +521,21 @@ targets.
 
 Uses standard SMG ammo.]]
 
+-- Killer's Knife
+L.kil_knife_desc = [[
+Gravely wounds living targets quietly.
+Kills wounded targets instantly and
+silently.
+
+Can drop a smoke grenade using alternate fire.]]
+
+-- Killer's Crowbar
+L.kil_crowbar_name = "Throwable Crowbar"
+L.kil_crowbar_desc = [[
+Used to blend in with other players and do minor damage.
+
+Can be thrown using alternate fire.]]
+
 -- DNA scanner
 L.dna_name = "DNA scanner"
 L.dna_identify = "Corpse must be identified to retrieve killer's DNA."

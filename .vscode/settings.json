@@ -317,7 +317,8 @@
         "WEAPON_EQUIP2",
         "WEAPON_UNARMED",
         "WEAPON_CARRY",
-        "OPEN_NO"
+        "OPEN_NO",
+        "TEXT_ALIGN_BOTTOM"
     ],
     "Lua.diagnostics.disable": [
         "undefined-field"

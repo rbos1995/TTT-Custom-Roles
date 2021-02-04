@@ -58,6 +58,7 @@
 ## General
 - Ported ability to load weapons into role weapon shops from Town of Terror. See [Configuration](CONVARS.md).
 - Added ability to exclude weapons from role weapon shops. See [Configuration](CONVARS.md).
+- Added ability to change which weapons show in the shop each round by random chance. See [Configuration](CONVARS.md).
 
 ## Round Summary
 - Updated end-of-round summary to merge the old tabs and buttons with the new interface.

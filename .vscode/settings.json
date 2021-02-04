@@ -318,7 +318,8 @@
         "WEAPON_UNARMED",
         "WEAPON_CARRY",
         "OPEN_NO",
-        "TEXT_ALIGN_BOTTOM"
+        "TEXT_ALIGN_BOTTOM",
+        "math"
     ],
     "Lua.diagnostics.disable": [
         "undefined-field"

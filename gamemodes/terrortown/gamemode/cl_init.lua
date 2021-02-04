@@ -117,6 +117,9 @@ local function RoundStateChange(o, n)
 
         -- reset cached server language in case it has changed
         RunConsoleCommand("_ttt_request_serverlang")
+
+        -- Reset client equipment list so the randomization changes every round
+        Equipment = { }
     elseif n == ROUND_ACTIVE then
         -- round starts
         VOICE.CycleMuteState(MUTE_NONE)

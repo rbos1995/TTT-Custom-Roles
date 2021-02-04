@@ -152,6 +152,12 @@ function GetEquipmentForRole(role)
                     table.RemoveByValue(v.CanBuy, role)
                 end
 
+                local random_cvar_percent = GetGlobalFloat("ttt_shop_random_percent", 0)
+                local random_cvar_enabled = GetGlobalBool("ttt_shop_random_" .. ROLE_STRINGS_SHORT[role] .. "_enabled", false)
+                if random_cvar_enabled and math.random() < (random_cvar_percent / 100.0) then
+                    table.RemoveByValue(v.CanBuy, role)
+                end
+
                 local data = v.EquipMenuData or {}
                 local base = {
                     id = id,

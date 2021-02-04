@@ -54,9 +54,19 @@ ttt_karma_jesterkill_penalty 50  // Karma penalty for killing the Jester
 ttt_karma_jester_ratio       0.5 // Ratio of damage to Jesters, to be taken from karma
 
 // Weapon Shop
-ttt_shop_merc_mode      0 // How to handle Mercenary shop weapons. All modes include weapons specifically mapped to the Mercenary role. 0 (Disable) - Do not allow additional weapons. 1 (Union) - Allow weapons available to EITHER the Traitor or the Detective. 2 (Intersect) - Allow weapons available to BOTH the Traitor and the Detective. 3 (Detective) - Allow weapons available to the Detective. 4 (Traitor) - Allow weapons available to the Traitor.
-ttt_shop_assassin_sync  0 // Whether Assassins should have all weapons that vanilla Traitors have in their weapon shop
-ttt_shop_hypnotist_sync 0 // Whether Hypnotists should have all weapons that vanilla Traitors have in their weapon shop
+ttt_shop_merc_mode      0     // How to handle Mercenary shop weapons. All modes include weapons specifically mapped to the Mercenary role. 0 (Disable) - Do not allow additional weapons. 1 (Union) - Allow weapons available to EITHER the Traitor or the Detective. 2 (Intersect) - Allow weapons available to BOTH the Traitor and the Detective. 3 (Detective) - Allow weapons available to the Detective. 4 (Traitor) - Allow weapons available to the Traitor.
+ttt_shop_assassin_sync  0     // Whether Assassins should have all weapons that vanilla Traitors have in their weapon shop
+ttt_shop_hypnotist_sync 0     // Whether Hypnotists should have all weapons that vanilla Traitors have in their weapon shop
+ttt_shop_random_percent 50    // The percent chance that a weapon in the shop will be shown
+ttt_shop_random_tra_enabled 0 // Whether role shop randomization is enabled for Traitors
+ttt_shop_random_asn_enabled 0 // Whether role shop randomization is enabled for Assassins
+ttt_shop_random_hyp_enabled 0 // Whether role shop randomization is enabled for Hypnotists
+ttt_shop_random_der_enabled 0 // Whether role shop randomization is enabled for Detraitors
+ttt_shop_random_det_enabled 0 // Whether role shop randomization is enabled for Detectives
+ttt_shop_random_mer_enabled 0 // Whether role shop randomization is enabled for Mercenary
+ttt_shop_random_vam_enabled 0 // Whether role shop randomization is enabled for Vampires
+ttt_shop_random_zom_enabled 0 // Whether role shop randomization is enabled for Zombies
+ttt_shop_random_kil_enabled 0 // Whether role shop randomization is enabled for Killers
 
 // Credits
 ttt_mer_credits_starting 1 // Number of credits the Mercenary starts with

@@ -207,6 +207,7 @@ if SERVER then
         ply:SetRole(ROLE_TRAITOR)
         ply:StripWeapon("weapon_zom_claws")
         ply:StripWeapon("weapon_vam_fangs")
+        ply:SetNWBool("RoleRevealed", false)
         ply:PrintMessage(HUD_PRINTCENTER, "You have been brainwashed and are now a traitor.")
         ply:SetHealth(spawnhealth)
 

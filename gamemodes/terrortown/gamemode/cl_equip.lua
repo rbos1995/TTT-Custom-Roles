@@ -70,9 +70,7 @@ function GetEquipmentForRole(role)
     local sync_hypnotist = GetGlobalBool("ttt_shop_hypnotist_sync") and role == ROLE_HYPNOTIST
 
     -- Prime traitor and detective lists to make sure the sync works
-    if (mercmode > 0 and role == ROLE_MERCENARY) or
-        (GetGlobalBool("ttt_shop_assassin_sync") and role == ROLE_ASSASSIN) or
-        (GetGlobalBool("ttt_shop_hypnotist_sync") and role == ROLE_HYPNOTIST) then
+    if (mercmode > 0 and role == ROLE_MERCENARY) or sync_assassin or sync_hypnotist then
         if not Equipment[ROLE_TRAITOR] then
             GetEquipmentForRole(ROLE_TRAITOR)
         end
@@ -146,16 +144,20 @@ function GetEquipmentForRole(role)
                     table.insert(v.CanBuy, role)
                 end
 
-                -- After all that, make sure each of the excluded weapons is NOT in the role's equipment list
-                local excludetable = ExcludeWeapons[role]
-                if excludetable and table.HasValue(v.CanBuy, role) and table.HasValue(excludetable, id) then
-                    table.RemoveByValue(v.CanBuy, role)
-                end
-
-                local random_cvar_percent = GetGlobalFloat("ttt_shop_random_percent", 0)
-                local random_cvar_enabled = GetGlobalBool("ttt_shop_random_" .. ROLE_STRINGS_SHORT[role] .. "_enabled", false)
-                if random_cvar_enabled and math.random() < (random_cvar_percent / 100.0) then
-                    table.RemoveByValue(v.CanBuy, role)
+                -- If the player can still buy this weapon, check the various excludes
+                if table.HasValue(v.CanBuy, role) then
+                    -- Make sure each of the excluded weapons is NOT in the role's equipment list
+                    local excludetable = ExcludeWeapons[role]
+                    if excludetable and table.HasValue(excludetable, id) then
+                        table.RemoveByValue(v.CanBuy, role)
+                    else
+                        -- Remove some weapons based on a random chance
+                        local random_cvar_percent = GetGlobalFloat("ttt_shop_random_percent", 0)
+                        local random_cvar_enabled = GetGlobalBool("ttt_shop_random_" .. ROLE_STRINGS_SHORT[role] .. "_enabled", false)
+                        if random_cvar_enabled and math.random() < (random_cvar_percent / 100.0) then
+                            table.RemoveByValue(v.CanBuy, role)
+                        end
+                    end
                 end
 
                 local data = v.EquipMenuData or {}

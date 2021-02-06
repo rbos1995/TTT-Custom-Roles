@@ -807,8 +807,7 @@ end
 concommand.Add("ttt_cl_traitorpopup", TraitorMenuPopup)
 
 function GM:OnContextMenuOpen()
-    local r = GetRoundState()
-    if r == ROUND_POST or r == ROUND_PREP then
+    if GetRoundState() ~= ROUND_ACTIVE then
         CLSCORE:Toggle()
         return
     end

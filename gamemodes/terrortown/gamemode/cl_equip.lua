@@ -62,7 +62,7 @@ end)
 
 local function ItemIsWeapon(item) return not tonumber(item.id) end
 
-function GetEquipmentForRole(role)
+function GetEquipmentForRole(role, block_randomization)
     PrepWeaponsLists(role)
 
     local mercmode = GetGlobalInt("ttt_shop_merc_mode")
@@ -72,12 +72,12 @@ function GetEquipmentForRole(role)
     -- Prime traitor and detective lists to make sure the sync works
     if (mercmode > 0 and role == ROLE_MERCENARY) or sync_assassin or sync_hypnotist then
         if not Equipment[ROLE_TRAITOR] then
-            GetEquipmentForRole(ROLE_TRAITOR)
+            GetEquipmentForRole(ROLE_TRAITOR, true)
         end
     end
     if (mercmode > 0 and role == ROLE_MERCENARY) or role == ROLE_DETRAITOR then
         if not Equipment[ROLE_DETECTIVE] then
-            GetEquipmentForRole(ROLE_DETECTIVE)
+            GetEquipmentForRole(ROLE_DETECTIVE, true)
         end
     end
 
@@ -150,8 +150,8 @@ function GetEquipmentForRole(role)
                     local excludetable = ExcludeWeapons[role]
                     if excludetable and table.HasValue(excludetable, id) then
                         table.RemoveByValue(v.CanBuy, role)
-                    else
-                        -- Remove some weapons based on a random chance
+                    -- Remove some weapons based on a random chance if it isn't blocked
+                    elseif not block_randomization then
                         local random_cvar_percent = GetGlobalFloat("ttt_shop_random_percent", 0)
                         local random_cvar_enabled = GetGlobalBool("ttt_shop_random_" .. ROLE_STRINGS_SHORT[role] .. "_enabled", false)
                         if random_cvar_enabled and math.random() < (random_cvar_percent / 100.0) then

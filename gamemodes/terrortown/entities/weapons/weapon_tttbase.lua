@@ -243,10 +243,12 @@ function SWEP:PrimaryAttack(worldsnd)
 
     if not self:CanPrimaryAttack() then return end
 
-    if not worldsnd then
-        self:EmitSound(self.Primary.Sound, self.Primary.SoundLevel)
-    elseif SERVER then
-        sound.Play(self.Primary.Sound, self:GetPos(), self.Primary.SoundLevel)
+    if self.Primary.Sound then
+        if not worldsnd then
+            self:EmitSound(self.Primary.Sound, self.Primary.SoundLevel)
+        elseif SERVER then
+            sound.Play(self.Primary.Sound, self:GetPos(), self.Primary.SoundLevel)
+        end
     end
 
     self:ShootBullet(self.Primary.Damage, self.Primary.Recoil, self.Primary.NumShots, self:GetPrimaryCone())

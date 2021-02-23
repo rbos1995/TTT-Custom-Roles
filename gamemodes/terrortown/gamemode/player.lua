@@ -1686,6 +1686,12 @@ function GM:PlayerTakeDamage(ent, infl, att, amount, dmginfo)
             if IsValid(ignite.att) and IsValid(ignite.infl) then
                 dmginfo:SetAttacker(ignite.att)
                 dmginfo:SetInflictor(ignite.infl)
+
+                -- Set burning damage from jester team to zero, regardless of source
+                if ignite.att:IsJesterTeam() then
+                    dmginfo:ScaleDamage(0)
+                    dmginfo:SetDamage(0)
+                end
             end
         end
     end

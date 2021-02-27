@@ -91,15 +91,8 @@ local function CanConvert(ply)
 end
 
 local function GetPlayerFromBody(body)
-    local ply = false
-    if body.sid == "BOT" then
-        ply = player.GetByUniqueID(body.uqid)
-    else
-        ply = player.GetBySteamID(body.sid)
-    end
-
+    local ply = player.GetBySteamID64(body.sid)
     if not IsValid(ply) then return false end
-
     return ply
 end
 

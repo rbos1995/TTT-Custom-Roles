@@ -91,13 +91,13 @@ local function FindTableIndex(playerTable, value)
     return -1
 end
 
-local function HandleRoleChange(roletable, role, targetrole, uid)
+local function HandleRoleChange(roletable, role, targetrole, sid)
     if role == targetrole then
-        if not table.HasValue(roletable, uid) then
-            table.insert(roletable, uid)
+        if not table.HasValue(roletable, sid) then
+            table.insert(roletable, sid)
         end
     else
-        local roleIndex = FindTableIndex(roletable, uid)
+        local roleIndex = FindTableIndex(roletable, sid)
         if roleIndex >= 0 then
             table.remove(roletable, roleIndex)
         end
@@ -230,11 +230,11 @@ net.Receive("TTT_LogInfo", function(len)
 end)
 
 net.Receive("TTT_RoleChanged", function(len)
-    local uid = net.ReadString()
+    local s64 = net.ReadString()
     local role = net.ReadUInt(8)
-    rolechanges[uid] = role
+    rolechanges[s64] = role
 
-    local ply = player.GetByUniqueID(uid)
+    local ply = player.GetBySteamID64(s64)
     local name = "UNKNOWN"
     if IsValid(ply) then
         name = ply:Nick()
@@ -1139,27 +1139,27 @@ function CLSCORE:Init(events)
     local nicks = {}
     for _, e in pairs(events) do
         if e.id == EVENT_SPAWN then
-            scores[e.uid] = ScoreInit()
-            nicks[e.uid] = e.ni
+            scores[e.sid] = ScoreInit()
+            nicks[e.sid] = e.ni
         end
     end
 
     -- If a player swapped roles during the round, remove them from the other table
-    for uid, role in pairs(rolechanges) do
-        HandleRoleChange(innocents, role, ROLE_INNOCENT, uid)
-        HandleRoleChange(traitors, role, ROLE_TRAITOR, uid)
-        HandleRoleChange(detectives, role, ROLE_DETECTIVE, uid)
-        HandleRoleChange(mercenary, role, ROLE_MERCENARY, uid)
-        HandleRoleChange(hypnotist, role, ROLE_HYPNOTIST, uid)
-        HandleRoleChange(glitch, role, ROLE_GLITCH, uid)
-        HandleRoleChange(jester, role, ROLE_JESTER, uid)
-        HandleRoleChange(phantom, role, ROLE_PHANTOM, uid)
-        HandleRoleChange(zombie, role, ROLE_ZOMBIE, uid)
-        HandleRoleChange(vampire, role, ROLE_VAMPIRE, uid)
-        HandleRoleChange(swapper, role, ROLE_SWAPPER, uid)
-        HandleRoleChange(assassin, role, ROLE_ASSASSIN, uid)
-        HandleRoleChange(killer, role, ROLE_KILLER, uid)
-        HandleRoleChange(detraitor, role, ROLE_DETRAITOR, uid)
+    for sid, role in pairs(rolechanges) do
+        HandleRoleChange(innocents, role, ROLE_INNOCENT, sid)
+        HandleRoleChange(traitors, role, ROLE_TRAITOR, sid)
+        HandleRoleChange(detectives, role, ROLE_DETECTIVE, sid)
+        HandleRoleChange(mercenary, role, ROLE_MERCENARY, sid)
+        HandleRoleChange(hypnotist, role, ROLE_HYPNOTIST, sid)
+        HandleRoleChange(glitch, role, ROLE_GLITCH, sid)
+        HandleRoleChange(jester, role, ROLE_JESTER, sid)
+        HandleRoleChange(phantom, role, ROLE_PHANTOM, sid)
+        HandleRoleChange(zombie, role, ROLE_ZOMBIE, sid)
+        HandleRoleChange(vampire, role, ROLE_VAMPIRE, sid)
+        HandleRoleChange(swapper, role, ROLE_SWAPPER, sid)
+        HandleRoleChange(assassin, role, ROLE_ASSASSIN, sid)
+        HandleRoleChange(killer, role, ROLE_KILLER, sid)
+        HandleRoleChange(detraitor, role, ROLE_DETRAITOR, sid)
     end
 
     scores = ScoreEventLog(events, scores, innocents, traitors, detectives, hypnotist, mercenary, jester, phantom, glitch, zombie, vampire, swapper, assassin, killer, detraitor)

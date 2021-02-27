@@ -823,7 +823,7 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
         local phantomUsers = table.GetKeys(deadPhantoms)
         for _, key in pairs(phantomUsers) do
             local phantom = deadPhantoms[key]
-            if phantom.attacker == ply:UniqueID() and IsValid(phantom.player) then
+            if phantom.attacker == ply:SteamID64() and IsValid(phantom.player) then
                 local deadPhantom = phantom.player
                 deadPhantom:SetNWBool("Haunting", false)
                 deadPhantom:SetNWString("HauntingTarget", nil)
@@ -1174,7 +1174,7 @@ function GM:PlayerDeath(victim, infl, attacker)
 
         if GetConVar("ttt_phantom_killer_haunt"):GetBool() then
             victim:SetNWBool("Haunting", true)
-            victim:SetNWString("HauntingTarget", attacker:UniqueID())
+            victim:SetNWString("HauntingTarget", attacker:SteamID64())
             victim:SetNWInt("HauntingPower", 0)
             timer.Create(victim:Nick() .. "HauntingPower", 1, 0, function()
                 -- Make sure the victim is still in the correct spectate mode
@@ -1205,12 +1205,12 @@ function GM:PlayerDeath(victim, infl, attacker)
             end
         end
 
-        local uqid = victim:UniqueID()
+        local sid = victim:SteamID64()
         -- Keep track of how many times this Phantom has been killed and by who
-        if not deadPhantoms[uqid] then
-            deadPhantoms[uqid] = {times = 1, player = victim, attacker = attacker:UniqueID()}
+        if not deadPhantoms[sid] then
+            deadPhantoms[sid] = {times = 1, player = victim, attacker = attacker:SteamID64()}
         else
-            deadPhantoms[uqid] = {times = deadPhantoms[uqid].times + 1, player = victim, attacker = attacker:UniqueID()}
+            deadPhantoms[sid] = {times = deadPhantoms[sid].times + 1, player = victim, attacker = attacker:SteamID64()}
         end
     end
 

@@ -17,12 +17,12 @@ function CreateTransferMenu(parent)
     dsubmit:SetDisabled(true)
     dsubmit:SetText(GetTranslation("xfer_send"))
 
-    local selected_uid = nil
+    local selected_entry = nil
 
     local dpick = vgui.Create("DComboBox", dform)
     dpick.OnSelect = function(s, idx, val, data)
         if data then
-            selected_uid = data
+            selected_entry = data
             dsubmit:SetDisabled(false)
         end
     end
@@ -53,7 +53,8 @@ function CreateTransferMenu(parent)
                 -- Local player is a Detective and target is a Mercenary whose role has been revealed
                 ply:IsDetective() and p:IsMercenary() and p:GetNWBool("RoleRevealed", false)
             )) then
-            dpick:AddChoice(p:Nick(), p:UniqueID())
+            local data = { ni = p:Nick(), sid = p:SteamID64() or "BOT"}
+            dpick:AddChoice(p:Nick(), data)
         end
     end
 
@@ -61,11 +62,13 @@ function CreateTransferMenu(parent)
     if dpick:GetOptionText(1) then dpick:ChooseOptionID(1) end
 
     dsubmit.DoClick = function(s)
-        if selected_uid then
-            if player.GetByUniqueID(selected_uid):IsActiveGlitch() then
-                RunConsoleCommand("ttt_fake_transfer_credits", selected_uid, "1")
+        if selected_entry then
+            if selected_entry.sid == "BOT" then
+                RunConsoleCommand("ttt_bot_transfer_credits", selected_entry.ni, "1")
+            elseif player.GetBySteamID64(selected_entry.sid):IsActiveGlitch() then
+                RunConsoleCommand("ttt_fake_transfer_credits", selected_entry.sid, "1")
             else
-                RunConsoleCommand("ttt_transfer_credits", selected_uid, "1")
+                RunConsoleCommand("ttt_transfer_credits", selected_entry.sid, "1")
             end
         end
     end

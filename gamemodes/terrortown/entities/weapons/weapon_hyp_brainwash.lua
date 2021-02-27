@@ -134,16 +134,8 @@ if SERVER then
     end
 
     local function bodyply(body)
-        local ply = false
-
-        if body.sid == "BOT" then
-            ply = player.GetByUniqueID(body.uqid)
-        else
-            ply = player.GetBySteamID(body.sid)
-        end
-
+        local ply = player.GetBySteamID64(body.sid)
         if not IsValid(ply) then return false end
-
         return ply
     end
 
@@ -196,7 +188,7 @@ if SERVER then
 
         -- Un-haunt the Hypnotist if the target was the Phantom
         local owner = self:GetOwner()
-        if ply:IsPhantom() and ply:GetNWString("HauntingTarget", nil) == owner:UniqueID() then
+        if ply:IsPhantom() and ply:GetNWString("HauntingTarget", nil) == owner:SteamID64() then
             owner:SetNWBool("Haunted", false)
         end
 

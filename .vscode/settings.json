@@ -319,7 +319,15 @@
         "WEAPON_CARRY",
         "OPEN_NO",
         "TEXT_ALIGN_BOTTOM",
-        "math"
+        "math",
+        "pairs",
+        "table",
+        "string",
+        "EQUIP_NONE",
+        "SendFullStateUpdate",
+        "SendRoundState",
+        "WEPS",
+        "IncRoundEnd"
     ],
     "Lua.diagnostics.disable": [
         "undefined-field"

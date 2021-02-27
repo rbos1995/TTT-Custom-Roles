@@ -58,8 +58,8 @@ function SCORE:HandleKill(victim, attacker, dmginfo)
 
     local e = {
         id = EVENT_KILL,
-        att = { ni = "", sid = -1, uid = -1, tr = false, inno = false, mon = false, jes = false, kil = false },
-        vic = { ni = victim:Nick(), sid = victim:SteamID(), uid = victim:UniqueID(), tr = false, inno = false, mon = false, jes = false, kil = false },
+        att = { ni = "", sid = -1, tr = false, inno = false, mon = false, jes = false, kil = false },
+        vic = { ni = victim:Nick(), sid = victim:SteamID64(), tr = false, inno = false, mon = false, jes = false, kil = false },
         dmg = CopyDmg(dmginfo),
         tk = false
     };
@@ -74,8 +74,7 @@ function SCORE:HandleKill(victim, attacker, dmginfo)
 
     if IsValid(attacker) and attacker:IsPlayer() then
         e.att.ni = attacker:Nick()
-        e.att.sid = attacker:SteamID()
-        e.att.uid = attacker:UniqueID()
+        e.att.sid = attacker:SteamID64()
         e.att.role = attacker:GetRole()
         e.att.inno = attacker:IsInnocentTeam()
         e.att.tr, e.att.mon = GetPlayerMonsterOrTraitor(attacker)
@@ -98,7 +97,7 @@ end
 
 function SCORE:HandleSpawn(ply)
     if ply:Team() == TEAM_TERROR then
-        self:AddEvent({ id = EVENT_SPAWN, ni = ply:Nick(), sid = ply:SteamID(), uid = ply:UniqueID() })
+        self:AddEvent({ id = EVENT_SPAWN, ni = ply:Nick(), sid = ply:SteamID64() })
     end
 end
 
@@ -119,33 +118,33 @@ function SCORE:HandleSelection()
     local detraitors = {}
     for _, ply in pairs(player.GetAll()) do
         if ply:IsTraitor() then
-            table.insert(traitors, ply:UniqueID())
+            table.insert(traitors, ply:SteamID64())
         elseif ply:IsDetective() then
-            table.insert(detectives, ply:UniqueID())
+            table.insert(detectives, ply:SteamID64())
         elseif ply:IsMercenary() then
-            table.insert(mercenaries, ply:UniqueID())
+            table.insert(mercenaries, ply:SteamID64())
         elseif ply:IsHypnotist() then
-            table.insert(hypnotists, ply:UniqueID())
+            table.insert(hypnotists, ply:SteamID64())
         elseif ply:IsGlitch() then
-            table.insert(glitches, ply:UniqueID())
+            table.insert(glitches, ply:SteamID64())
         elseif ply:IsJester() then
-            table.insert(jesters, ply:UniqueID())
+            table.insert(jesters, ply:SteamID64())
         elseif ply:IsPhantom() then
-            table.insert(phantoms, ply:UniqueID())
+            table.insert(phantoms, ply:SteamID64())
         elseif ply:IsZombie() then
-            table.insert(zombies, ply:UniqueID())
+            table.insert(zombies, ply:SteamID64())
         elseif ply:IsVampire() then
-            table.insert(vampires, ply:UniqueID())
+            table.insert(vampires, ply:SteamID64())
         elseif ply:IsSwapper() then
-            table.insert(swappers, ply:UniqueID())
+            table.insert(swappers, ply:SteamID64())
         elseif ply:IsAssassin() then
-            table.insert(assassins, ply:UniqueID())
+            table.insert(assassins, ply:SteamID64())
         elseif ply:IsKiller() then
-            table.insert(killers, ply:UniqueID())
+            table.insert(killers, ply:SteamID64())
         elseif ply:IsDetraitor() then
-            table.insert(detraitors, ply:UniqueID())
+            table.insert(detraitors, ply:SteamID64())
         elseif ply:IsInnocent() then
-            table.insert(innocents, ply:UniqueID())
+            table.insert(innocents, ply:SteamID64())
         end
     end
 
@@ -153,21 +152,19 @@ function SCORE:HandleSelection()
 end
 
 function SCORE:HandleBodyFound(finder, found)
-    self:AddEvent({ id = EVENT_BODYFOUND, ni = finder:Nick(), sid = finder:SteamID(), uid = finder:UniqueID(), b = found:Nick() })
+    self:AddEvent({ id = EVENT_BODYFOUND, ni = finder:Nick(), sid = finder:SteamID64(), b = found:Nick() })
 end
 
 function SCORE:HandleC4Explosion(planter, arm_time, exp_time)
     local nick = "Someone"
     local sid = -1
-    local uid = -1
     if IsValid(planter) and planter:IsPlayer() then
         nick = planter:Nick()
-        sid = planter:SteamID()
-        uid = planter:UniqueID()
+        sid = planter:SteamID64()
     end
 
-    self:AddEvent({ id = EVENT_C4PLANT, ni = nick, sid = sid, uid = uid }, arm_time)
-    self:AddEvent({ id = EVENT_C4EXPLODE, ni = nick, sid = sid, uid = uid }, exp_time)
+    self:AddEvent({ id = EVENT_C4PLANT, ni = nick, sid = sid }, arm_time)
+    self:AddEvent({ id = EVENT_C4EXPLODE, ni = nick, sid = sid }, exp_time)
 end
 
 function SCORE:HandleC4Disarm(disarmer, owner, success)
@@ -177,8 +174,7 @@ function SCORE:HandleC4Disarm(disarmer, owner, success)
     local ev = {
         id = EVENT_C4DISARM,
         ni = disarmer:Nick(),
-        sid = disarmer:SteamID(),
-        uid = disarmer:UniqueID(),
+        sid = disarmer:SteamID64(),
         s = success
     };
 
@@ -190,7 +186,7 @@ function SCORE:HandleC4Disarm(disarmer, owner, success)
 end
 
 function SCORE:HandleCreditFound(finder, found_nick, credits)
-    self:AddEvent({ id = EVENT_CREDITFOUND, ni = finder:Nick(), sid = finder:SteamID(), uid = finder:UniqueID(), b = found_nick, cr = credits })
+    self:AddEvent({ id = EVENT_CREDITFOUND, ni = finder:Nick(), sid = finder:SteamID64(), b = found_nick, cr = credits })
 end
 
 function SCORE:ApplyEventLogScores(wintype)
@@ -210,44 +206,44 @@ function SCORE:ApplyEventLogScores(wintype)
     local killers = {}
     local detraitors = {}
     for _, ply in pairs(player.GetAll()) do
-        scores[ply:UniqueID()] = {}
+        scores[ply:SteamID64()] = {}
 
         if ply:IsTraitor() then
-            table.insert(traitors, ply:UniqueID())
+            table.insert(traitors, ply:SteamID64())
         elseif ply:IsDetective() then
-            table.insert(detectives, ply:UniqueID())
+            table.insert(detectives, ply:SteamID64())
         elseif ply:IsMercenary() then
-            table.insert(mercenaries, ply:UniqueID())
+            table.insert(mercenaries, ply:SteamID64())
         elseif ply:IsHypnotist() then
-            table.insert(hypnotists, ply:UniqueID())
+            table.insert(hypnotists, ply:SteamID64())
         elseif ply:IsGlitch() then
-            table.insert(glitches, ply:UniqueID())
+            table.insert(glitches, ply:SteamID64())
         elseif ply:IsJester() then
-            table.insert(jesters, ply:UniqueID())
+            table.insert(jesters, ply:SteamID64())
         elseif ply:IsPhantom() then
-            table.insert(phantoms, ply:UniqueID())
+            table.insert(phantoms, ply:SteamID64())
         elseif ply:IsZombie() then
-            table.insert(zombies, ply:UniqueID())
+            table.insert(zombies, ply:SteamID64())
         elseif ply:IsVampire() then
-            table.insert(vampires, ply:UniqueID())
+            table.insert(vampires, ply:SteamID64())
         elseif ply:IsSwapper() then
-            table.insert(swappers, ply:UniqueID())
+            table.insert(swappers, ply:SteamID64())
         elseif ply:IsAssassin() then
-            table.insert(assassins, ply:UniqueID())
+            table.insert(assassins, ply:SteamID64())
         elseif ply:IsKiller() then
-            table.insert(killers, ply:UniqueID())
+            table.insert(killers, ply:SteamID64())
         elseif ply:IsDetraitor() then
-            table.insert(detraitors, ply:UniqueID())
+            table.insert(detraitors, ply:SteamID64())
         elseif ply:IsInnocent() then
-            table.insert(innocents, ply:UniqueID())
+            table.insert(innocents, ply:SteamID64())
         end
     end
 
     -- individual scores, and count those left alive
     local scored_log = ScoreEventLog(self.Events, scores, innocents, traitors, detectives, hypnotists, mercenaries, jesters, phantoms, glitches, zombies, vampires, swappers, assassins, killers, detraitors)
     local ply = nil
-    for uid, s in pairs(scored_log) do
-        ply = Player(uid)
+    for sid, s in pairs(scored_log) do
+        ply = player.GetBySteamID64(sid)
         if IsValid(ply) and ply:ShouldScore() then
             local was_traitor, was_monster = GetPlayerMonsterOrTraitor(ply)
             ply:AddFrags(KillsToPoints(s, was_traitor, was_monster, ply:IsKiller(), ply:IsInnocentTeam()))
@@ -257,8 +253,8 @@ function SCORE:ApplyEventLogScores(wintype)
     -- team scores
     local bonus = ScoreTeamBonus(scored_log, wintype)
 
-    for uid, _ in pairs(scored_log) do
-        ply = Player(uid)
+    for sid, _ in pairs(scored_log) do
+        ply = player.GetBySteamID64(sid)
         if IsValid(ply) and ply:ShouldScore() then
             local points_team = bonus.innos
             if ply:IsTraitorTeam() then
@@ -284,7 +280,7 @@ function SCORE:ApplyEventLogScores(wintype)
     -- count deaths
     for _, e in pairs(self.Events) do
         if e.id == EVENT_KILL then
-            local victim = Player(e.vic.uid)
+            local victim = player.GetBySteamID64(e.vic.sid)
             if IsValid(victim) and victim:ShouldScore() then
                 victim:AddDeaths(1)
             end

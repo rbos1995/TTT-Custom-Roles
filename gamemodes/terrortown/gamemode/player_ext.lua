@@ -3,6 +3,9 @@
 local plymeta = FindMetaTable("Player")
 if not plymeta then Error("FAILED TO FIND PLAYER TABLE") return end
 
+local entmeta = FindMetaTable( "Entity" )
+if not entmeta then Error("FAILED TO FIND ENTITY TABLE") return end
+
 function plymeta:SetRagdollSpec(s)
     if s then
         self.spec_ragdoll_start = CurTime()
@@ -461,6 +464,11 @@ function plymeta:SetTeam(team)
             self:StripAll()
         end)
     end
+end
+
+function plymeta:Ignite(dur, radius)
+    self.ignite_info_ext = {dur = dur, end_time = CurTime() + dur}
+    entmeta.Ignite(self, dur, radius)
 end
 
 function plymeta:GetAvoidDetective()

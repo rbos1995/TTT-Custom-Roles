@@ -100,6 +100,7 @@ if SERVER then
     resource.AddSingleFile("materials/vgui/ttt/score_let_vam_zomed.png")
     resource.AddSingleFile("materials/vgui/ttt/score_let_zom.png")
     resource.AddSingleFile("materials/vgui/ttt/score_let_zom_hyped.png")
+    resource.AddSingleFile("materials/vgui/ttt/score_let_zom_vamped.png")
     resource.AddSingleFile("materials/vgui/ttt/score_sym_ass.png")
     resource.AddSingleFile("materials/vgui/ttt/score_sym_ass_vamped.png")
     resource.AddSingleFile("materials/vgui/ttt/score_sym_ass_zomed.png")
@@ -147,6 +148,7 @@ if SERVER then
     resource.AddSingleFile("materials/vgui/ttt/score_sym_vam_zomed.png")
     resource.AddSingleFile("materials/vgui/ttt/score_sym_zom.png")
     resource.AddSingleFile("materials/vgui/ttt/score_sym_zom_hyped.png")
+    resource.AddSingleFile("materials/vgui/ttt/score_sym_zom_vamped.png")
 
     -- Status icons for end-of-round summary
     resource.AddSingleFile("materials/vgui/ttt/score_disconicon.png")

@@ -239,7 +239,7 @@ if SERVER then
 
         self:SetState(DEFIB_BUSY)
         self:SetBegin(CurTime())
-        self:SetMessage("DEFIBRILLATING " .. string.upper(ply:Nick()))
+        self:SetMessage("BRAINWASHING " .. string.upper(ply:Nick()))
 
         self:GetOwner():EmitSound(hum, 75, math.random(98, 102), 1)
 
@@ -252,7 +252,7 @@ if SERVER then
             if self:GetBegin() + charge <= CurTime() then
                 self:Defib()
             elseif not self:GetOwner():KeyDown(IN_ATTACK) or self:GetOwner():GetEyeTrace(MASK_SHOT_HULL).Entity ~= self.Target then
-                self:Error("DEFIBRILLATION ABORTED")
+                self:Error("BRAINWASHING ABORTED")
             end
         end
     end

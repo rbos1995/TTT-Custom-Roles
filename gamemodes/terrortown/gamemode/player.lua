@@ -1534,7 +1534,7 @@ function GM:EntityTakeDamage(ent, dmginfo)
 
         if ent:IsPlayer() and ent:IsJesterTeam() then
             -- Damage type DMG_GENERIC is "0" which doesn't seem to work with IsDamageType
-            if (att:IsPlayer() and att:IsZombie()) or dmginfo:IsExplosionDamage() or dmginfo:IsDamageType(DMG_BURN) or dmginfo:IsDamageType(DMG_CRUSH) or dmginfo:IsFallDamage() or dmginfo:IsDamageType(DMG_DROWN) or dmginfo:GetDamageType() == 0 or dmginfo:IsDamageType(DMG_DISSOLVE) then
+            if dmginfo:IsExplosionDamage() or dmginfo:IsDamageType(DMG_BURN) or dmginfo:IsDamageType(DMG_CRUSH) or dmginfo:IsFallDamage() or dmginfo:IsDamageType(DMG_DROWN) or dmginfo:GetDamageType() == 0 or dmginfo:IsDamageType(DMG_DISSOLVE) then
                 dmginfo:ScaleDamage(0)
                 dmginfo:SetDamage(0)
             end

@@ -3,7 +3,7 @@
 local plymeta = FindMetaTable("Player")
 if not plymeta then Error("FAILED TO FIND PLAYER TABLE") return end
 
-local entmeta = FindMetaTable( "Entity" )
+local entmeta = FindMetaTable("Entity")
 if not entmeta then Error("FAILED TO FIND ENTITY TABLE") return end
 
 function plymeta:SetRagdollSpec(s)

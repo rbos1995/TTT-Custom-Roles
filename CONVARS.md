@@ -58,6 +58,15 @@ ttt_shop_merc_mode      0     // How to handle Mercenary shop weapons. All modes
 ttt_shop_assassin_sync  0     // Whether Assassins should have all weapons that vanilla Traitors have in their weapon shop
 ttt_shop_hypnotist_sync 0     // Whether Hypnotists should have all weapons that vanilla Traitors have in their weapon shop
 ttt_shop_random_percent 50    // The percent chance that a weapon in the shop will be not be shown
+ttt_shop_random_tra_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Traitors
+ttt_shop_random_asn_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Assassins
+ttt_shop_random_hyp_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Hypnotists
+ttt_shop_random_der_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Detraitors
+ttt_shop_random_det_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Detectives
+ttt_shop_random_mer_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Mercenary
+ttt_shop_random_vam_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Vampires
+ttt_shop_random_zom_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Zombies
+ttt_shop_random_kil_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Killers
 ttt_shop_random_tra_enabled 0 // Whether role shop randomization is enabled for Traitors
 ttt_shop_random_asn_enabled 0 // Whether role shop randomization is enabled for Assassins
 ttt_shop_random_hyp_enabled 0 // Whether role shop randomization is enabled for Hypnotists

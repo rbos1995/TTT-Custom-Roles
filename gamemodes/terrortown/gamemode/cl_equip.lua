@@ -164,7 +164,12 @@ function GetEquipmentForRole(role, block_randomization)
                         table.RemoveByValue(v.CanBuy, role)
                     -- Remove some weapons based on a random chance if it isn't blocked
                     elseif not block_randomization then
-                        local random_cvar_percent = GetGlobalFloat("ttt_shop_random_percent", 0)
+                        local random_cvar_percent_global = GetGlobalInt("ttt_shop_random_percent", 0)
+                        local random_cvar_percent = GetGlobalInt("ttt_shop_random_" .. ROLE_STRINGS_SHORT[role] .. "_percent", 0)
+                        -- Use the global value if the per-role override isn't set
+                        if random_cvar_percent == 0 then
+                            random_cvar_percent = random_cvar_percent_global
+                        end
                         local random_cvar_enabled = GetGlobalBool("ttt_shop_random_" .. ROLE_STRINGS_SHORT[role] .. "_enabled", false)
                         if random_cvar_enabled and math.random() < (random_cvar_percent / 100.0) then
                             table.RemoveByValue(v.CanBuy, role)

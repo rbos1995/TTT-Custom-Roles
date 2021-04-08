@@ -41,14 +41,26 @@ end
 local function UpdateWeaponList(role, list, weapon)
     if not table.HasValue(list[role], weapon) then
         table.insert(list[role], weapon)
-        -- Clear the weapon cache
-        Equipment[role] = nil
     end
 end
+
+local function ResetWeaponsCache()
+    -- Clear the weapon cache for each role
+    for role, _ in pairs(ROLE_STRINGS) do
+        Equipment[role] = nil
+    end
+    -- Clear the overall weapons cache
+    Equipment = {}
+end
+
+net.Receive("TTT_ResetBuyableWeaponsCache", function()
+    ResetWeaponsCache()
+end)
 
 net.Receive("TTT_BuyableWeapons", function()
     local role = net.ReadInt(16)
     PrepWeaponsLists(role)
+    ResetWeaponsCache()
 
     local roleweapons = net.ReadTable()
     for _, v in pairs(roleweapons) do

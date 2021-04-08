@@ -291,6 +291,7 @@ util.AddNetworkString("TTT_PlayerFootstep")
 util.AddNetworkString("TTT_ClearPlayerFootsteps")
 util.AddNetworkString("TTT_JesterDeathCelebration")
 util.AddNetworkString("TTT_BuyableWeapons")
+util.AddNetworkString("TTT_ResetBuyableWeaponsCache")
 util.AddNetworkString("TTT_LogInfo")
 
 local jesterkilled = 0
@@ -946,7 +947,7 @@ function BeginRound()
 
     if CheckForAbort() then return end
 
-    ReadRoleEquipment()
+    HandleRoleEquipment()
     InitRoundEndTime()
 
     if CheckForAbort() then return end
@@ -1759,7 +1760,8 @@ end
 concommand.Add("ttt_roundrestart", ForceRoundRestart)
 
 -- If this logic or the list of roles who can buy is changed, it must also be updated in weaponry.lua and cl_equip.lua
-function ReadRoleEquipment()
+-- This also sends a cache reset request to every client so that things like shop randomization happen every round
+function HandleRoleEquipment()
     for id, name in pairs(ROLE_STRINGS) do
         local rolefiles, _ = file.Find("roleweapons/" .. name .. "/*.txt", "DATA")
         local roleweapons = { }
@@ -1794,6 +1796,9 @@ function ReadRoleEquipment()
             net.WriteInt(id, 16)
             net.WriteTable(roleweapons)
             net.WriteTable(roleexcludes)
+            net.Broadcast()
+        else
+            net.Start("TTT_ResetBuyableWeaponsCache")
             net.Broadcast()
         end
     end

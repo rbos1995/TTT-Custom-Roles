@@ -365,6 +365,20 @@ local function PrepWeaponsLists(role)
     end
 end
 
+-- This logic is also mirrored in cl_equip.lua
+local function ResetWeaponsCache()
+    -- Reset the CanBuy list or save the original for next time
+    for _, v in pairs(weapons.GetList()) do
+        if v and v.CanBuy then
+            if v.CanBuyOrig then
+                v.CanBuy = table.Copy(v.CanBuyOrig)
+            else
+                v.CanBuyOrig = table.Copy(v.CanBuy)
+            end
+        end
+    end
+end
+
 -- If this logic or the list of roles who can buy is changed, it must also be updated in init.lua and cl_equip.lua
 local function ReadRoleEquipment(role, rolename)
     PrepWeaponsLists(role)
@@ -396,6 +410,7 @@ local function ReadRoleEquipment(role, rolename)
     end
 end
 
+ResetWeaponsCache()
 for id, name in pairs(ROLE_STRINGS) do
     ReadRoleEquipment(id, name)
 end

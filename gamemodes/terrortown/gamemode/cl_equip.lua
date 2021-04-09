@@ -44,6 +44,7 @@ local function UpdateWeaponList(role, list, weapon)
     end
 end
 
+-- Part of this logic is also mirrored in weaponry.lua
 local function ResetWeaponsCache()
     -- Clear the weapon cache for each role
     for role, _ in pairs(ROLE_STRINGS) do
@@ -51,6 +52,16 @@ local function ResetWeaponsCache()
     end
     -- Clear the overall weapons cache
     Equipment = {}
+    -- Reset the CanBuy list or save the original for next time
+    for _, v in pairs(weapons.GetList()) do
+        if v and v.CanBuy then
+            if v.CanBuyOrig then
+                v.CanBuy = table.Copy(v.CanBuyOrig)
+            else
+                v.CanBuyOrig = table.Copy(v.CanBuy)
+            end
+        end
+    end
 end
 
 net.Receive("TTT_ResetBuyableWeaponsCache", function()

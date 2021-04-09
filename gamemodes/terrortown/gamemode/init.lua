@@ -1780,6 +1780,7 @@ concommand.Add("ttt_roundrestart", ForceRoundRestart)
 -- If this logic or the list of roles who can buy is changed, it must also be updated in weaponry.lua and cl_equip.lua
 -- This also sends a cache reset request to every client so that things like shop randomization happen every round
 function HandleRoleEquipment()
+    local handled = false
     for id, name in pairs(ROLE_STRINGS) do
         local rolefiles, _ = file.Find("roleweapons/" .. name .. "/*.txt", "DATA")
         local roleweapons = { }
@@ -1815,10 +1816,14 @@ function HandleRoleEquipment()
             net.WriteTable(roleweapons)
             net.WriteTable(roleexcludes)
             net.Broadcast()
-        else
-            net.Start("TTT_ResetBuyableWeaponsCache")
-            net.Broadcast()
+            handled = true
         end
+    end
+
+    -- Send this once if the roleweapons feature wasn't used (which resets the cache on its own)
+    if not handled then
+        net.Start("TTT_ResetBuyableWeaponsCache")
+        net.Broadcast()
     end
 end
 

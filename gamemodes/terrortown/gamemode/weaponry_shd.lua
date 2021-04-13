@@ -28,3 +28,48 @@ function WEPS.DisguiseToggle(ply)
         end
     end
 end
+
+WEPS.BuyableWeapons = { }
+WEPS.ExcludeWeapons = { }
+
+function WEPS.PrepWeaponsLists(role)
+    -- Initialize the lists for this role
+    if not WEPS.BuyableWeapons[role] then
+        WEPS.BuyableWeapons[role] = {}
+    end
+    if not WEPS.ExcludeWeapons[role] then
+        WEPS.ExcludeWeapons[role] = {}
+    end
+end
+
+local DoesRoleHaveWeaponCache = { }
+
+function WEPS.ResetRoleWeaponCache()
+    for id, _ in pairs(ROLE_STRINGS) do
+        DoesRoleHaveWeaponCache[id] = nil
+    end
+end
+
+function WEPS.DoesRoleHaveWeapon(role)
+    if type(DoesRoleHaveWeaponCache[role]) ~= "boolean" then
+        DoesRoleHaveWeaponCache[role] = nil
+    end
+
+    if DoesRoleHaveWeaponCache[role] ~= nil then
+        return DoesRoleHaveWeaponCache[role]
+    end
+    if WEPS.BuyableWeapons[role] ~= nil and table.Count(WEPS.BuyableWeapons[role]) > 0 then
+        DoesRoleHaveWeaponCache[role] = true
+        return true
+    end
+
+    for _, w in ipairs(weapons.GetList()) do
+        if w and w.CanBuy and table.HasValue(w.CanBuy, role) then
+            DoesRoleHaveWeaponCache[role] = true
+            return true
+        end
+    end
+
+    DoesRoleHaveWeaponCache[role] = false
+    return false
+end

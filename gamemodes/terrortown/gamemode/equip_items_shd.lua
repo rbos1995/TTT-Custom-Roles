@@ -263,6 +263,9 @@ EquipmentItems = {
             desc = "item_radar_desc"
         }
     };
+
+    [ROLE_JESTER] = {};
+    [ROLE_SWAPPER] = {};
 };
 
 -- Search if an item is in the equipment table of a given role, and return it if

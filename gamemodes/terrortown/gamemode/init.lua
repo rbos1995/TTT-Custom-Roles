@@ -524,7 +524,7 @@ end
 -- we regularly check for these broken spectators while we wait for players
 -- and immediately fix them.
 function FixSpectators()
-    for k, ply in pairs(player.GetAll()) do
+    for _, ply in pairs(player.GetAll()) do
         if ply:IsSpec() and not ply:GetRagdollSpec() and ply:GetMoveType() < MOVETYPE_NOCLIP then
             ply:Spectate(OBS_MODE_ROAMING)
         end
@@ -726,6 +726,9 @@ function PrepareRound()
     KARMA.RoundBegin()
 
     DRINKS.RoundBegin()
+
+    WEPS.ResetWeaponsCache()
+    WEPS.ResetRoleWeaponCache()
 
     -- New look. Random if no forced model set.
     GAMEMODE.playermodel = GAMEMODE.force_plymodel == "" and GetRandomPlayerModel() or GAMEMODE.force_plymodel

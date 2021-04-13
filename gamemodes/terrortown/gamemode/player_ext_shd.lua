@@ -357,8 +357,9 @@ end
 
 function player.HasBuyMenu(ply, active)
     if not IsValid(ply) then return false end
-    local hasMenu = ply:IsTraitorTeam() or ply:IsDetective() or ply:IsMercenary() or
-            ply:IsMonsterTeam() or ply:IsKiller()
+    local hasMenu = ply:IsTraitorTeam() or ply:IsDetective() or ply:IsMercenary() or ply:IsMonsterTeam() or ply:IsKiller() or
+        -- Jester team only has a buy menu if they have weapons assigned to them
+        (ply:IsJesterTeam() and WEPS.DoesRoleHaveWeapon(ply:GetRole()))
     -- Second parameter is optional so make sure it's actually "true"
     return hasMenu and ((not (active == true)) or ply:IsActive())
 end

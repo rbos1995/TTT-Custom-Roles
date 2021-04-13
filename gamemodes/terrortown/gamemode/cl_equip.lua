@@ -24,19 +24,7 @@ include("shared.lua")
 -- Buyable weapons are loaded automatically. Buyable items are defined in
 -- equip_items_shd.lua
 
-local BuyableWeapons = { }
-local ExcludeWeapons = { }
 local Equipment = { }
-
-local function PrepWeaponsLists(role)
-    -- Initialize the lists for this role
-    if not BuyableWeapons[role] then
-        BuyableWeapons[role] = {}
-    end
-    if not ExcludeWeapons[role] then
-        ExcludeWeapons[role] = {}
-    end
-end
 
 local function UpdateWeaponList(role, list, weapon)
     if not table.HasValue(list[role], weapon) then
@@ -62,6 +50,7 @@ local function ResetWeaponsCache()
             end
         end
     end
+    WEPS.ResetRoleWeaponCache()
 end
 
 net.Receive("TTT_ResetBuyableWeaponsCache", function()
@@ -70,23 +59,23 @@ end)
 
 net.Receive("TTT_BuyableWeapons", function()
     local role = net.ReadInt(16)
-    PrepWeaponsLists(role)
+    WEPS.PrepWeaponsLists(role)
     ResetWeaponsCache()
 
     local roleweapons = net.ReadTable()
     for _, v in pairs(roleweapons) do
-        UpdateWeaponList(role, BuyableWeapons, v)
+        UpdateWeaponList(role, WEPS.BuyableWeapons, v)
     end
     local excludeweapons = net.ReadTable()
     for _, v in pairs(excludeweapons) do
-        UpdateWeaponList(role, ExcludeWeapons, v)
+        UpdateWeaponList(role, WEPS.ExcludeWeapons, v)
     end
 end)
 
 local function ItemIsWeapon(item) return not tonumber(item.id) end
 
 function GetEquipmentForRole(role, block_randomization)
-    PrepWeaponsLists(role)
+    WEPS.PrepWeaponsLists(role)
 
     local mercmode = GetGlobalInt("ttt_shop_merc_mode")
     local sync_assassin = GetGlobalBool("ttt_shop_assassin_sync") and role == ROLE_ASSASSIN
@@ -113,7 +102,7 @@ function GetEquipmentForRole(role, block_randomization)
         for _, v in pairs(weapons.GetList()) do
             if v and v.CanBuy then
                 local id = WEPS.GetClass(v)
-                local roletable = BuyableWeapons[role] or {}
+                local roletable = WEPS.BuyableWeapons[role] or {}
                 -- Make sure each of the buyable weapons is in the role's equipment list
                 -- If this logic or the list of roles who can buy is changed, it must also be updated in weaponry.lua and cl_equip.lua
                 if not table.HasValue(v.CanBuy, role) and table.HasValue(roletable, id) then
@@ -170,7 +159,7 @@ function GetEquipmentForRole(role, block_randomization)
                 -- If the player can still buy this weapon, check the various excludes
                 if table.HasValue(v.CanBuy, role) then
                     -- Make sure each of the excluded weapons is NOT in the role's equipment list
-                    local excludetable = ExcludeWeapons[role]
+                    local excludetable = WEPS.ExcludeWeapons[role]
                     if excludetable and table.HasValue(excludetable, id) then
                         table.RemoveByValue(v.CanBuy, role)
                     -- Remove some weapons based on a random chance if it isn't blocked
@@ -272,7 +261,7 @@ function GetEquipmentForRole(role, block_randomization)
         end
 
         -- Also check the extra buyable equipment
-        for _, v in pairs(BuyableWeapons[role]) do
+        for _, v in pairs(WEPS.BuyableWeapons[role]) do
             -- If this isn't a weapon, get its information from one of the roles and compare that to the ID we have
             if not weapons.GetStored(v) then
                 local equip = GetEquipmentItemByName(v)

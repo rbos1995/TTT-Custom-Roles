@@ -352,25 +352,8 @@ function GM:TTTCanOrderEquipment(ply, id, is_item)
     return true
 end
 
-local BuyableWeapons = { }
-local ExcludeWeapons = { }
-local DoesRoleHaveWeaponCache = { }
-
-local function PrepWeaponsLists(role)
-    -- Initialize the lists for this role
-    if not BuyableWeapons[role] then
-        BuyableWeapons[role] = {}
-    end
-    if not ExcludeWeapons[role] then
-        ExcludeWeapons[role] = {}
-    end
-    if type(DoesRoleHaveWeaponCache[role]) ~= "boolean" then
-        DoesRoleHaveWeaponCache[role] = nil
-    end
-end
-
 -- This logic is also mirrored in cl_equip.lua
-local function ResetWeaponsCache()
+function WEPS.ResetWeaponsCache()
     -- Reset the CanBuy list or save the original for next time
     for _, v in pairs(weapons.GetList()) do
         if v and v.CanBuy then
@@ -381,36 +364,12 @@ local function ResetWeaponsCache()
             end
         end
     end
-    for id, _ in pairs(ROLE_STRINGS) do
-        DoesRoleHaveWeaponCache[id] = nil
-    end
-end
-
-function WEPS.DoesRoleHaveWeapon(role)
-    PrepWeaponsLists(role)
-
-    if DoesRoleHaveWeaponCache[role] ~= nil then
-        return DoesRoleHaveWeaponCache[role]
-    end
-    if table.HasValue(EquipmentItems, role) and table.Count(EquipmentItems[role]) > 0 then
-        DoesRoleHaveWeaponCache[role] = true
-        return true
-    end
-
-    for _, w in ipairs(weapons.GetList()) do
-        if w and w.CanBuy and table.HasValue(w.CanBuy, role) then
-            DoesRoleHaveWeaponCache[role] = true
-            return true
-        end
-    end
-
-    DoesRoleHaveWeaponCache[role] = false
-    return false
+    WEPS.ResetRoleWeaponCache()
 end
 
 -- If this logic or the list of roles who can buy is changed, it must also be updated in init.lua and cl_equip.lua
 local function ReadRoleEquipment(role, rolename)
-    PrepWeaponsLists(role)
+    WEPS.PrepWeaponsLists(role)
 
     local rolefiles, _ = file.Find("roleweapons/" .. rolename .. "/*.txt", "DATA")
     for _, v in pairs(rolefiles) do
@@ -432,14 +391,14 @@ local function ReadRoleEquipment(role, rolename)
         end
 
         if exclude then
-            table.insert(ExcludeWeapons[role], weaponname)
+            table.insert(WEPS.ExcludeWeapons[role], weaponname)
         else
-            table.insert(BuyableWeapons[role], weaponname)
+            table.insert(WEPS.BuyableWeapons[role], weaponname)
         end
     end
 end
 
-ResetWeaponsCache()
+WEPS.ResetWeaponsCache()
 for id, name in pairs(ROLE_STRINGS) do
     ReadRoleEquipment(id, name)
 end
@@ -484,14 +443,14 @@ local function OrderEquipment(ply, cmd, args)
         end
 
         -- Add the loaded weapons for this role
-        HandleRoleWeapons(role, BuyableWeapons[role], swep_table, id)
+        HandleRoleWeapons(role, WEPS.BuyableWeapons[role], swep_table, id)
 
         -- If the player is a mercenary and mercenaries should have all weapons that traitors and detectives have
         if mercmode > 0 and role == ROLE_MERCENARY then
             -- Traitor OR Detective or Detective only modes
             if mercmode == 1 or mercmode == 3 then
                 -- Add the loaded weapons for Detective
-                HandleRoleWeapons(role, BuyableWeapons[ROLE_DETECTIVE], swep_table, id)
+                HandleRoleWeapons(role, WEPS.BuyableWeapons[ROLE_DETECTIVE], swep_table, id)
 
                 -- If this weapon is still not buyable but is buyable by Detective, add this role directly
                 if not table.HasValue(swep_table.CanBuy, role) and table.HasValue(swep_table.CanBuy, ROLE_DETECTIVE) then
@@ -502,7 +461,7 @@ local function OrderEquipment(ply, cmd, args)
             -- Traitor OR Detective or Traitor only modes
             if mercmode == 1 or mercmode == 4 then
                 -- Add the loaded weapons for Traitor
-                HandleRoleWeapons(role, BuyableWeapons[ROLE_TRAITOR], swep_table, id)
+                HandleRoleWeapons(role, WEPS.BuyableWeapons[ROLE_TRAITOR], swep_table, id)
 
                 -- If this weapon is still not buyable but is buyable by Traitor, add this role directly
                 if not table.HasValue(swep_table.CanBuy, role) and table.HasValue(swep_table.CanBuy, ROLE_TRAITOR) then
@@ -513,8 +472,8 @@ local function OrderEquipment(ply, cmd, args)
             -- Traitor AND Detective
             -- If this weapon is not buyable by this role
             if mercmode == 2 and not table.HasValue(swep_table.CanBuy, role) then
-                local traitorbuyable = (BuyableWeapons[ROLE_TRAITOR] and table.HasValue(BuyableWeapons[ROLE_TRAITOR], id)) or table.HasValue(swep_table.CanBuy, ROLE_TRAITOR)
-                local detectivebuyable = (BuyableWeapons[ROLE_DETECTIVE] and table.HasValue(BuyableWeapons[ROLE_DETECTIVE], id)) or table.HasValue(swep_table.CanBuy, ROLE_DETECTIVE)
+                local traitorbuyable = (WEPS.BuyableWeapons[ROLE_TRAITOR] and table.HasValue(WEPS.BuyableWeapons[ROLE_TRAITOR], id)) or table.HasValue(swep_table.CanBuy, ROLE_TRAITOR)
+                local detectivebuyable = (WEPS.BuyableWeapons[ROLE_DETECTIVE] and table.HasValue(WEPS.BuyableWeapons[ROLE_DETECTIVE], id)) or table.HasValue(swep_table.CanBuy, ROLE_DETECTIVE)
                 -- If the weapon is buyable in either of the two methods by both the Traitor and the Detective, add it for this role too
                 if traitorbuyable and detectivebuyable then
                     table.insert(swep_table.CanBuy, role)
@@ -524,7 +483,7 @@ local function OrderEquipment(ply, cmd, args)
         -- If the player is a non-vanilla traitor and they should have all weapons that vanilla traitors have
         if sync_assassin or sync_hypnotist then
             -- Add the loaded weapons for Traitor
-            HandleRoleWeapons(role, BuyableWeapons[ROLE_TRAITOR], swep_table, id)
+            HandleRoleWeapons(role, WEPS.BuyableWeapons[ROLE_TRAITOR], swep_table, id)
 
             -- If this weapon is still not buyable but is buyable by Traitor, add this role directly
             if not table.HasValue(swep_table.CanBuy, role) and table.HasValue(swep_table.CanBuy, ROLE_TRAITOR) then
@@ -533,7 +492,7 @@ local function OrderEquipment(ply, cmd, args)
         end
         -- If the player is a detraitor they should have all the weapons of a detective
         if role == ROLE_DETRAITOR then
-            HandleRoleWeapons(role, BuyableWeapons[ROLE_DETECTIVE], swep_table, id)
+            HandleRoleWeapons(role, WEPS.BuyableWeapons[ROLE_DETECTIVE], swep_table, id)
 
             -- If this weapon is still not buyable but is buyable by Detective, add this role directly
             if not table.HasValue(swep_table.CanBuy, role) and table.HasValue(swep_table.CanBuy, ROLE_DETECTIVE) then
@@ -542,7 +501,7 @@ local function OrderEquipment(ply, cmd, args)
         end
 
         -- After all that, make sure each of the excluded weapons is NOT in the role's equipment list
-        local excludetable = ExcludeWeapons[role]
+        local excludetable = WEPS.ExcludeWeapons[role]
         if excludetable and table.HasValue(excludetable, id) and table.HasValue(swep_table.CanBuy, role) then
             table.RemoveByValue(swep_table.CanBuy, role)
         end
@@ -581,7 +540,7 @@ local function OrderEquipment(ply, cmd, args)
 
         -- If it's still not allowed, check the extra buyable equipment
         if not allowed then
-            for _, v in pairs(BuyableWeapons[role]) do
+            for _, v in pairs(WEPS.BuyableWeapons[role]) do
                 -- If this isn't a weapon, get its information from one of the roles and compare that to the ID we have
                 if not weapons.GetStored(v) then
                     local equip = GetEquipmentItemById(id)

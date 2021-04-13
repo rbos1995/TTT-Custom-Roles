@@ -67,6 +67,8 @@ ttt_shop_random_mer_percent 0 // The percent chance that a weapon in the shop wi
 ttt_shop_random_vam_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Vampires
 ttt_shop_random_zom_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Zombies
 ttt_shop_random_kil_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Killers
+ttt_shop_random_jes_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Jesters
+ttt_shop_random_swa_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Swappers
 ttt_shop_random_tra_enabled 0 // Whether role shop randomization is enabled for Traitors
 ttt_shop_random_asn_enabled 0 // Whether role shop randomization is enabled for Assassins
 ttt_shop_random_hyp_enabled 0 // Whether role shop randomization is enabled for Hypnotists
@@ -76,15 +78,25 @@ ttt_shop_random_mer_enabled 0 // Whether role shop randomization is enabled for 
 ttt_shop_random_vam_enabled 0 // Whether role shop randomization is enabled for Vampires
 ttt_shop_random_zom_enabled 0 // Whether role shop randomization is enabled for Zombies
 ttt_shop_random_kil_enabled 0 // Whether role shop randomization is enabled for Killers
+ttt_shop_random_jes_enabled 0 // Whether role shop randomization is enabled for Jesters
+ttt_shop_random_swa_enabled 0 // Whether role shop randomization is enabled for Swappers
 
-// Credits
+// Innocent Credits
+ttt_det_credits_starting 1 // Number of credits the Detective starts with
 ttt_mer_credits_starting 1 // Number of credits the Mercenary starts with
+
+// Traitor/Monster/Killer credits
+ttt_credits_starting     2 // Number of credits the Traitor starts with
+ttt_der_credits_starting 2 // Number of credits the Detraitor starts with
 ttt_kil_credits_starting 2 // Number of credits the Killer starts with
 ttt_asn_credits_starting 0 // Number of credits the Assassin starts with
 ttt_hyp_credits_starting 0 // Number of credits the Hypnotist starts with
 ttt_zom_credits_starting 0 // Number of credits the Zombie starts with
 ttt_vam_credits_starting 0 // Number of credits the Vampire starts with
-ttt_der_credits_starting 2 // Number of credits the Detraitor starts with
+
+// Jester/Swapper Credits
+ttt_jes_credits_starting 2 // Number of credits the Jester starts with
+ttt_swa_credits_starting 2 // Number of credits the Swapper starts with
 
 // Innocents
 ttt_phantom_weaker_each_respawn      0   // Whether a Phantom respawns weaker (1/2 as much HP) each time they respawn, down to a minimum of 1

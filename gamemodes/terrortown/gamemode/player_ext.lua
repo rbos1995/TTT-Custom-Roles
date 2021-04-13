@@ -95,6 +95,10 @@ function plymeta:SetDefaultCredits()
         self:SetCredits(math.ceil(GetConVar("ttt_mer_credits_starting"):GetInt()))
     elseif self:IsKiller() then
         self:SetCredits(math.ceil(GetConVar("ttt_kil_credits_starting"):GetInt()))
+    elseif self:IsJester() then
+        self:SetCredits(math.ceil(GetConVar("ttt_jes_credits_starting"):GetInt()))
+    elseif self:IsSwapper() then
+        self:SetCredits(math.ceil(GetConVar("ttt_swa_credits_starting"):GetInt()))
     elseif self:IsMonsterTeam() then
         local c
         local is_traitor = GetGlobalBool("ttt_monsters_are_traitors")

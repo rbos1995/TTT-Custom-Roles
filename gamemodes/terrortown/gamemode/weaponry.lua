@@ -354,6 +354,7 @@ end
 
 local BuyableWeapons = { }
 local ExcludeWeapons = { }
+local DoesRoleHaveWeaponCache = { }
 
 local function PrepWeaponsLists(role)
     -- Initialize the lists for this role
@@ -362,6 +363,9 @@ local function PrepWeaponsLists(role)
     end
     if not ExcludeWeapons[role] then
         ExcludeWeapons[role] = {}
+    end
+    if type(DoesRoleHaveWeaponCache[role]) ~= "boolean" then
+        DoesRoleHaveWeaponCache[role] = nil
     end
 end
 
@@ -377,6 +381,31 @@ local function ResetWeaponsCache()
             end
         end
     end
+    for id, _ in pairs(ROLE_STRINGS) do
+        DoesRoleHaveWeaponCache[id] = nil
+    end
+end
+
+function WEPS.DoesRoleHaveWeapon(role)
+    PrepWeaponsLists(role)
+
+    if DoesRoleHaveWeaponCache[role] ~= nil then
+        return DoesRoleHaveWeaponCache[role]
+    end
+    if table.HasValue(EquipmentItems, role) and table.Count(EquipmentItems[role]) > 0 then
+        DoesRoleHaveWeaponCache[role] = true
+        return true
+    end
+
+    for _, w in ipairs(weapons.GetList()) do
+        if w and w.CanBuy and table.HasValue(w.CanBuy, role) then
+            DoesRoleHaveWeaponCache[role] = true
+            return true
+        end
+    end
+
+    DoesRoleHaveWeaponCache[role] = false
+    return false
 end
 
 -- If this logic or the list of roles who can buy is changed, it must also be updated in init.lua and cl_equip.lua

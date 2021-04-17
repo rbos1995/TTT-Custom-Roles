@@ -43,11 +43,19 @@ ttt_jester_required_innos       2 // Number of innocents for the Jester to spawn
 ttt_swapper_required_innos      2 // Number of innocents for the Swapper to spawn
 ttt_killer_required_innos       3 // Number of innocents for the Killerto spawn
 ttt_detraitor_required_traitors 2 // Number of traitors for the Detraitor to spawn
+ttt_detective_min_players       8 // Number of total players for the Detective to spawn
 
 // Role Percentages
 ttt_traitor_pct   0.25 // Percentage of total players that will be traitors
 ttt_detective_pct 0.13 // Percentage of total players that will be detectives
 ttt_monster_pct   0.25 // Percentage of total players that will be monsters (Zombies or Vampires)
+
+// Role Counts
+ttt_detective_max 32 // The maximum number of Detectives that can spawn
+ttt_traitor_max   32 // The maxinum number of players on the traitor team that can spawn
+
+// Detective
+ttt_detective_karma_min 600 // The minimum karma a player must have to be chosen as detective
 
 // Karma
 ttt_karma_jesterkill_penalty 50  // Karma penalty for killing the Jester

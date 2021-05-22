@@ -1796,10 +1796,12 @@ function HandleRoleEquipment()
     local handled = false
     for id, name in pairs(ROLE_STRINGS) do
         local rolefiles, _ = file.Find("roleweapons/" .. name .. "/*.txt", "DATA")
-        local roleweapons = { }
         local roleexcludes = { }
+        local roleenorandoms = { }
+        local roleweapons = { }
         for _, v in pairs(rolefiles) do
             local exclude = false
+            local norandom = false
             -- Extract the weapon name from the file name
             local lastdotpos = v:find("%.")
             local weaponname = v:sub(0, lastdotpos - 1)
@@ -1813,21 +1815,26 @@ function HandleRoleEquipment()
                 extension = extension:sub(0, lastdotpos - 1)
                 if extension:lower() == "exclude" then
                     exclude = true
+                elseif extension:lower() == "norandom" then
+                    norandom = true
                 end
             end
 
             if exclude then
                 table.insert(roleexcludes, weaponname)
+            elseif norandom then
+                table.insert(roleenorandoms, weaponname)
             else
                 table.insert(roleweapons, weaponname)
             end
         end
 
-        if #roleweapons > 0 or #roleexcludes > 0 then
+        if #roleweapons > 0 or #roleexcludes > 0 or #roleenorandoms > 0 then
             net.Start("TTT_BuyableWeapons")
             net.WriteInt(id, 16)
             net.WriteTable(roleweapons)
             net.WriteTable(roleexcludes)
+            net.WriteTable(roleenorandoms)
             net.Broadcast()
             handled = true
         end

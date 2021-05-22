@@ -31,6 +31,7 @@ end
 
 WEPS.BuyableWeapons = { }
 WEPS.ExcludeWeapons = { }
+WEPS.BypassRandomWeapons = { }
 
 function WEPS.PrepWeaponsLists(role)
     -- Initialize the lists for this role
@@ -39,6 +40,9 @@ function WEPS.PrepWeaponsLists(role)
     end
     if not WEPS.ExcludeWeapons[role] then
         WEPS.ExcludeWeapons[role] = {}
+    end
+    if not WEPS.BypassRandomWeapons[role] then
+        WEPS.BypassRandomWeapons[role] = {}
     end
 end
 

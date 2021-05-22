@@ -374,6 +374,7 @@ local function ReadRoleEquipment(role, rolename)
     local rolefiles, _ = file.Find("roleweapons/" .. rolename .. "/*.txt", "DATA")
     for _, v in pairs(rolefiles) do
         local exclude = false
+        local norandom = false
         -- Extract the weapon name from the file name
         local lastdotpos = v:find("%.")
         local weaponname = v:sub(0, lastdotpos - 1)
@@ -387,11 +388,15 @@ local function ReadRoleEquipment(role, rolename)
             extension = extension:sub(0, lastdotpos - 1)
             if extension:lower() == "exclude" then
                 exclude = true
+            elseif extension:lower() == "norandom" then
+                norandom = true
             end
         end
 
         if exclude then
             table.insert(WEPS.ExcludeWeapons[role], weaponname)
+        elseif norandom then
+            table.insert(WEPS.BypassRandomWeapons[role], weaponname)
         else
             table.insert(WEPS.BuyableWeapons[role], weaponname)
         end

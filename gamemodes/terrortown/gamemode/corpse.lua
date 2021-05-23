@@ -247,7 +247,7 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
     local hshot = rag.was_headshot or false
     local dtime = rag.time or 0
 
-    local ownerEnt = player.GetBySteamID64(rag.sid)
+    local ownerEnt = player.GetBySteamID64(rag.sid) or player.GetBySteamID(rag.sid)
     local owner = IsValid(ownerEnt) and ownerEnt:EntIndex() or -1
 
     -- basic sanity check

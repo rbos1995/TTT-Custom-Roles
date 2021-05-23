@@ -89,6 +89,7 @@
 - Added ability to exclude weapons from role weapon shops. See [Configuration](CONVARS.md).
 - Added ability to change which weapons show in the shop each round by random chance. See [Configuration](CONVARS.md).
   - Added the ability for specific weapons to bypass the shop randomization. See [Configuration](CONVARS.md).
+- Added ability to have up to 32 different equipment items (from the workshop), up from 16.
 
 ## Round Summary
 - Updated end-of-round summary to merge the old tabs and buttons with the new interface.

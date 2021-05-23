@@ -172,19 +172,20 @@ concommand.Add("ttt_confirm_death", IdentifyCommand)
 -- Call detectives to a corpse
 local function CallDetective(ply, cmd, args)
     if not IsValid(ply) then return end
-    if #args ~= 1 then return end
+    if #args ~= 2 then return end
     if not ply:IsActive() then return end
 
     local eidx = tonumber(args[1])
     if not eidx then return end
 
+    local sid = args[2]
     local rag = Entity(eidx)
     if IsValid(rag) and rag:GetPos():Distance(ply:GetPos()) < 128 then
         if CORPSE.GetFound(rag, false) then
             -- show indicator to detectives
             net.Start("TTT_CorpseCall")
             net.WriteVector(rag:GetPos())
-            net.WriteUInt(rag:EntIndex(), 16)
+            net.WriteString(sid)
             net.Send(GetDetectiveFilter(true))
 
             LANG.Msg("body_call", {
@@ -270,7 +271,7 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
                 hook.Call("TTTBodyFound", GAMEMODE, ply, ownerEnt, rag)
                 net.Start("TTT_CorpseCall")
                 net.WriteVector(rag:GetPos())
-                net.WriteUInt(rag:EntIndex(), 16)
+                net.WriteString(rag.sid)
                 net.Send(GetDetectiveFilter(true))
                 ownerEnt:SetNWBool("det_called", true)
                 ownerEnt:SetNWBool("body_found", true)
@@ -327,7 +328,8 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
     net.WriteString(wep)
     net.WriteBit(hshot) -- ( 1 bit )
     net.WriteInt(dtime, 16)
-    --net.WriteInt(stime, 16)
+    net.WriteInt(stime, 16)
+    net.WriteString(rag.sid)
 
     net.WriteUInt(#kill_entids, 8)
     for _, idx in pairs(kill_entids) do

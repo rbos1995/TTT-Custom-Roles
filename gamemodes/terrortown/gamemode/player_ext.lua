@@ -486,7 +486,8 @@ hook.Add("TTTPrepareRound", "PostLoadOverride", function()
             oldDRuncloak(self)
 
             net.Start("TTT_RemoveCorpseCall")
-            net.WriteUInt(self:EntIndex(), 16)
+            -- Must be SteamID for Dead Ringer compatibility
+            net.WriteString(self:SteamID())
             net.Broadcast()
         end
     end

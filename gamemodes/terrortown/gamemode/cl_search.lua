@@ -402,7 +402,7 @@ local function ShowSearchScreen(search_raw)
             client.called_corpses = client.called_corpses or {}
             table.insert(client.called_corpses, search_raw.eidx)
             s:SetDisabled(true)
-            RunConsoleCommand("ttt_call_detective", search_raw.eidx)
+            RunConsoleCommand("ttt_call_detective", search_raw.eidx, search_raw.sid)
         end
 
         dcall:SetDisabled(client:IsSpec() or table.HasValue(client.called_corpses or {}, search_raw.eidx))
@@ -520,7 +520,8 @@ local function ReceiveRagdollSearch()
     search.wep = net.ReadString()
     search.head = net.ReadBit() == 1
     search.dtime = net.ReadInt(16)
-    --search.stime = net.ReadInt(16)
+    search.stime = net.ReadInt(16)
+    search.sid = net.ReadString()
 
     -- Players killed
     local num_kills = net.ReadUInt(8)
@@ -557,7 +558,7 @@ local function ReceiveRagdollSearch()
     -- Remove the radar icon for the searched corpse
     if RADAR and RADAR.called_corpses then
         for i, v in pairs(RADAR.called_corpses) do
-            if v.eidx == search.eidx then
+            if v.sid == search.sid then
                 table.remove(RADAR.called_corpses, i)
                 return
             end

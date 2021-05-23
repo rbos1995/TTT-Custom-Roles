@@ -475,6 +475,14 @@ function plymeta:Ignite(dur, radius)
     entmeta.Ignite(self, dur, radius)
 end
 
+if plymeta.DRuncloak then
+    local oldDRuncloak = plymeta.DRuncloak
+    function plymeta:DRuncloak()
+        self:SetNWBool("body_searched", false)
+        oldDRuncloak(self)
+    end
+end
+
 function plymeta:GetAvoidDetective()
     return self:GetInfoNum("ttt_avoid_detective", 0) > 0
 end

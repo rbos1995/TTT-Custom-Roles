@@ -101,7 +101,7 @@ local function IdentifyBody(ply, rag)
     -- Register find
     if not CORPSE.GetFound(rag, false) then
         -- will return either false or a valid ply
-        local deadply = player.GetBySteamID64(rag.sid)
+        local deadply = player.GetBySteamID64(rag.sid) or player.GetBySteamID(rag.sid)
         if deadply then
             deadply:SetNWBool("body_searched", true)
             deadply:SetNWBool("body_found", true)
@@ -124,7 +124,7 @@ local function IdentifyBody(ply, rag)
     -- Handle kill list
     for _, vicsid in pairs(rag.kills) do
         -- filter out disconnected
-        local vic = player.GetBySteamID64(vicsid)
+        local vic = player.GetBySteamID64(vicsid) or player.GetBySteamID(vicsid)
 
         -- is this an unconfirmed dead?
         if IsValid(vic) and (not vic:GetNWBool("body_searched", false)) and (not vic:GetNWBool("body_found", false)) then

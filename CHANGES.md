@@ -10,9 +10,6 @@
 - Added ability to haunt the Phantom's killer and perform various actions. See [Configuration](CONVARS.md) to disable and adjust costs.
 - Added ability for Phantom to come back with decreasing health each time they are killed. See [Configuration](CONVARS.md) to enable.
 
-## Glitch
-- Fixed assassin and hypnotist start-of-round popups not including glitches in their traitor list
-
 # Traitors
 - Made Hypnotist and Assassin more integrated traitor team members by
   - Allowing transferring of credits.

@@ -475,19 +475,25 @@ function plymeta:Ignite(dur, radius)
     entmeta.Ignite(self, dur, radius)
 end
 
--- Handle clearing search and corpse data when a Dead Ringer'd player uncloaks
-if plymeta.DRuncloak then
-    local oldDRuncloak = plymeta.DRuncloak
-    function plymeta:DRuncloak()
-        self:SetNWBool("body_searched", false)
-        self:SetNWBool("det_called", false)
-        oldDRuncloak(self)
+-- Run these overrides when the round is preparing the first time to ensure their addons have been loaded
+hook.Add("TTTPrepareRound", "PostLoadOverride", function()
+    if plymeta.DRuncloak then
+        local oldDRuncloak = plymeta.DRuncloak
+        -- Handle clearing search and corpse data when a Dead Ringer'd player uncloaks
+        function plymeta:DRuncloak()
+            self:SetNWBool("body_searched", false)
+            self:SetNWBool("det_called", false)
+            oldDRuncloak(self)
 
-        net.Start("TTT_RemoveCorpseCall")
-        net.WriteUInt(self:EntIndex(), 16)
-        net.Broadcast()
+            net.Start("TTT_RemoveCorpseCall")
+            net.WriteUInt(self:EntIndex(), 16)
+            net.Broadcast()
+        end
     end
-end
+
+    -- These overrides are set, no reason to check every round
+    hook.Remove("TTTPrepareRound", "PostLoadOverride")
+end)
 
 function plymeta:GetAvoidDetective()
     return self:GetInfoNum("ttt_avoid_detective", 0) > 0

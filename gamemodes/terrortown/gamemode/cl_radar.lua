@@ -270,6 +270,22 @@ end
 
 net.Receive("TTT_CorpseCall", ReceiveCorpseCall)
 
+local function RemoveCorpseCall()
+    local eidx = net.ReadUInt(16)
+
+    -- Remove the radar icon for the searched corpse
+    if RADAR and RADAR.called_corpses then
+        for i, v in pairs(RADAR.called_corpses) do
+            if v.eidx == eidx then
+                table.remove(RADAR.called_corpses, i)
+                return
+            end
+        end
+    end
+end
+
+net.Receive("TTT_RemoveCorpseCall", RemoveCorpseCall)
+
 local function RecieveTeleportMark()
     local pos = net.ReadVector()
     pos.z = pos.z + 50

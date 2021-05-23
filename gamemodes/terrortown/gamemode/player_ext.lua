@@ -475,11 +475,17 @@ function plymeta:Ignite(dur, radius)
     entmeta.Ignite(self, dur, radius)
 end
 
+-- Handle clearing search and corpse data when a Dead Ringer'd player uncloaks
 if plymeta.DRuncloak then
     local oldDRuncloak = plymeta.DRuncloak
     function plymeta:DRuncloak()
         self:SetNWBool("body_searched", false)
+        self:SetNWBool("det_called", false)
         oldDRuncloak(self)
+
+        net.Start("TTT_RemoveCorpseCall")
+        net.WriteUInt(self:EntIndex(), 16)
+        net.Broadcast()
     end
 end
 

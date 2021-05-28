@@ -329,7 +329,6 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
     net.WriteBit(hshot) -- ( 1 bit )
     net.WriteInt(dtime, 16)
     net.WriteInt(stime, 16)
-    net.WriteString(rag.sid)
 
     net.WriteUInt(#kill_entids, 8)
     for _, idx in pairs(kill_entids) do
@@ -350,6 +349,11 @@ function CORPSE.ShowSearch(ply, rag, covert, long_range)
     -- If found by detective, send to all, else just the finder
     if ply:IsActiveDetective() or ply:IsActiveDetraitor() then
         net.Broadcast()
+
+        -- Let detctives know that this body has already been searched
+        net.Start("TTT_RemoveCorpseCall")
+        net.WriteString(rag.sid)
+        net.Send(GetDetectiveFilter(true))
     else
         net.Send(ply)
     end

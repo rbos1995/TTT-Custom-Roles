@@ -521,13 +521,12 @@ local function ReceiveRagdollSearch()
     search.head = net.ReadBit() == 1
     search.dtime = net.ReadInt(16)
     search.stime = net.ReadInt(16)
-    search.sid = net.ReadString()
 
     -- Players killed
     local num_kills = net.ReadUInt(8)
     if num_kills > 0 then
         search.kills = {}
-        for i = 1, num_kills do
+        for _ = 1, num_kills do
             table.insert(search.kills, net.ReadUInt(8))
         end
     else
@@ -554,16 +553,6 @@ local function ReceiveRagdollSearch()
     end
 
     StoreSearchResult(search)
-
-    -- Remove the radar icon for the searched corpse
-    if RADAR and RADAR.called_corpses then
-        for i, v in pairs(RADAR.called_corpses) do
-            if v.sid == search.sid then
-                table.remove(RADAR.called_corpses, i)
-                return
-            end
-        end
-    end
 
     search = nil
 end

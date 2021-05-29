@@ -690,7 +690,6 @@ function PrepareRound()
         v:SetNWBool("zombie_prime", false)
         v:SetNWBool("vampire_prime", false)
         v:SetNWInt("vampire_previous_role", ROLE_NONE)
-        v:SetNWFloat("RmdtSpeedModifier", 1)
         -- Workaround to prevent GMod sprint from working
         v:SetRunSpeed(v:GetWalkSpeed())
     end

@@ -139,7 +139,7 @@
 - Added ability to override sprint key via hook so mods (like my Randomat 2.0) could let you sprint backwards.
 - Added chat support for name overrides via the ULX SetName addon.
 - Added support to the end-of-round summary and logic for multiples Jesters, Killers, or Swappers in case an external addon (like the Randomat) does that.
-- Added "RmdtSpeedModifier" player property to allow Randomat to set custom speed modifier that is replicated to client and server.
+- Added "TTTSpeedMultiplier" hook to allow other mods (like the Randomat) to set multiple custom speed multipliers.
 - Added sprint speed logic for the Randomat Murder event's knife speed boost.
 - Changed credits transfer tab to only show if you have a shop so mods (like my Randomat 2.0) that give everyone credits don't cause confusion.
 - Changed Radar and Disguiser to allow anyone to use them if they are given then (e.g. by another addon).

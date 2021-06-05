@@ -160,6 +160,7 @@ end
 
 function SWEP:CancelUnfreeze(entity)
     if not IsValid(entity) or not entity:IsPlayer() then return end
+    if not IsValid(self:GetOwner()) then return end
     timer.Remove("VampUnfreezeDelay_" .. self:GetOwner():Nick() .. "_" .. entity:Nick())
 end
 

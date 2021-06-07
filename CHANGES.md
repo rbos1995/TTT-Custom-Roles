@@ -39,10 +39,10 @@
 
 ## Zombie
 - Ported/Inspired by Infected from Town of Terror.
- - Claw attack look (model, animation) and feel (range, damage, spread).
- - Jump attack. See [Configuration](CONVARS.md) to disable.
- - Spit attack. See [Configuration](CONVARS.md) to disable.
- - Configurable damage scaling when not using the claws. See [Configuration](CONVARS.md).
+  - Claw attack look (model, animation) and feel (range, damage, spread).
+  - Jump attack. See [Configuration](CONVARS.md) to disable.
+  - Spit attack. See [Configuration](CONVARS.md) to disable.
+  - Configurable damage scaling when not using the claws. See [Configuration](CONVARS.md).
 - Added recoil to Spit attack.
 - Made Spit not 100% accurate.
 - Changed spawned Zombies (e.g. Zombies created by dying to the Zombie claws) to configurably disallow picking up weapons. See [Configuration](CONVARS.md).

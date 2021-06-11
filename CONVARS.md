@@ -189,6 +189,12 @@ multijump_default_jumps          1 // The amount of extra jumps players should g
 multijump_default_power          1 // Multiplier for the jump-power when multi jumping
 multijump_can_jump_while_falling 1 // Whether the player should be able to multi-jump if they didn't jump to begin with
 multijump_max_fall_distance      0 // The maximum distance a player can fall before multi jump is disabled. 0 to disable
+
+// Better Equipment Menu
+ttt_bem_allow_change 1  // Allow clients to change the look of the Traitor/Detective menu
+ttt_bem_sv_cols      4  // Sets the number of columns in the Traitor/Detective menu's item list (serverside)
+ttt_bem_sv_rows      5  // Sets the number of rows in the Traitor/Detective menu's item list (serverside)
+ttt_bem_sv_size      64 // Sets the item size in the Traitor/Detective menu's item list (serverside)
 ```
 
 Thanks to [KarlOfDuty](https://github.com/KarlOfDuty) for his original version of this document, [here](https://github.com/KarlOfDuty/TTT-Custom-Roles/blob/patch-1/README.md).

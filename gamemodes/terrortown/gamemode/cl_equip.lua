@@ -279,6 +279,24 @@ function GetEquipmentForRole(role, block_randomization)
             end
         end
 
+        -- Lastly, go through the excludes to make sure things are removed that should be
+        for _, v in ipairs(WEPS.ExcludeWeapons[role]) do
+            -- If this isn't a weapon, get its information from one of the roles and compare that to the ID we have
+            if not weapons.GetStored(v) then
+                local equip = GetEquipmentItemByName(v)
+                -- If this exists and is in the available list, remove it from the role's list
+                if equip ~= nil then
+                    for idx, i in ipairs(tbl[role]) do
+                        if not ItemIsWeapon(i) and i.id == equip.id then
+                            table.remove(tbl[role], idx)
+                            break
+                        end
+                    end
+                    break
+                end
+            end
+        end
+
         Equipment[role] = tbl[role]
     end
 

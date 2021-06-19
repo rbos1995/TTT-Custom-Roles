@@ -105,6 +105,13 @@ function GetEquipmentForRole(role, block_randomization)
         -- find buyable weapons to load info from
         for _, v in pairs(weapons.GetList()) do
             if v and v.CanBuy then
+                -- If the last key in the table does not match how many keys there are, this is a non-sequential table
+                -- table.RemoveByValue does not work with non-sequential tables and there is not an easy way
+                -- of removing items from a non-sequential table by key or value
+                if #v.CanBuy ~= table.Count(v.CanBuy) then
+                    v.CanBuy = table.ClearKeys(v.CanBuy)
+                end
+
                 local id = WEPS.GetClass(v)
                 local roletable = WEPS.BuyableWeapons[role] or {}
                 -- Make sure each of the buyable weapons is in the role's equipment list

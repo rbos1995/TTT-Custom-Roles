@@ -447,6 +447,13 @@ local function OrderEquipment(ply, cmd, args)
             return
         end
 
+        -- If the last key in the table does not match how many keys there are, this is a non-sequential table
+        -- table.RemoveByValue does not work with non-sequential tables and there is not an easy way
+        -- of removing items from a non-sequential table by key or value
+        if #swep_table.CanBuy ~= table.Count(swep_table.CanBuy) then
+            swep_table.CanBuy = table.ClearKeys(swep_table.CanBuy)
+        end
+
         -- Add the loaded weapons for this role
         HandleRoleWeapons(role, WEPS.BuyableWeapons[role], swep_table, id)
 

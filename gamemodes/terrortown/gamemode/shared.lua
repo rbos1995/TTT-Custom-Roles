@@ -96,6 +96,23 @@ ROLE_STRINGS_EXT = {
     [ROLE_DETRAITOR] = "a detraitor"
 }
 
+ROLE_STRINGS_SHORT = {
+    [ROLE_TRAITOR] = "tra",
+    [ROLE_INNOCENT] = "inn",
+    [ROLE_DETECTIVE] = "det",
+    [ROLE_MERCENARY] = "mer",
+    [ROLE_HYPNOTIST] = "hyp",
+    [ROLE_GLITCH] = "gli",
+    [ROLE_JESTER] = "jes",
+    [ROLE_PHANTOM] = "pha",
+    [ROLE_ZOMBIE] = "zom",
+    [ROLE_VAMPIRE] = "vam",
+    [ROLE_SWAPPER] = "swa",
+    [ROLE_ASSASSIN] = "asn",
+    [ROLE_KILLER] = "kil",
+    [ROLE_DETRAITOR] = "der"
+}
+
 -- Game event log defs
 EVENT_KILL = 1
 EVENT_SPAWN = 2

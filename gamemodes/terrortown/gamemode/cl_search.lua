@@ -402,7 +402,7 @@ local function ShowSearchScreen(search_raw)
             client.called_corpses = client.called_corpses or {}
             table.insert(client.called_corpses, search_raw.eidx)
             s:SetDisabled(true)
-            RunConsoleCommand("ttt_call_detective", search_raw.eidx)
+            RunConsoleCommand("ttt_call_detective", search_raw.eidx, search_raw.sid)
         end
 
         dcall:SetDisabled(client:IsSpec() or table.HasValue(client.called_corpses or {}, search_raw.eidx))
@@ -504,7 +504,7 @@ local function ReceiveRagdollSearch()
     search.nick = net.ReadString()
 
     -- Equipment
-    local eq = net.ReadUInt(16)
+    local eq = net.ReadUInt(32)
 
     -- All equipment pieces get their own icon
     search.eq_armor = util.BitSet(eq, EQUIP_ARMOR)
@@ -520,13 +520,13 @@ local function ReceiveRagdollSearch()
     search.wep = net.ReadString()
     search.head = net.ReadBit() == 1
     search.dtime = net.ReadInt(16)
-    --search.stime = net.ReadInt(16)
+    search.stime = net.ReadInt(16)
 
     -- Players killed
     local num_kills = net.ReadUInt(8)
     if num_kills > 0 then
         search.kills = {}
-        for i = 1, num_kills do
+        for _ = 1, num_kills do
             table.insert(search.kills, net.ReadUInt(8))
         end
     else
@@ -553,16 +553,6 @@ local function ReceiveRagdollSearch()
     end
 
     StoreSearchResult(search)
-
-    -- Remove the radar icon for the searched corpse
-    if RADAR and RADAR.called_corpses then
-        for i, v in pairs(RADAR.called_corpses) do
-            if v.eidx == search.eidx then
-                table.remove(RADAR.called_corpses, i)
-                return
-            end
-        end
-    end
 
     search = nil
 end

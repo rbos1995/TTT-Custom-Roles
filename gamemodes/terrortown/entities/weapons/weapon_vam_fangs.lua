@@ -36,7 +36,7 @@ SWEP.Kind = WEAPON_ROLE
 SWEP.LimitedStock = false
 SWEP.AllowDrop = false
 
-SWEP.Target = nil
+SWEP.TargetEntity = nil
 
 local STATE_ERROR = -1
 local STATE_NONE = 0
@@ -50,6 +50,7 @@ local vampire_convert = CreateConVar("ttt_vampire_convert_enable", "1", FCVAR_AR
 local vampire_fang_timer = CreateConVar("ttt_vampire_fang_timer", "5", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 local vampire_fang_heal = CreateConVar("ttt_vampire_fang_heal", "50", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 local vampire_fang_overheal = CreateConVar("ttt_vampire_fang_overheal", "25", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+local vampire_fang_unfreeze_delay = CreateConVar("ttt_vampire_fang_unfreeze_delay", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 local vampire_prime_convert = CreateConVar("ttt_vampire_prime_only_convert", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 
 function SWEP:SetupDataTables()
@@ -79,9 +80,7 @@ function SWEP:Holster()
 end
 
 function SWEP:OnDrop()
-    if IsValid(self.TargetEntity) and self.TargetEntity:IsPlayer() then
-        self.TargetEntity:Freeze(false)
-    end
+    self:UnfreezeTarget()
     self:Reset()
     self:Remove()
 end
@@ -91,15 +90,8 @@ local function CanConvert(ply)
 end
 
 local function GetPlayerFromBody(body)
-    local ply = false
-    if body.sid == "BOT" then
-        ply = player.GetByUniqueID(body.uqid)
-    else
-        ply = player.GetBySteamID(body.sid)
-    end
-
+    local ply = player.GetBySteamID64(body.sid)
     if not IsValid(ply) then return false end
-
     return ply
 end
 
@@ -157,6 +149,7 @@ function SWEP:Drain(entity)
     self:SetState(STATE_DRAIN)
     self:SetStartTime(CurTime())
     self:SetMessage("DRAINING")
+    self:CancelUnfreeze(entity)
 
     entity:PrintMessage(HUD_PRINTCENTER, "Someone is draining your blood!")
     entity:Freeze(true)
@@ -165,13 +158,31 @@ function SWEP:Drain(entity)
     self:SetNextPrimaryFire(CurTime() + self:GetFangTime())
 end
 
+function SWEP:CancelUnfreeze(entity)
+    if not IsValid(entity) or not entity:IsPlayer() then return end
+    if not IsValid(self:GetOwner()) then return end
+    timer.Remove("VampUnfreezeDelay_" .. self:GetOwner():Nick() .. "_" .. entity:Nick())
+end
+
+function SWEP:UnfreezeTarget()
+    if not IsValid(self.TargetEntity) or not self.TargetEntity:IsPlayer() then return end
+
+    local delay = vampire_fang_unfreeze_delay:GetFloat()
+    if delay <= 0 then
+        self.TargetEntity:Freeze(false)
+    else
+        self:CancelUnfreeze(self.TargetEntity)
+        timer.Create("VampUnfreezeDelay_" .. self:GetOwner():Nick() .. "_" .. self.TargetEntity:Nick(), delay, 1, function()
+            if not IsValid(self.TargetEntity) or not self.TargetEntity:IsPlayer() then return end
+            self.TargetEntity:Freeze(false)
+            self.TargetEntity = nil
+        end)
+    end
+end
+
 function SWEP:FireError()
     self:SetState(STATE_NONE)
-
-    if IsValid(self.TargetEntity) and self.TargetEntity:IsPlayer() then
-        self.TargetEntity:Freeze(false)
-    end
-
+    self:UnfreezeTarget()
     self:SetNextPrimaryFire(CurTime() + 0.1)
 end
 
@@ -348,7 +359,6 @@ else
         self:SetStartTime(-1)
         self:SetMessage('')
         self:SetNextPrimaryFire(CurTime() + 0.1)
-        self.TargetEntity = nil
     end
 
     function SWEP:Error(msg)
@@ -357,11 +367,7 @@ else
         self:SetMessage(msg)
 
         self:GetOwner():EmitSound(beep, 60, 50, 1)
-
-        if IsValid(self.TargetEntity) and self.TargetEntity:IsPlayer() then
-            self.TargetEntity:Freeze(false)
-        end
-        self.TargetEntity = nil
+        self:UnfreezeTarget()
 
         timer.Simple(0.75, function()
             if IsValid(self) then self:Reset() end

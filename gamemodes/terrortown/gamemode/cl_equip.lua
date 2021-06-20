@@ -24,62 +24,76 @@ include("shared.lua")
 -- Buyable weapons are loaded automatically. Buyable items are defined in
 -- equip_items_shd.lua
 
-local BuyableWeapons = { }
-local ExcludeWeapons = { }
 local Equipment = { }
-
-local function PrepWeaponsLists(role)
-    -- Initialize the lists for this role
-    if not BuyableWeapons[role] then
-        BuyableWeapons[role] = {}
-    end
-    if not ExcludeWeapons[role] then
-        ExcludeWeapons[role] = {}
-    end
-end
 
 local function UpdateWeaponList(role, list, weapon)
     if not table.HasValue(list[role], weapon) then
         table.insert(list[role], weapon)
-        -- Clear the weapon cache
-        Equipment[role] = nil
     end
 end
 
+-- Part of this logic is also mirrored in weaponry.lua
+local function ResetWeaponsCache()
+    -- Clear the weapon cache for each role
+    for role, _ in pairs(ROLE_STRINGS) do
+        Equipment[role] = nil
+    end
+    -- Clear the overall weapons cache
+    Equipment = {}
+    -- Reset the CanBuy list or save the original for next time
+    for _, v in pairs(weapons.GetList()) do
+        if v and v.CanBuy then
+            if v.CanBuyOrig then
+                v.CanBuy = table.Copy(v.CanBuyOrig)
+            else
+                v.CanBuyOrig = table.Copy(v.CanBuy)
+            end
+        end
+    end
+    WEPS.ResetRoleWeaponCache()
+end
+
+net.Receive("TTT_ResetBuyableWeaponsCache", function()
+    ResetWeaponsCache()
+end)
+
 net.Receive("TTT_BuyableWeapons", function()
     local role = net.ReadInt(16)
-    PrepWeaponsLists(role)
+    WEPS.PrepWeaponsLists(role)
+    ResetWeaponsCache()
 
     local roleweapons = net.ReadTable()
     for _, v in pairs(roleweapons) do
-        UpdateWeaponList(role, BuyableWeapons, v)
+        UpdateWeaponList(role, WEPS.BuyableWeapons, v)
     end
     local excludeweapons = net.ReadTable()
     for _, v in pairs(excludeweapons) do
-        UpdateWeaponList(role, ExcludeWeapons, v)
+        UpdateWeaponList(role, WEPS.ExcludeWeapons, v)
+    end
+    local norandomweapons = net.ReadTable()
+    for _, v in pairs(norandomweapons) do
+        UpdateWeaponList(role, WEPS.BypassRandomWeapons, v)
     end
 end)
 
 local function ItemIsWeapon(item) return not tonumber(item.id) end
 
-function GetEquipmentForRole(role)
-    PrepWeaponsLists(role)
+function GetEquipmentForRole(role, block_randomization)
+    WEPS.PrepWeaponsLists(role)
 
     local mercmode = GetGlobalInt("ttt_shop_merc_mode")
     local sync_assassin = GetGlobalBool("ttt_shop_assassin_sync") and role == ROLE_ASSASSIN
     local sync_hypnotist = GetGlobalBool("ttt_shop_hypnotist_sync") and role == ROLE_HYPNOTIST
 
     -- Prime traitor and detective lists to make sure the sync works
-    if (mercmode > 0 and role == ROLE_MERCENARY) or
-        (GetGlobalBool("ttt_shop_assassin_sync") and role == ROLE_ASSASSIN) or
-        (GetGlobalBool("ttt_shop_hypnotist_sync") and role == ROLE_HYPNOTIST) then
+    if (mercmode > 0 and role == ROLE_MERCENARY) or sync_assassin or sync_hypnotist then
         if not Equipment[ROLE_TRAITOR] then
-            GetEquipmentForRole(ROLE_TRAITOR)
+            GetEquipmentForRole(ROLE_TRAITOR, true)
         end
     end
     if (mercmode > 0 and role == ROLE_MERCENARY) or role == ROLE_DETRAITOR then
         if not Equipment[ROLE_DETECTIVE] then
-            GetEquipmentForRole(ROLE_DETECTIVE)
+            GetEquipmentForRole(ROLE_DETECTIVE, true)
         end
     end
 
@@ -91,8 +105,15 @@ function GetEquipmentForRole(role)
         -- find buyable weapons to load info from
         for _, v in pairs(weapons.GetList()) do
             if v and v.CanBuy then
+                -- If the last key in the table does not match how many keys there are, this is a non-sequential table
+                -- table.RemoveByValue does not work with non-sequential tables and there is not an easy way
+                -- of removing items from a non-sequential table by key or value
+                if #v.CanBuy ~= table.Count(v.CanBuy) then
+                    v.CanBuy = table.ClearKeys(v.CanBuy)
+                end
+
                 local id = WEPS.GetClass(v)
-                local roletable = BuyableWeapons[role] or {}
+                local roletable = WEPS.BuyableWeapons[role] or {}
                 -- Make sure each of the buyable weapons is in the role's equipment list
                 -- If this logic or the list of roles who can buy is changed, it must also be updated in weaponry.lua and cl_equip.lua
                 if not table.HasValue(v.CanBuy, role) and table.HasValue(roletable, id) then
@@ -146,10 +167,28 @@ function GetEquipmentForRole(role)
                     table.insert(v.CanBuy, role)
                 end
 
-                -- After all that, make sure each of the excluded weapons is NOT in the role's equipment list
-                local excludetable = ExcludeWeapons[role]
-                if excludetable and table.HasValue(v.CanBuy, role) and table.HasValue(excludetable, id) then
-                    table.RemoveByValue(v.CanBuy, role)
+                -- If the player can still buy this weapon, check the various excludes
+                if table.HasValue(v.CanBuy, role) then
+                    -- Make sure each of the excluded weapons is NOT in the role's equipment list
+                    local excludetable = WEPS.ExcludeWeapons[role]
+                    if excludetable and table.HasValue(excludetable, id) then
+                        table.RemoveByValue(v.CanBuy, role)
+                    -- Remove some weapons based on a random chance if it isn't blocked or bypassed
+                    else
+                        local norandomtable = WEPS.BypassRandomWeapons[role]
+                        if not block_randomization and (not norandomtable or not table.HasValue(norandomtable, id)) then
+                            local random_cvar_percent_global = GetGlobalInt("ttt_shop_random_percent", 0)
+                            local random_cvar_percent = GetGlobalInt("ttt_shop_random_" .. ROLE_STRINGS_SHORT[role] .. "_percent", 0)
+                            -- Use the global value if the per-role override isn't set
+                            if random_cvar_percent == 0 then
+                                random_cvar_percent = random_cvar_percent_global
+                            end
+                            local random_cvar_enabled = GetGlobalBool("ttt_shop_random_" .. ROLE_STRINGS_SHORT[role] .. "_enabled", false)
+                            if random_cvar_enabled and math.random() < (random_cvar_percent / 100.0) then
+                                table.RemoveByValue(v.CanBuy, role)
+                            end
+                        end
+                    end
                 end
 
                 local data = v.EquipMenuData or {}
@@ -236,12 +275,30 @@ function GetEquipmentForRole(role)
         end
 
         -- Also check the extra buyable equipment
-        for _, v in pairs(BuyableWeapons[role]) do
+        for _, v in pairs(WEPS.BuyableWeapons[role]) do
             -- If this isn't a weapon, get its information from one of the roles and compare that to the ID we have
             if not weapons.GetStored(v) then
                 local equip = GetEquipmentItemByName(v)
                 if equip ~= nil then
                     table.insert(tbl[role], equip)
+                    break
+                end
+            end
+        end
+
+        -- Lastly, go through the excludes to make sure things are removed that should be
+        for _, v in ipairs(WEPS.ExcludeWeapons[role]) do
+            -- If this isn't a weapon, get its information from one of the roles and compare that to the ID we have
+            if not weapons.GetStored(v) then
+                local equip = GetEquipmentItemByName(v)
+                -- If this exists and is in the available list, remove it from the role's list
+                if equip ~= nil then
+                    for idx, i in ipairs(tbl[role]) do
+                        if not ItemIsWeapon(i) and i.id == equip.id then
+                            table.remove(tbl[role], idx)
+                            break
+                        end
+                    end
                     break
                 end
             end
@@ -780,7 +837,7 @@ local function TraitorMenuPopup()
     end
 
     -- Credit transferring for those roles that have a buy menu
-    if credits > 0 and player.HasBuyMenu(ply, false) and not (ply:IsMercenary() or ply:IsKiller()) then
+    if credits > 0 and player.HasBuyMenu(ply, false) and not (ply:IsMercenary() or ply:IsKiller() or ply:IsJesterTeam()) then
         local dtransfer = CreateTransferMenu(dsheet)
         dsheet:AddSheet(GetTranslation("xfer_name"), dtransfer, "icon16/group_gear.png", false, false, "Transfer credits")
         show = true
@@ -801,8 +858,7 @@ end
 concommand.Add("ttt_cl_traitorpopup", TraitorMenuPopup)
 
 function GM:OnContextMenuOpen()
-    local r = GetRoundState()
-    if r == ROUND_POST or r == ROUND_PREP then
+    if GetRoundState() ~= ROUND_ACTIVE then
         CLSCORE:Toggle()
         return
     end
@@ -817,7 +873,7 @@ local function ReceiveEquipment()
     local ply = LocalPlayer()
     if not IsValid(ply) then return end
 
-    ply.equipment_items = net.ReadUInt(16)
+    ply.equipment_items = net.ReadUInt(32)
 end
 
 net.Receive("TTT_Equipment", ReceiveEquipment)
@@ -861,7 +917,20 @@ net.Receive("TTT_Bought", ReceiveBought)
 -- Player received the item he has just bought, so run clientside init
 local function ReceiveBoughtItem()
     local is_item = net.ReadBit() == 1
-    local id = is_item and net.ReadUInt(16) or net.ReadString()
+    local id
+    if is_item then
+        local _, bits_left = net.BytesLeft()
+
+        -- If we don't have enough bits for the full amount, only read 16
+        local bits = 32
+        if bits_left < bits then
+            bits = 16
+        end
+
+        id = net.ReadUInt(bits)
+    else
+        id = net.ReadString()
+    end
 
     -- I can imagine custom equipment wanting this, so making a hook
     hook.Run("TTTBoughtItem", is_item, id)

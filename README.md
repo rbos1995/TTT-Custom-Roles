@@ -1,5 +1,5 @@
 Thanks to [Jenssons](https://steamcommunity.com/profiles/76561198044525091) for the 'Town of Terror' mod which was the foundation of this mod.\
-Thanks to [Noxx](https://steamcommunity.com/id/nickpops98), [Lix3](https://steamcommunity.com/id/lix3), and [Kommandos0](https://steamcommunity.com/id/Kommandos0) for the original version of this mod.\
+Thanks to [Noxx](https://steamcommunity.com/id/noxxflame), [Lix3](https://steamcommunity.com/id/lix3), and [Kommandos0](https://steamcommunity.com/id/Kommandos0) for the original version of this mod.\
 \
 **Edits the original version to restore some of the Town of Terror functionality**
 
@@ -37,7 +37,7 @@ Goal: Work on your own to win the round by playing your role carefully\
 
 # Special Thanks
 - [Jenssons](https://steamcommunity.com/profiles/76561198044525091) for the ['Town of Terror'](https://steamcommunity.com/sharedfiles/filedetails/?id=1092556189) mod which was the foundation of this mod.
-- [Noxx](https://steamcommunity.com/id/nickpops98), [Lix3](https://steamcommunity.com/id/lix3), and [Kommandos0](https://steamcommunity.com/id/Kommandos0) for the [original version](https://steamcommunity.com/sharedfiles/filedetails/?id=1215502383) of this mod.
+- [Noxx](https://steamcommunity.com/id/noxxflame), [Lix3](https://steamcommunity.com/id/lix3), and [Kommandos0](https://steamcommunity.com/id/Kommandos0) for the [original version](https://steamcommunity.com/sharedfiles/filedetails/?id=1215502383) of this mod.
 - [Long Long Longson](https://steamcommunity.com/id/gamerhenne) for the ['Better Equipment Menu'](https://steamcommunity.com/sharedfiles/filedetails/?id=878772496) mod
 - [Silky](https://steamcommunity.com/profiles/76561198094798859) for the code used to create the pile of bones after the Vampire eats a body taken from the ['TTT Traitor Weapon Evolve'](https://steamcommunity.com/sharedfiles/filedetails/?id=1240572856) mod.
 - [Minty](https://steamcommunity.com/id/_Minty_) for the code used for the Hypnotist's brain washing device taken from the ['Defibrillator for TTT'](https://steamcommunity.com/sharedfiles/filedetails/?id=801433502) mod.
@@ -51,10 +51,12 @@ Goal: Work on your own to win the round by playing your role carefully\
 - u/Trenched_Colonel, u/JeremyDaBanana, and u/JanuryFirstCakeDay on Reddit for the ideas behind my implementation of the Detraitor role.
 - u/The00Devon on Reddit for the idea for the Killer smoke countdown warning.
 - u/Left4DayZ1 on Reddit for the ideas for Phantom killer footprints and haunting features.
+- u/nd4spd1919 on Reddit for the idea for the role shop item randomization feature.
 - [Blim](https://steamcommunity.com/profiles/76561198050743605/) for help finding an infinite loop that could crash the game if nobody had enough karma to be a Detective.
 - [GengarDC](https://steamcommunity.com/id/GengarDC) for his [TTT_Double_Jump_Nerfed](https://steamcommunity.com/sharedfiles/filedetails/?id=1962801891) mod whose functionality was integrated via a setting.
 - [KuMaGR](https://steamcommunity.com/id/kuma96) for his [TTT Glowing Traitors](https://steamcommunity.com/sharedfiles/filedetails/?id=690007939) mod which was the basis for the idea behind the Traitor team highlight feature.
 - [LeBroomer](https://steamcommunity.com/id/LeBroomer) for his [TTT Demonic Possession](https://steamcommunity.com/sharedfiles/filedetails/?id=1403395766) mod which was used for the basis of the Phantom haunting UI.
+- The Stig for providing feedback and helping to verify bug fixes.
 
 # Changes from the Original Version
 See [here](CHANGES.md)

@@ -357,6 +357,7 @@ local function force_jester(ply)
     ply:SetRoleAndBroadcast(ROLE_JESTER)
     ply:SetMaxHealth(100)
     ply:SetHealth(100)
+    ply:AddCredits(GetConVarNumber("ttt_jes_credits_starting"))
     if ply:HasWeapon("weapon_hyp_brainwash") then
         ply:StripWeapon("weapon_hyp_brainwash")
     end
@@ -447,6 +448,7 @@ local function force_swapper(ply)
     ply:SetRoleAndBroadcast(ROLE_SWAPPER)
     ply:SetMaxHealth(100)
     ply:SetHealth(100)
+    ply:AddCredits(GetConVarNumber("ttt_swa_credits_starting"))
     if ply:HasWeapon("weapon_hyp_brainwash") then
         ply:StripWeapon("weapon_hyp_brainwash")
     end

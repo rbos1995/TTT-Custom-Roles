@@ -3,6 +3,9 @@
 local plymeta = FindMetaTable("Player")
 if not plymeta then Error("FAILED TO FIND PLAYER TABLE") return end
 
+local entmeta = FindMetaTable("Entity")
+if not entmeta then Error("FAILED TO FIND ENTITY TABLE") return end
+
 function plymeta:SetRagdollSpec(s)
     if s then
         self.spec_ragdoll_start = CurTime()
@@ -92,6 +95,10 @@ function plymeta:SetDefaultCredits()
         self:SetCredits(math.ceil(GetConVar("ttt_mer_credits_starting"):GetInt()))
     elseif self:IsKiller() then
         self:SetCredits(math.ceil(GetConVar("ttt_kil_credits_starting"):GetInt()))
+    elseif self:IsJester() then
+        self:SetCredits(math.ceil(GetConVar("ttt_jes_credits_starting"):GetInt()))
+    elseif self:IsSwapper() then
+        self:SetCredits(math.ceil(GetConVar("ttt_swa_credits_starting"):GetInt()))
     elseif self:IsMonsterTeam() then
         local c
         local is_traitor = GetGlobalBool("ttt_monsters_are_traitors")
@@ -129,7 +136,7 @@ end
 -- We do this instead of an NW var in order to limit the info to just this ply
 function plymeta:SendEquipment()
     net.Start("TTT_Equipment")
-    net.WriteUInt(self.equipment_items, 16)
+    net.WriteUInt(self.equipment_items, 32)
     net.Send(self)
 end
 
@@ -260,7 +267,7 @@ function plymeta:RecordKill(victim)
         self.kills = {}
     end
 
-    table.insert(self.kills, victim:SteamID())
+    table.insert(self.kills, victim:SteamID64())
 end
 
 function plymeta:SetSpeed(slowed)
@@ -462,6 +469,32 @@ function plymeta:SetTeam(team)
         end)
     end
 end
+
+function plymeta:Ignite(dur, radius)
+    self.ignite_info_ext = {dur = dur, end_time = CurTime() + dur}
+    entmeta.Ignite(self, dur, radius)
+end
+
+-- Run these overrides when the round is preparing the first time to ensure their addons have been loaded
+hook.Add("TTTPrepareRound", "PostLoadOverride", function()
+    if plymeta.DRuncloak then
+        local oldDRuncloak = plymeta.DRuncloak
+        -- Handle clearing search and corpse data when a Dead Ringer'd player uncloaks
+        function plymeta:DRuncloak()
+            self:SetNWBool("body_searched", false)
+            self:SetNWBool("det_called", false)
+            oldDRuncloak(self)
+
+            net.Start("TTT_RemoveCorpseCall")
+            -- Must be SteamID for Dead Ringer compatibility
+            net.WriteString(self:SteamID())
+            net.Broadcast()
+        end
+    end
+
+    -- These overrides are set, no reason to check every round
+    hook.Remove("TTTPrepareRound", "PostLoadOverride")
+end)
 
 function plymeta:GetAvoidDetective()
     return self:GetInfoNum("ttt_avoid_detective", 0) > 0

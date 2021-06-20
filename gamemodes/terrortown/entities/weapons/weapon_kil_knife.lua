@@ -10,7 +10,7 @@ if CLIENT then
     SWEP.ViewModelFOV = 54
     SWEP.DrawCrosshair = false
 
-    SWEP.EquipMenuData = {type = "item_weapon", desc = "knife_desc"};
+    SWEP.EquipMenuData = {type = "item_weapon", desc = "kil_knife_desc"};
 
     SWEP.Icon = "vgui/ttt/icon_knife"
     SWEP.IconLetter = "j"
@@ -208,3 +208,31 @@ end
 function SWEP:OnDrop()
     self:Remove()
 end
+
+if CLIENT then
+    local T = LANG.GetTranslation
+    function SWEP:DrawHUD()
+       local tr = self:GetOwner():GetEyeTrace(MASK_SHOT)
+
+       if tr.HitNonWorld and IsValid(tr.Entity) and tr.Entity:IsPlayer()
+          and tr.Entity:Health() < (self.Primary.Damage + 10) then
+
+          local x = ScrW() / 2.0
+          local y = ScrH() / 2.0
+
+          surface.SetDrawColor(255, 0, 0, 255)
+
+          local outer = 20
+          local inner = 10
+          surface.DrawLine(x - outer, y - outer, x - inner, y - inner)
+          surface.DrawLine(x + outer, y + outer, x + inner, y + inner)
+
+          surface.DrawLine(x - outer, y + outer, x - inner, y + inner)
+          surface.DrawLine(x + outer, y - outer, x + inner, y - inner)
+
+          draw.SimpleText(T("knife_instant"), "TabLarge", x, y - 30, COLOR_RED, TEXT_ALIGN_CENTER, TEXT_ALIGN_BOTTOM)
+       end
+
+       return self.BaseClass.DrawHUD(self)
+    end
+ end

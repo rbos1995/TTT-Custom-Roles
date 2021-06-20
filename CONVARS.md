@@ -43,29 +43,68 @@ ttt_jester_required_innos       2 // Number of innocents for the Jester to spawn
 ttt_swapper_required_innos      2 // Number of innocents for the Swapper to spawn
 ttt_killer_required_innos       3 // Number of innocents for the Killerto spawn
 ttt_detraitor_required_traitors 2 // Number of traitors for the Detraitor to spawn
+ttt_detective_min_players       8 // Number of total players for the Detective to spawn
 
 // Role Percentages
 ttt_traitor_pct   0.25 // Percentage of total players that will be traitors
 ttt_detective_pct 0.13 // Percentage of total players that will be detectives
 ttt_monster_pct   0.25 // Percentage of total players that will be monsters (Zombies or Vampires)
 
+// Role Counts
+ttt_detective_max 32 // The maximum number of Detectives that can spawn
+ttt_traitor_max   32 // The maxinum number of players on the traitor team that can spawn
+
+// Detective
+ttt_detective_karma_min 600 // The minimum karma a player must have to be chosen as detective
+
 // Karma
 ttt_karma_jesterkill_penalty 50  // Karma penalty for killing the Jester
 ttt_karma_jester_ratio       0.5 // Ratio of damage to Jesters, to be taken from karma
 
 // Weapon Shop
-ttt_shop_merc_mode      0 // How to handle Mercenary shop weapons. All modes include weapons specifically mapped to the Mercenary role. 0 (Disable) - Do not allow additional weapons. 1 (Union) - Allow weapons available to EITHER the Traitor or the Detective. 2 (Intersect) - Allow weapons available to BOTH the Traitor and the Detective. 3 (Detective) - Allow weapons available to the Detective. 4 (Traitor) - Allow weapons available to the Traitor.
-ttt_shop_assassin_sync  0 // Whether Assassins should have all weapons that vanilla Traitors have in their weapon shop
-ttt_shop_hypnotist_sync 0 // Whether Hypnotists should have all weapons that vanilla Traitors have in their weapon shop
+ttt_shop_merc_mode      0     // How to handle Mercenary shop weapons. All modes include weapons specifically mapped to the Mercenary role. 0 (Disable) - Do not allow additional weapons. 1 (Union) - Allow weapons available to EITHER the Traitor or the Detective. 2 (Intersect) - Allow weapons available to BOTH the Traitor and the Detective. 3 (Detective) - Allow weapons available to the Detective. 4 (Traitor) - Allow weapons available to the Traitor.
+ttt_shop_assassin_sync  0     // Whether Assassins should have all weapons that vanilla Traitors have in their weapon shop
+ttt_shop_hypnotist_sync 0     // Whether Hypnotists should have all weapons that vanilla Traitors have in their weapon shop
+ttt_shop_random_percent 50    // The percent chance that a weapon in the shop will be not be shown
+ttt_shop_random_tra_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Traitors
+ttt_shop_random_asn_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Assassins
+ttt_shop_random_hyp_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Hypnotists
+ttt_shop_random_der_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Detraitors
+ttt_shop_random_det_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Detectives
+ttt_shop_random_mer_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Mercenary
+ttt_shop_random_vam_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Vampires
+ttt_shop_random_zom_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Zombies
+ttt_shop_random_kil_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Killers
+ttt_shop_random_jes_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Jesters
+ttt_shop_random_swa_percent 0 // The percent chance that a weapon in the shop will be not be shown for the Swappers
+ttt_shop_random_tra_enabled 0 // Whether role shop randomization is enabled for Traitors
+ttt_shop_random_asn_enabled 0 // Whether role shop randomization is enabled for Assassins
+ttt_shop_random_hyp_enabled 0 // Whether role shop randomization is enabled for Hypnotists
+ttt_shop_random_der_enabled 0 // Whether role shop randomization is enabled for Detraitors
+ttt_shop_random_det_enabled 0 // Whether role shop randomization is enabled for Detectives
+ttt_shop_random_mer_enabled 0 // Whether role shop randomization is enabled for Mercenary
+ttt_shop_random_vam_enabled 0 // Whether role shop randomization is enabled for Vampires
+ttt_shop_random_zom_enabled 0 // Whether role shop randomization is enabled for Zombies
+ttt_shop_random_kil_enabled 0 // Whether role shop randomization is enabled for Killers
+ttt_shop_random_jes_enabled 0 // Whether role shop randomization is enabled for Jesters
+ttt_shop_random_swa_enabled 0 // Whether role shop randomization is enabled for Swappers
 
-// Credits
+// Innocent Credits
+ttt_det_credits_starting 1 // Number of credits the Detective starts with
 ttt_mer_credits_starting 1 // Number of credits the Mercenary starts with
+
+// Traitor/Monster/Killer credits
+ttt_credits_starting     2 // Number of credits the Traitor starts with
+ttt_der_credits_starting 2 // Number of credits the Detraitor starts with
 ttt_kil_credits_starting 2 // Number of credits the Killer starts with
 ttt_asn_credits_starting 0 // Number of credits the Assassin starts with
 ttt_hyp_credits_starting 0 // Number of credits the Hypnotist starts with
 ttt_zom_credits_starting 0 // Number of credits the Zombie starts with
 ttt_vam_credits_starting 0 // Number of credits the Vampire starts with
-ttt_der_credits_starting 2 // Number of credits the Detraitor starts with
+
+// Jester/Swapper Credits
+ttt_jes_credits_starting 2 // Number of credits the Jester starts with
+ttt_swa_credits_starting 2 // Number of credits the Swapper starts with
 
 // Innocents
 ttt_phantom_weaker_each_respawn      0   // Whether a Phantom respawns weaker (1/2 as much HP) each time they respawn, down to a minimum of 1
@@ -150,6 +189,12 @@ multijump_default_jumps          1 // The amount of extra jumps players should g
 multijump_default_power          1 // Multiplier for the jump-power when multi jumping
 multijump_can_jump_while_falling 1 // Whether the player should be able to multi-jump if they didn't jump to begin with
 multijump_max_fall_distance      0 // The maximum distance a player can fall before multi jump is disabled. 0 to disable
+
+// Better Equipment Menu
+ttt_bem_allow_change 1  // Allow clients to change the look of the Traitor/Detective menu
+ttt_bem_sv_cols      4  // Sets the number of columns in the Traitor/Detective menu's item list (serverside)
+ttt_bem_sv_rows      5  // Sets the number of rows in the Traitor/Detective menu's item list (serverside)
+ttt_bem_sv_size      64 // Sets the item size in the Traitor/Detective menu's item list (serverside)
 ```
 
 Thanks to [KarlOfDuty](https://github.com/KarlOfDuty) for his original version of this document, [here](https://github.com/KarlOfDuty/TTT-Custom-Roles/blob/patch-1/README.md).
@@ -174,6 +219,14 @@ To remove weapons from a role's shop, create a .exclude.txt file with the weapon
 **NOTE**: If the _roleweapons_ folder does not already exist in garrysmod/data, create it.\
 **NOTE**: The name of the role must be all lowercase for cross-operating system compatibility. For example: garrysmod/data/roleweapons/detective/weapon_ttt_somethingcool.exclude.txt
 
+## Bypassing Weapon Randomization
+
+With the addition of the Shop Randomization feature (and the ttt_shop_random_* ConVars), weapons may not always appear in the shop (which is the point). If, however, you want certain weapons to _always_ be in the shop while other weapons are randomized, the ability to bypass shop randomization for a weapon in a role's weapon shop has been added.
+
+To stop a weapon from being removed from a role's shop via randomization, create a .norandom.txt file with the weapon class (e.g. weapon_ttt_somethingcool.norandom.txt) in the garrysmod/data/roleweapons/{rolename} folder.\
+**NOTE**: If the _roleweapons_ folder does not already exist in garrysmod/data, create it.\
+**NOTE**: The name of the role must be all lowercase for cross-operating system compatibility. For example: garrysmod/data/roleweapons/detective/weapon_ttt_somethingcool.norandom.txt
+
 ## Finding a Weapon's Class
 
 To find the class name of a weapon to use above, follow the steps below
@@ -184,9 +237,17 @@ To find the class name of a weapon to use above, follow the steps below
 
 ## Adding Equipment
 
-Equipment are items that a role can use that do not take up an equipment slot, such as the body armor or radar. To add equipment items to a role (that already has a shop), create a .txt file with the equipment item's name (e.g. "bruh bunker.txt") in the garrysmod/data/roleweapons/{rolename} folder.\
+Equipment are items that a role can use that do not take up a weapon slot, such as the body armor or radar. To add equipment items to a role (that already has a shop), create a .txt file with the equipment item's name (e.g. "bruh bunker.txt") in the garrysmod/data/roleweapons/{rolename} folder.\
 **NOTE**: If the _roleweapons_ folder does not already exist in garrysmod/data, create it.\
 **NOTE**: The name of the role must be all lowercase for cross-operating system compatibility. For example: garrysmod/data/roleweapons/detective/bruh bunker.txt
+
+## Removing Equipment
+
+Similarly there are some equipment items that you want to prevent a specific role from buying. To handle that case, the addon has the ability to exclude specific equipment items from the shop in a similar way.
+
+To remove equipment from a role's shop, create a .exclude.txt file with the item's name (e.g. "bruh bunker.exclude.txt") in the garrysmod/data/roleweapons/{rolename} folder.\
+**NOTE**: If the _roleweapons_ folder does not already exist in garrysmod/data, create it.\
+**NOTE**: The name of the role must be all lowercase for cross-operating system compatibility. For example: garrysmod/data/roleweapons/detective/bruh bunker.exclude.txt
 
 ## Finding an Equipment Item's Name
 

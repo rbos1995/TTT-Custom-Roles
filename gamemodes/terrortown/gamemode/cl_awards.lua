@@ -38,7 +38,7 @@ end
 local function FirstSuicide(events, scores, players, innocents, traitors, detectives, mercenaries, hypnotists, glitches, jesters, phantoms, zombies, vampires, swappers, assassins, killers, detraitors)
    local fs = nil
    local fnum = 0
-   for k, e in pairs(events) do
+   for _, e in pairs(events) do
       if e.id == EVENT_KILL and e.att.sid == e.vic.sid then
          fnum = fnum + 1
          if fs == nil then

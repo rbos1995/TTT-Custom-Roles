@@ -143,6 +143,8 @@ CreateConVar("ttt_hyp_credits_starting", "0", FCVAR_ARCHIVE)
 CreateConVar("ttt_zom_credits_starting", "0", FCVAR_ARCHIVE)
 CreateConVar("ttt_vam_credits_starting", "0", FCVAR_ARCHIVE)
 CreateConVar("ttt_der_credits_starting", "2", FCVAR_ARCHIVE)
+CreateConVar("ttt_jes_credits_starting", "0", FCVAR_ARCHIVE)
+CreateConVar("ttt_swa_credits_starting", "0", FCVAR_ARCHIVE)
 
 CreateConVar("ttt_detective_search_only", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_all_search_postround", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
@@ -151,6 +153,29 @@ CreateConVar("ttt_all_search_postround", "1", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_shop_merc_mode", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_shop_assassin_sync", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_shop_hypnotist_sync", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_shop_random_percent", "50", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The percent chance that a weapon in the shop will not be shown", 0, 100)
+CreateConVar("ttt_shop_random_tra_percent", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The percent chance that a weapon in the shop will not be shown for the Traitor", 0, 100)
+CreateConVar("ttt_shop_random_asn_percent", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The percent chance that a weapon in the shop will not be shown for the Assassin", 0, 100)
+CreateConVar("ttt_shop_random_hyp_percent", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The percent chance that a weapon in the shop will not be shown for the Hypnotist", 0, 100)
+CreateConVar("ttt_shop_random_der_percent", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The percent chance that a weapon in the shop will not be shown for the Detraitor", 0, 100)
+CreateConVar("ttt_shop_random_det_percent", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The percent chance that a weapon in the shop will not be shown for the Detective", 0, 100)
+CreateConVar("ttt_shop_random_mer_percent", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The percent chance that a weapon in the shop will not be shown for the Mercenary", 0, 100)
+CreateConVar("ttt_shop_random_vam_percent", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The percent chance that a weapon in the shop will not be shown for the Vampire", 0, 100)
+CreateConVar("ttt_shop_random_zom_percent", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The percent chance that a weapon in the shop will not be shown for the Zombie", 0, 100)
+CreateConVar("ttt_shop_random_kil_percent", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The percent chance that a weapon in the shop will not be shown for the Killer", 0, 100)
+CreateConVar("ttt_shop_random_jes_percent", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The percent chance that a weapon in the shop will not be shown for the Jester", 0, 100)
+CreateConVar("ttt_shop_random_swa_percent", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED, "The percent chance that a weapon in the shop will not be shown for the Swapper", 0, 100)
+CreateConVar("ttt_shop_random_tra_enabled", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_shop_random_asn_enabled", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_shop_random_hyp_enabled", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_shop_random_der_enabled", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_shop_random_det_enabled", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_shop_random_mer_enabled", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_shop_random_vam_enabled", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_shop_random_zom_enabled", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_shop_random_kil_enabled", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_shop_random_jes_enabled", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
+CreateConVar("ttt_shop_random_swa_enabled", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_assassin_show_target_icon", "0", FCVAR_ARCHIVE + FCVAR_REPLICATED)
 CreateConVar("ttt_killer_max_health", "100", FCVAR_ARCHIVE)
 CreateConVar("ttt_killer_knife_enabled", "1", FCVAR_ARCHIVE)
@@ -253,6 +278,7 @@ util.AddNetworkString("TTT_InterruptChat")
 util.AddNetworkString("TTT_PlayerSpawned")
 util.AddNetworkString("TTT_PlayerDied")
 util.AddNetworkString("TTT_CorpseCall")
+util.AddNetworkString("TTT_RemoveCorpseCall")
 util.AddNetworkString("TTT_ClearClientState")
 util.AddNetworkString("TTT_PerformGesture")
 util.AddNetworkString("TTT_Role")
@@ -281,6 +307,7 @@ util.AddNetworkString("TTT_PlayerFootstep")
 util.AddNetworkString("TTT_ClearPlayerFootsteps")
 util.AddNetworkString("TTT_JesterDeathCelebration")
 util.AddNetworkString("TTT_BuyableWeapons")
+util.AddNetworkString("TTT_ResetBuyableWeaponsCache")
 util.AddNetworkString("TTT_LogInfo")
 
 local jesterkilled = 0
@@ -386,9 +413,33 @@ function GM:SyncGlobals()
 
     SetGlobalBool("ttt_detective_search_only", GetConVar("ttt_detective_search_only"):GetBool())
     SetGlobalBool("ttt_all_search_postround", GetConVar("ttt_all_search_postround"):GetBool())
+
     SetGlobalInt("ttt_shop_merc_mode", GetConVar("ttt_shop_merc_mode"):GetInt())
     SetGlobalBool("ttt_shop_assassin_sync", GetConVar("ttt_shop_assassin_sync"):GetBool())
     SetGlobalBool("ttt_shop_hypnotist_sync", GetConVar("ttt_shop_hypnotist_sync"):GetBool())
+    SetGlobalInt("ttt_shop_random_percent", GetConVar("ttt_shop_random_percent"):GetInt())
+    SetGlobalInt("ttt_shop_random_tra_percent", GetConVar("ttt_shop_random_tra_percent"):GetInt())
+    SetGlobalInt("ttt_shop_random_asn_percent", GetConVar("ttt_shop_random_asn_percent"):GetInt())
+    SetGlobalInt("ttt_shop_random_hyp_percent", GetConVar("ttt_shop_random_hyp_percent"):GetInt())
+    SetGlobalInt("ttt_shop_random_der_percent", GetConVar("ttt_shop_random_der_percent"):GetInt())
+    SetGlobalInt("ttt_shop_random_det_percent", GetConVar("ttt_shop_random_det_percent"):GetInt())
+    SetGlobalInt("ttt_shop_random_mer_percent", GetConVar("ttt_shop_random_mer_percent"):GetInt())
+    SetGlobalInt("ttt_shop_random_vam_percent", GetConVar("ttt_shop_random_vam_percent"):GetInt())
+    SetGlobalInt("ttt_shop_random_zom_percent", GetConVar("ttt_shop_random_zom_percent"):GetInt())
+    SetGlobalInt("ttt_shop_random_kil_percent", GetConVar("ttt_shop_random_kil_percent"):GetInt())
+    SetGlobalInt("ttt_shop_random_jes_percent", GetConVar("ttt_shop_random_jes_percent"):GetInt())
+    SetGlobalInt("ttt_shop_random_swa_percent", GetConVar("ttt_shop_random_swa_percent"):GetInt())
+    SetGlobalBool("ttt_shop_random_tra_enabled", GetConVar("ttt_shop_random_tra_enabled"):GetBool())
+    SetGlobalBool("ttt_shop_random_asn_enabled", GetConVar("ttt_shop_random_asn_enabled"):GetBool())
+    SetGlobalBool("ttt_shop_random_hyp_enabled", GetConVar("ttt_shop_random_hyp_enabled"):GetBool())
+    SetGlobalBool("ttt_shop_random_der_enabled", GetConVar("ttt_shop_random_der_enabled"):GetBool())
+    SetGlobalBool("ttt_shop_random_det_enabled", GetConVar("ttt_shop_random_det_enabled"):GetBool())
+    SetGlobalBool("ttt_shop_random_mer_enabled", GetConVar("ttt_shop_random_mer_enabled"):GetBool())
+    SetGlobalBool("ttt_shop_random_vam_enabled", GetConVar("ttt_shop_random_vam_enabled"):GetBool())
+    SetGlobalBool("ttt_shop_random_zom_enabled", GetConVar("ttt_shop_random_zom_enabled"):GetBool())
+    SetGlobalBool("ttt_shop_random_kil_enabled", GetConVar("ttt_shop_random_kil_enabled"):GetBool())
+    SetGlobalBool("ttt_shop_random_jes_enabled", GetConVar("ttt_shop_random_jes_enabled"):GetBool())
+    SetGlobalBool("ttt_shop_random_swa_enabled", GetConVar("ttt_shop_random_swa_enabled"):GetBool())
 
     SetGlobalBool("ttt_monsters_are_traitors", GetConVar("ttt_monsters_are_traitors"):GetBool())
     SetGlobalBool("ttt_zombies_are_traitors", GetConVar("ttt_zombies_are_traitors"):GetBool())
@@ -474,7 +525,7 @@ end
 -- we regularly check for these broken spectators while we wait for players
 -- and immediately fix them.
 function FixSpectators()
-    for k, ply in pairs(player.GetAll()) do
+    for _, ply in pairs(player.GetAll()) do
         if ply:IsSpec() and not ply:GetRagdollSpec() and ply:GetMoveType() < MOVETYPE_NOCLIP then
             ply:Spectate(OBS_MODE_ROAMING)
         end
@@ -639,7 +690,6 @@ function PrepareRound()
         v:SetNWBool("zombie_prime", false)
         v:SetNWBool("vampire_prime", false)
         v:SetNWInt("vampire_previous_role", ROLE_NONE)
-        v:SetNWFloat("RmdtSpeedModifier", 1)
         -- Workaround to prevent GMod sprint from working
         v:SetRunSpeed(v:GetWalkSpeed())
     end
@@ -676,6 +726,9 @@ function PrepareRound()
     KARMA.RoundBegin()
 
     DRINKS.RoundBegin()
+
+    WEPS.ResetWeaponsCache()
+    WEPS.ResetRoleWeaponCache()
 
     -- New look. Random if no forced model set.
     GAMEMODE.playermodel = GAMEMODE.force_plymodel == "" and GetRandomPlayerModel() or GAMEMODE.force_plymodel
@@ -925,7 +978,7 @@ function BeginRound()
 
     if CheckForAbort() then return end
 
-    ReadRoleEquipment()
+    HandleRoleEquipment()
     InitRoundEndTime()
 
     if CheckForAbort() then return end
@@ -935,6 +988,9 @@ function BeginRound()
 
     -- Remove their ragdolls
     ents.TTT.RemoveRagdolls(true)
+
+    -- Check for low-karma players that weren't banned on round end
+    if KARMA.cv.autokick:GetBool() then KARMA.CheckAutoKickAll() end
 
     if CheckForAbort() then return end
     -- Select traitors & co. This is where things really start so we can't abort
@@ -1340,7 +1396,7 @@ local function PrintRoleText(text)
 end
 
 local function PrintRole(ply, role)
-    PrintRoleText(ply:Nick() .. " (" .. ply:SteamID() .. ") - " .. role)
+    PrintRoleText(ply:Nick() .. " (" .. ply:SteamID() .. " | " .. ply:SteamID64() .. ") - " .. role)
 end
 
 function SelectRoles()
@@ -1369,7 +1425,7 @@ function SelectRoles()
         -- everyone on the spec team is in specmode
         if IsValid(v) and (not v:IsSpec()) then
             -- save previous role and sign up as possible traitor/detective
-            local r = GAMEMODE.LastRole[v:SteamID()] or v:GetRole() or ROLE_INNOCENT
+            local r = GAMEMODE.LastRole[v:SteamID64()] or v:GetRole() or ROLE_INNOCENT
 
             table.insert(prev_roles[r], v)
             table.insert(choices, v)
@@ -1419,6 +1475,7 @@ function SelectRoles()
     local hasGlitch = false
     local hasKiller = false
     local hasDetraitor = false
+    local repeatMax = 6
 
     PrintRoleText("-----CHECKING EXTERNALLY CHOSEN ROLES-----")
     for _, v in pairs(player.GetAll()) do
@@ -1501,7 +1558,7 @@ function SelectRoles()
             local pply, pick = GetRandomPlayer(choices)
 
             -- make this guy zombie if he was not a traitor last time, or if he makes a roll
-            if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_TRAITOR, ROLE_ASSASSIN, ROLE_HYPNOTIST, ROLE_ZOMBIE, ROLE_VAMPIRE) or (math.random(1, 3) == 2)) then
+            if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_TRAITOR, ROLE_ASSASSIN, ROLE_HYPNOTIST, ROLE_ZOMBIE, ROLE_VAMPIRE) or (math.random(1, repeatMax) == 1)) then
                 PrintRole(pply, "Zombie")
                 pply:SetRole(ROLE_ZOMBIE)
                 pply:SetZombiePrime(true)
@@ -1527,7 +1584,7 @@ function SelectRoles()
             end
 
             -- make this guy traitor if he was not one last time, or if he makes a roll
-            if IsValid(pply) and (not wasTraitor or math.random(1, 3) == 2) then
+            if IsValid(pply) and (not wasTraitor or math.random(1, repeatMax) == 1) then
                 if ts >= GetConVar("ttt_detraitor_required_traitors"):GetInt() and GetConVar("ttt_detraitor_enabled"):GetBool() and math.random() <= detraitor_chance and ds == 0 and not hasDetraitor then
                     PrintRole(pply, "Detraitor")
                     pply:SetRole(ROLE_DETRAITOR)
@@ -1564,7 +1621,7 @@ function SelectRoles()
             local pply, pick = GetRandomPlayer(choices)
 
             -- make this guy monster if he was not one last time, or if he makes a roll
-            if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_ZOMBIE, ROLE_VAMPIRE) or math.random(1, 3) == 2) then
+            if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_ZOMBIE, ROLE_VAMPIRE) or math.random(1, repeatMax) == 1) then
                 if not GetGlobalBool("ttt_zombies_are_traitors") and ts >= GetConVar("ttt_zombie_required_traitors"):GetInt() and GetConVar("ttt_zombie_enabled"):GetBool() and math.random() <= zombie_chance and not hasMonster then
                     PrintRole(pply, "Zombie")
                     pply:SetRole(ROLE_ZOMBIE)
@@ -1608,7 +1665,7 @@ function SelectRoles()
         local pply, pick = GetRandomPlayer(choices)
 
         -- we are less likely to be a detective unless we were innocent last round
-        if (IsValid(pply) and (pply:GetBaseKarma() >= min_karma and WasRole(prev_roles, pply, ROLE_INNOCENT, ROLE_GLITCH, ROLE_PHANTOM, ROLE_MERCENARY) or math.random(1, 3) == 2)) then
+        if (IsValid(pply) and (pply:GetBaseKarma() >= min_karma and WasRole(prev_roles, pply, ROLE_INNOCENT, ROLE_GLITCH, ROLE_PHANTOM, ROLE_MERCENARY) or math.random(1, repeatMax) == 1)) then
             -- if a player has specified he does not want to be detective, we skip
             -- him here (he might still get it if we don't have enough
             -- alternatives)
@@ -1625,7 +1682,7 @@ function SelectRoles()
     local pply, pick = GetRandomPlayer(choices)
 
     -- make this guy jester if he was not one last time, or if he makes a roll
-    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_JESTER, ROLE_SWAPPER) or math.random(1, 3) == 2) then
+    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_JESTER, ROLE_SWAPPER) or math.random(1, repeatMax) == 1) then
         if GetConVar("ttt_jester_enabled"):GetBool() and #choices >= GetConVar("ttt_jester_required_innos"):GetInt() and math.random() <= jester_chance and not hasJester then
             if IsValid(pply) then
                 PrintRole(pply, "Jester")
@@ -1646,7 +1703,7 @@ function SelectRoles()
     -- select random index in choices table
     pply, pick = GetRandomPlayer(choices)
     -- make this guy killer if he was not one last time, or if he makes a roll
-    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_KILLER) or math.random(1, 3) == 2) then
+    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_KILLER) or math.random(1, repeatMax) == 1) then
         if GetConVar("ttt_killer_enabled"):GetBool() and #choices >= GetConVar("ttt_killer_required_innos"):GetInt() and math.random() <= killer_chance and not hasKiller then
             if IsValid(pply) then
                 PrintRole(pply, "Killer")
@@ -1661,7 +1718,7 @@ function SelectRoles()
 
     -- select random index in choices table
     pply, pick = GetRandomPlayer(choices)
-    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_MERCENARY) or math.random(1, 3) == 2) then
+    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_MERCENARY) or math.random(1, repeatMax) == 1) then
         if GetConVar("ttt_mercenary_enabled"):GetBool() and #choices >= GetConVar("ttt_mercenary_required_innos"):GetInt() and math.random() <= mercenary_chance and not hasMercenary then
             if IsValid(pply) then
                 PrintRole(pply, "Mercenary")
@@ -1674,7 +1731,7 @@ function SelectRoles()
 
     -- select random index in choices table
     pply, pick = GetRandomPlayer(choices)
-    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_PHANTOM) or math.random(1, 3) == 2) then
+    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_PHANTOM) or math.random(1, repeatMax) == 1) then
         if GetConVar("ttt_phantom_enabled"):GetBool() and #choices >= GetConVar("ttt_phantom_required_innos"):GetInt() and math.random() <= phantom_chance and not hasPhantom then
             if IsValid(pply) then
                 PrintRole(pply, "Phantom")
@@ -1687,7 +1744,7 @@ function SelectRoles()
 
     -- select random index in choices table
     pply, pick = GetRandomPlayer(choices)
-    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_GLITCH) or math.random(1, 3) == 2) then
+    if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_GLITCH) or math.random(1, repeatMax) == 1) then
         -- Only spawn a glitch if we have multiple vanilla Traitors since otherwise the role doesn't do anything
         if GetConVar("ttt_glitch_enabled"):GetBool() and #choices >= GetConVar("ttt_glitch_required_innos"):GetInt() and math.random() <= glitch_chance and not hasGlitch and vanilla_ts > 1 then
             if IsValid(pply) then
@@ -1713,7 +1770,7 @@ function SelectRoles()
         ply:SetDefaultCredits()
 
         -- store a steamid -> role map
-        GAMEMODE.LastRole[ply:SteamID()] = ply:GetRole()
+        GAMEMODE.LastRole[ply:SteamID64()] = ply:GetRole()
     end
 end
 
@@ -1737,13 +1794,17 @@ end
 concommand.Add("ttt_roundrestart", ForceRoundRestart)
 
 -- If this logic or the list of roles who can buy is changed, it must also be updated in weaponry.lua and cl_equip.lua
-function ReadRoleEquipment()
+-- This also sends a cache reset request to every client so that things like shop randomization happen every round
+function HandleRoleEquipment()
+    local handled = false
     for id, name in pairs(ROLE_STRINGS) do
         local rolefiles, _ = file.Find("roleweapons/" .. name .. "/*.txt", "DATA")
-        local roleweapons = { }
         local roleexcludes = { }
+        local roleenorandoms = { }
+        local roleweapons = { }
         for _, v in pairs(rolefiles) do
             local exclude = false
+            local norandom = false
             -- Extract the weapon name from the file name
             local lastdotpos = v:find("%.")
             local weaponname = v:sub(0, lastdotpos - 1)
@@ -1757,23 +1818,35 @@ function ReadRoleEquipment()
                 extension = extension:sub(0, lastdotpos - 1)
                 if extension:lower() == "exclude" then
                     exclude = true
+                elseif extension:lower() == "norandom" then
+                    norandom = true
                 end
             end
 
             if exclude then
                 table.insert(roleexcludes, weaponname)
+            elseif norandom then
+                table.insert(roleenorandoms, weaponname)
             else
                 table.insert(roleweapons, weaponname)
             end
         end
 
-        if #roleweapons > 0 or #roleexcludes > 0 then
+        if #roleweapons > 0 or #roleexcludes > 0 or #roleenorandoms > 0 then
             net.Start("TTT_BuyableWeapons")
             net.WriteInt(id, 16)
             net.WriteTable(roleweapons)
             net.WriteTable(roleexcludes)
+            net.WriteTable(roleenorandoms)
             net.Broadcast()
+            handled = true
         end
+    end
+
+    -- Send this once if the roleweapons feature wasn't used (which resets the cache on its own)
+    if not handled then
+        net.Start("TTT_ResetBuyableWeaponsCache")
+        net.Broadcast()
     end
 end
 

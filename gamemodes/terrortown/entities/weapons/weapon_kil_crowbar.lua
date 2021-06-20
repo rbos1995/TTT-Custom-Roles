@@ -1,10 +1,15 @@
 SWEP.HoldType  = "melee"
-SWEP.PrintName = "Throwable Crowbar"
 
-if (CLIENT) then
+if CLIENT then
+    SWEP.PrintName = "kil_crowbar_name"
     SWEP.Slot = 6
+
     SWEP.ViewModelFOV = 86
     SWEP.ViewModelFlip = false
+
+    SWEP.EquipMenuData = {type = "item_weapon", desc = "kil_crowbar_desc"};
+
+    SWEP.Icon = "vgui/ttt/icon_cbar"
 end
 
 SWEP.Base = "weapon_tttbase"

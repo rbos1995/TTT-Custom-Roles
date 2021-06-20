@@ -49,7 +49,7 @@ if SERVER then
             elseif killer == victim then
                 reason = "suicide"
             elseif IsValid(entity) then
-                if victim:IsPlayer() and entity:GetClass() == "prop_physics" or entity:GetClass() == "prop_dynamic" or entity:GetClass() == "prop_physics" then -- If the killer is also a prop
+                if victim:IsPlayer() and (string.StartWith(entity:GetClass(), "prop_physics") or entity:GetClass() == "prop_dynamic") then -- If the killer is also a prop
                     reason = "prop"
                 elseif IsValid(killer) then
                     if entity:GetClass() == "entityflame" and killer:GetClass() == "entityflame" then

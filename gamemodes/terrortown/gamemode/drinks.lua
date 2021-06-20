@@ -71,7 +71,7 @@ function DRINKS.CreateDrinkMessage(convar, key, message)
 	else
 		punishment = GetConVar(convar):GetString()
 	end
-	
+
 	local punishedplys = DRINKS.PlayerActions[key]
 	if #punishedplys > 0 and (punishment == "drink" or punishment == "shot") then
 		if punishment == "drink" then
@@ -79,13 +79,13 @@ function DRINKS.CreateDrinkMessage(convar, key, message)
 		elseif punishment == "shot" then
 			message = " a shot for " .. message
 		end
-		
+
 		if #punishedplys == 1 then
 			message = " takes" .. message
 		else
 			message = " take" .. message
 		end
-		
+
 		for key, nick in pairs(punishedplys) do
 			if key == 1 and #punishedplys > 1 then
 				message = " and " .. nick .. message
@@ -95,7 +95,7 @@ function DRINKS.CreateDrinkMessage(convar, key, message)
 				message = ", " .. nick .. message
 			end
 		end
-		
+
 		return message
 	else
 		return false
@@ -108,14 +108,14 @@ function DRINKS.NotifyPlayers()
 	local suicidemessage = DRINKS.CreateDrinkMessage("ttt_drinking_suicide", "suicide", "committing suicide.")
 	local jesterkillmessage = DRINKS.CreateDrinkMessage("ttt_drinking_jester_kill", "jesterkill", "killing the jester.")
 	local goldengunmessage = DRINKS.CreateDrinkMessage("shot", "goldengun", "dying to the golden gun.")
-	
+
 	for _, ply in pairs(player.GetAll()) do
 		if deathmessage then ply:PrintMessage(HUD_PRINTTALK, deathmessage) end
 		if teamkillmessage then ply:PrintMessage(HUD_PRINTTALK, teamkillmessage) end
 		if suicidemessage then ply:PrintMessage(HUD_PRINTTALK, suicidemessage) end
 		if jesterkillmessage then ply:PrintMessage(HUD_PRINTTALK, jesterkillmessage) end
 		if goldengunmessage then ply:PrintMessage(HUD_PRINTTALK, goldengunmessage) end
-		
+
 		if (ply:GetLiveDrinks() and ply:GetLiveDrinks() > ply:GetBaseDrinks()) or (ply:GetLiveShots() and ply:GetLiveShots() > ply:GetBaseShots()) then
 			ply:PrintMessage(HUD_PRINTTALK, "You must take " .. ((ply:GetLiveDrinks() or 0) - (ply:GetBaseDrinks() or 0)) .. " drink(s) and " .. ((ply:GetLiveShots() or 0) - (ply:GetBaseShots() or 0)) .. " shot(s).")
 			ply:PrintMessage(HUD_PRINTCENTER, "You must take " .. ((ply:GetLiveDrinks() or 0) - (ply:GetBaseDrinks() or 0)) .. " drink(s) and " .. ((ply:GetLiveShots() or 0) - (ply:GetBaseShots() or 0)) .. " shot(s).")
@@ -138,7 +138,7 @@ end
 
 function DRINKS.InitPlayer(ply)
 	local ds = DRINKS.Recall(ply) or { 0, 0 }
-	
+
 	ply:SetBaseDrinks(ds[1])
 	ply:SetLiveDrinks(ds[1])
 	ply:SetBaseShots(ds[2])
@@ -147,17 +147,17 @@ end
 
 function DRINKS.Remember(ply)
 	if not ply:IsFullyAuthenticated() then return end
-	
+
 	ply:SetPData("drinks_stored", ply:GetLiveDrinks())
 	ply:SetPData("shots_stored", ply:GetLiveShots())
-	
+
 	-- this is purely a backup method
-	DRINKS.RememberedPlayers[ply:SteamID()] = { ply:GetLiveDrinks(), ply:GetLiveShots() }
+	DRINKS.RememberedPlayers[ply:SteamID64()] = { ply:GetLiveDrinks(), ply:GetLiveShots() }
 end
 
 function DRINKS.Recall(ply)
 	ply.delay_drinks_recall = not ply:IsFullyAuthenticated()
-	
+
 	if ply:IsFullyAuthenticated() then
 		local d = tonumber(ply:GetPData("drinks_stored", nil))
 		local s = tonumber(ply:GetPData("shots_stored", nil))
@@ -165,13 +165,13 @@ function DRINKS.Recall(ply)
 			return { d, s }
 		end
 	end
-	
-	return DRINKS.RememberedPlayers[ply:SteamID()]
+
+	return DRINKS.RememberedPlayers[ply:SteamID64()]
 end
 
 function DRINKS.LateRecallAndSet(ply)
-	local d = tonumber(ply:GetPData("drinks_stored", DRINKS.RememberedPlayers[ply:SteamID()][1]))
-	local s = tonumber(ply:GetPData("shots_stored", DRINKS.RememberedPlayers[ply:SteamID()][2]))
+	local d = tonumber(ply:GetPData("drinks_stored", DRINKS.RememberedPlayers[ply:SteamID64()][1]))
+	local s = tonumber(ply:GetPData("shots_stored", DRINKS.RememberedPlayers[ply:SteamID64()][2]))
 	if d and s then
 		ply:SetBaseDrinks(d)
 		ply:SetLiveDrinks(d)

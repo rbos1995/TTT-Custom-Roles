@@ -10,7 +10,6 @@ if CLIENT then
     SWEP.Slot = 8 -- add 1 to get the slot number key
     SWEP.ViewModelFOV = 54
     SWEP.ViewModelFlip = false
-    SWEP.UseHands = true
 else
     util.AddNetworkString("TTT_Zombified")
 end
@@ -129,8 +128,8 @@ function SWEP:PrimaryAttack()
         self:GetOwner():SetAnimation(PLAYER_ATTACK1)
 
         if hitEnt and hitEnt:IsValid() then
-            if hitEnt:IsPlayer() and not hitEnt:IsZombieAlly() then
-                if hitEnt:Health() <= self.Primary.Damage and not hitEnt:IsJester() and not hitEnt:IsSwapper() then
+            if hitEnt:IsPlayer() and not hitEnt:IsZombieAlly() and not hitEnt:IsJesterTeam() then
+                if hitEnt:Health() <= self.Primary.Damage then
                     self:GetOwner():AddCredits(1)
                     LANG.Msg(self:GetOwner(), "credit_zom", { num = 1 })
                     hitEnt:PrintMessage(HUD_PRINTCENTER, "You will respawn as a zombie in 3 seconds.")

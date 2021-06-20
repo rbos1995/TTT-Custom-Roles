@@ -823,7 +823,7 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
         local phantomUsers = table.GetKeys(deadPhantoms)
         for _, key in pairs(phantomUsers) do
             local phantom = deadPhantoms[key]
-            if phantom.attacker == ply:UniqueID() and IsValid(phantom.player) then
+            if phantom.attacker == ply:SteamID64() and IsValid(phantom.player) then
                 local deadPhantom = phantom.player
                 deadPhantom:SetNWBool("Haunting", false)
                 deadPhantom:SetNWString("HauntingTarget", nil)
@@ -1174,7 +1174,7 @@ function GM:PlayerDeath(victim, infl, attacker)
 
         if GetConVar("ttt_phantom_killer_haunt"):GetBool() then
             victim:SetNWBool("Haunting", true)
-            victim:SetNWString("HauntingTarget", attacker:UniqueID())
+            victim:SetNWString("HauntingTarget", attacker:SteamID64())
             victim:SetNWInt("HauntingPower", 0)
             timer.Create(victim:Nick() .. "HauntingPower", 1, 0, function()
                 -- Make sure the victim is still in the correct spectate mode
@@ -1205,12 +1205,12 @@ function GM:PlayerDeath(victim, infl, attacker)
             end
         end
 
-        local uqid = victim:UniqueID()
+        local sid = victim:SteamID64()
         -- Keep track of how many times this Phantom has been killed and by who
-        if not deadPhantoms[uqid] then
-            deadPhantoms[uqid] = {times = 1, player = victim, attacker = attacker:UniqueID()}
+        if not deadPhantoms[sid] then
+            deadPhantoms[sid] = {times = 1, player = victim, attacker = attacker:SteamID64()}
         else
-            deadPhantoms[uqid] = {times = deadPhantoms[uqid].times + 1, player = victim, attacker = attacker:UniqueID()}
+            deadPhantoms[sid] = {times = deadPhantoms[sid].times + 1, player = victim, attacker = attacker:SteamID64()}
         end
     end
 
@@ -1534,7 +1534,7 @@ function GM:EntityTakeDamage(ent, dmginfo)
 
         if ent:IsPlayer() and ent:IsJesterTeam() then
             -- Damage type DMG_GENERIC is "0" which doesn't seem to work with IsDamageType
-            if (att:IsPlayer() and att:IsZombie()) or dmginfo:IsExplosionDamage() or dmginfo:IsDamageType(DMG_BURN) or dmginfo:IsDamageType(DMG_CRUSH) or dmginfo:IsFallDamage() or dmginfo:IsDamageType(DMG_DROWN) or dmginfo:GetDamageType() == 0 or dmginfo:IsDamageType(DMG_DISSOLVE) then
+            if dmginfo:IsExplosionDamage() or dmginfo:IsDamageType(DMG_BURN) or dmginfo:IsDamageType(DMG_CRUSH) or dmginfo:IsFallDamage() or dmginfo:IsDamageType(DMG_DROWN) or dmginfo:GetDamageType() == 0 or dmginfo:IsDamageType(DMG_DISSOLVE) then
                 dmginfo:ScaleDamage(0)
                 dmginfo:SetDamage(0)
             end
@@ -1548,7 +1548,7 @@ function GM:EntityTakeDamage(ent, dmginfo)
         end
     end
 
-    if att:IsPlayer() and att:IsJesterTeam() and GetRoundState() == ROUND_ACTIVE then
+    if att:IsPlayer() and att:IsJesterTeam() and ent:IsPlayer() and GetRoundState() == ROUND_ACTIVE then
         dmginfo:ScaleDamage(0)
         dmginfo:SetDamage(0)
     end
@@ -1678,14 +1678,42 @@ function GM:PlayerTakeDamage(ent, infl, att, amount, dmginfo)
         end
     end
 
-    -- handle fire attacker
-    if ent.ignite_info and dmginfo:IsDamageType(DMG_DIRECT) then
+    -- Get the active entity fire info
+    local ignite_info = ent.ignite_info
+
+    -- Check if we have extended info
+    if ent.ignite_info_ext then
+        -- If we have extended info but not regular info
+        if not ignite_info then
+            -- Check that the extended info is still valid and use it, if so
+            if ent.ignite_info_ext.end_time > CurTime() then
+                ignite_info = ent.ignite_info_ext
+            -- Otherwise clear it out
+            else
+                ent.ignite_info_ext = nil
+            end
+        else
+            -- If we have both regular and extended info, save the attacker and inflictor to the extended info for later
+            if not ent.ignite_info_ext.att then
+                ent.ignite_info_ext.att = ent.ignite_info.att
+            end
+            if not ent.ignite_info_ext.infl then
+                ent.ignite_info_ext.infl = ent.ignite_info.infl
+            end
+        end
+    end
+
+    -- Handle fire attacker
+    if ignite_info and dmginfo:IsDamageType(DMG_DIRECT) then
         local datt = dmginfo:GetAttacker()
-        if (not IsValid(datt)) or (not datt:IsPlayer()) then
-            local ignite = ent.ignite_info
-            if IsValid(ignite.att) and IsValid(ignite.infl) then
-                dmginfo:SetAttacker(ignite.att)
-                dmginfo:SetInflictor(ignite.infl)
+        if (not IsValid(datt) or not datt:IsPlayer()) and IsValid(ignite_info.att) and IsValid(ignite_info.infl) then
+            dmginfo:SetAttacker(ignite_info.att)
+            dmginfo:SetInflictor(ignite_info.infl)
+
+            -- Set burning damage from jester team to zero, regardless of source
+            if ignite_info.att:IsJesterTeam() then
+                dmginfo:ScaleDamage(0)
+                dmginfo:SetDamage(0)
             end
         end
     end

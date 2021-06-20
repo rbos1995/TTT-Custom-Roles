@@ -53,6 +53,12 @@ include("cl_voice.lua")
 CreateClientConVar("ttt_role_symbols", 0, true, false, "Shows symbols instead of letters in role icons.")
 CreateClientConVar("ttt_export_player_data", 0, true, false)
 
+local killer_vision = false
+local zombie_vision = false
+local vampire_vision = false
+local traitor_vision = false
+local vision_enabled = false
+
 function GM:Initialize()
     MsgN("TTT Client initializing...")
 
@@ -117,6 +123,9 @@ local function RoundStateChange(o, n)
 
         -- reset cached server language in case it has changed
         RunConsoleCommand("_ttt_request_serverlang")
+
+        -- Reset client equipment list so the randomization changes every round
+        Equipment = { }
     elseif n == ROUND_ACTIVE then
         -- round starts
         VOICE.CycleMuteState(MUTE_NONE)
@@ -228,6 +237,18 @@ local function ReceiveRole()
     if not client.SetRole then return end
 
     client:SetRole(role)
+
+    -- Update the local state
+    killer_vision = GetGlobalBool("ttt_killer_vision_enable")
+    zombie_vision = GetGlobalBool("ttt_zombie_vision_enable")
+    vampire_vision = GetGlobalBool("ttt_vampire_vision_enable")
+    traitor_vision = GetGlobalBool("ttt_traitor_vision_enable")
+
+    -- Disable highlights on role change
+    if vision_enabled then
+        hook.Remove("PreDrawHalos", "AddPlayerHighlights")
+        vision_enabled = false
+    end
 
     Msg("You are: ")
     if client:IsTraitor() then MsgN("TRAITOR")
@@ -444,7 +465,9 @@ function GM:Tick()
         if client:Alive() and client:Team() ~= TEAM_SPEC then
             WSWITCH:Think()
             RADIO:StoreTarget()
-            HandleRoleForcedWeapons(client)
+            if killer_vision or zombie_vision or vampire_vision or traitor_vision then
+                HandleRoleHighlights(client)
+            end
         end
 
         VOICE.Tick()
@@ -660,37 +683,36 @@ local function EnableTraitorHighlights()
     end)
 end
 
-function HandleRoleForcedWeapons(ply)
-    if not IsValid(ply) then return end
+function HandleRoleHighlights(client)
+    if not IsValid(client) then return end
 
-    local enabled = false
-    if ply:IsKiller() then
-        if GetGlobalBool("ttt_killer_vision_enable") then
+    if client:IsKiller() and killer_vision then
+        if not vision_enabled then
             EnableKillerHighlights()
-            enabled = true
+            vision_enabled = true
         end
-    elseif ply:IsZombie() then
-        if ply.GetActiveWeapon and IsValid(ply:GetActiveWeapon()) then
-            if GetGlobalBool("ttt_zombie_vision_enable") and ply:GetActiveWeapon():GetClass() == "weapon_zom_claws" then
-                EnableZombieHighlights()
-                enabled = true
-            end
+    elseif client:IsZombie() and zombie_vision and
+            client.GetActiveWeapon and IsValid(client:GetActiveWeapon()) and client:GetActiveWeapon():GetClass() == "weapon_zom_claws" then
+        if not vision_enabled then
+            EnableZombieHighlights()
+            vision_enabled = true
         end
-    elseif ply:IsVampire() then
-        if ply.GetActiveWeapon and IsValid(ply:GetActiveWeapon()) then
-            if GetGlobalBool("ttt_vampire_vision_enable") and ply:GetActiveWeapon():GetClass() == "weapon_vam_fangs" then
-                EnableVampireHighlights()
-                enabled = true
-            end
+    elseif client:IsVampire() and vampire_vision and
+            client.GetActiveWeapon and IsValid(client:GetActiveWeapon()) and client:GetActiveWeapon():GetClass() == "weapon_vam_fangs" then
+        if not vision_enabled then
+            EnableVampireHighlights()
+            vision_enabled = true
         end
-    elseif ply:IsTraitorTeam() then
-        if GetGlobalBool("ttt_traitor_vision_enable") then
+    elseif client:IsTraitorTeam() and traitor_vision then
+        if not vision_enabled then
             EnableTraitorHighlights()
-            enabled = true
+            vision_enabled = true
         end
+    else
+        vision_enabled = false
     end
 
-    if not enabled then
+    if not vision_enabled then
         hook.Remove("PreDrawHalos", "AddPlayerHighlights")
     end
 end

@@ -213,13 +213,22 @@ function WEPS.DropNotifiedWeapon(ply, wep, death_drop)
         -- auto-pickup when nearby.
         wep.IsDropped = true
 
+        -- After dropping a weapon, always switch to holstered, so that traitors
+        -- will never accidentally pull out a traitor weapon.
+        --
+        -- Perform this *before* the drop in order to abuse the fact that this
+        -- holsters the weapon, which in turn aborts any reload that's in
+        -- progress. We don't want a dropped weapon to be in a reloading state
+        -- because the relevant timer is reset when picking it up, making the
+        -- reload happen instantly. This allows one to dodge the delay by dropping
+        -- during reload. All of this is a workaround for not having access to
+        -- CBaseWeapon::AbortReload() (and that not being handled in
+        -- CBaseWeapon::Drop in the first place).
+        ply:SelectWeapon("weapon_ttt_unarmed")
+
         ply:DropWeapon(wep)
 
         wep:PhysWake()
-
-        -- After dropping a weapon, always switch to holstered, so that traitors
-        -- will never accidentally pull out a traitor weapon
-        ply:SelectWeapon("weapon_ttt_unarmed")
     end
 end
 
@@ -305,7 +314,7 @@ local function GiveEquipmentWeapon(sid, cls)
     -- Referring to players by SteamID because a player may disconnect while his
     -- unique timer still runs, in which case we want to be able to stop it. For
     -- that we need its name, and hence his SteamID.
-    local ply = player.GetBySteamID(sid)
+    local ply = player.GetBySteamID64(sid)
     local tmr = "give_equipment" .. sid
 
     if (not IsValid(ply)) or (not ply:IsActiveSpecial()) then
@@ -335,7 +344,7 @@ local function GiveEquipmentWeapon(sid, cls)
 end
 
 local function HasPendingOrder(ply)
-    return timer.Exists("give_equipment" .. tostring(ply:SteamID()))
+    return timer.Exists("give_equipment" .. tostring(ply:SteamID64()))
 end
 
 function GM:TTTCanOrderEquipment(ply, id, is_item)
@@ -343,26 +352,29 @@ function GM:TTTCanOrderEquipment(ply, id, is_item)
     return true
 end
 
-local BuyableWeapons = { }
-local ExcludeWeapons = { }
-
-local function PrepWeaponsLists(role)
-    -- Initialize the lists for this role
-    if not BuyableWeapons[role] then
-        BuyableWeapons[role] = {}
+-- This logic is also mirrored in cl_equip.lua
+function WEPS.ResetWeaponsCache()
+    -- Reset the CanBuy list or save the original for next time
+    for _, v in pairs(weapons.GetList()) do
+        if v and v.CanBuy then
+            if v.CanBuyOrig then
+                v.CanBuy = table.Copy(v.CanBuyOrig)
+            else
+                v.CanBuyOrig = table.Copy(v.CanBuy)
+            end
+        end
     end
-    if not ExcludeWeapons[role] then
-        ExcludeWeapons[role] = {}
-    end
+    WEPS.ResetRoleWeaponCache()
 end
 
 -- If this logic or the list of roles who can buy is changed, it must also be updated in init.lua and cl_equip.lua
 local function ReadRoleEquipment(role, rolename)
-    PrepWeaponsLists(role)
+    WEPS.PrepWeaponsLists(role)
 
     local rolefiles, _ = file.Find("roleweapons/" .. rolename .. "/*.txt", "DATA")
     for _, v in pairs(rolefiles) do
         local exclude = false
+        local norandom = false
         -- Extract the weapon name from the file name
         local lastdotpos = v:find("%.")
         local weaponname = v:sub(0, lastdotpos - 1)
@@ -376,17 +388,22 @@ local function ReadRoleEquipment(role, rolename)
             extension = extension:sub(0, lastdotpos - 1)
             if extension:lower() == "exclude" then
                 exclude = true
+            elseif extension:lower() == "norandom" then
+                norandom = true
             end
         end
 
         if exclude then
-            table.insert(ExcludeWeapons[role], weaponname)
+            table.insert(WEPS.ExcludeWeapons[role], weaponname)
+        elseif norandom then
+            table.insert(WEPS.BypassRandomWeapons[role], weaponname)
         else
-            table.insert(BuyableWeapons[role], weaponname)
+            table.insert(WEPS.BuyableWeapons[role], weaponname)
         end
     end
 end
 
+WEPS.ResetWeaponsCache()
 for id, name in pairs(ROLE_STRINGS) do
     ReadRoleEquipment(id, name)
 end
@@ -430,15 +447,22 @@ local function OrderEquipment(ply, cmd, args)
             return
         end
 
+        -- If the last key in the table does not match how many keys there are, this is a non-sequential table
+        -- table.RemoveByValue does not work with non-sequential tables and there is not an easy way
+        -- of removing items from a non-sequential table by key or value
+        if #swep_table.CanBuy ~= table.Count(swep_table.CanBuy) then
+            swep_table.CanBuy = table.ClearKeys(swep_table.CanBuy)
+        end
+
         -- Add the loaded weapons for this role
-        HandleRoleWeapons(role, BuyableWeapons[role], swep_table, id)
+        HandleRoleWeapons(role, WEPS.BuyableWeapons[role], swep_table, id)
 
         -- If the player is a mercenary and mercenaries should have all weapons that traitors and detectives have
         if mercmode > 0 and role == ROLE_MERCENARY then
             -- Traitor OR Detective or Detective only modes
             if mercmode == 1 or mercmode == 3 then
                 -- Add the loaded weapons for Detective
-                HandleRoleWeapons(role, BuyableWeapons[ROLE_DETECTIVE], swep_table, id)
+                HandleRoleWeapons(role, WEPS.BuyableWeapons[ROLE_DETECTIVE], swep_table, id)
 
                 -- If this weapon is still not buyable but is buyable by Detective, add this role directly
                 if not table.HasValue(swep_table.CanBuy, role) and table.HasValue(swep_table.CanBuy, ROLE_DETECTIVE) then
@@ -449,7 +473,7 @@ local function OrderEquipment(ply, cmd, args)
             -- Traitor OR Detective or Traitor only modes
             if mercmode == 1 or mercmode == 4 then
                 -- Add the loaded weapons for Traitor
-                HandleRoleWeapons(role, BuyableWeapons[ROLE_TRAITOR], swep_table, id)
+                HandleRoleWeapons(role, WEPS.BuyableWeapons[ROLE_TRAITOR], swep_table, id)
 
                 -- If this weapon is still not buyable but is buyable by Traitor, add this role directly
                 if not table.HasValue(swep_table.CanBuy, role) and table.HasValue(swep_table.CanBuy, ROLE_TRAITOR) then
@@ -460,8 +484,8 @@ local function OrderEquipment(ply, cmd, args)
             -- Traitor AND Detective
             -- If this weapon is not buyable by this role
             if mercmode == 2 and not table.HasValue(swep_table.CanBuy, role) then
-                local traitorbuyable = (BuyableWeapons[ROLE_TRAITOR] and table.HasValue(BuyableWeapons[ROLE_TRAITOR], id)) or table.HasValue(swep_table.CanBuy, ROLE_TRAITOR)
-                local detectivebuyable = (BuyableWeapons[ROLE_DETECTIVE] and table.HasValue(BuyableWeapons[ROLE_DETECTIVE], id)) or table.HasValue(swep_table.CanBuy, ROLE_DETECTIVE)
+                local traitorbuyable = (WEPS.BuyableWeapons[ROLE_TRAITOR] and table.HasValue(WEPS.BuyableWeapons[ROLE_TRAITOR], id)) or table.HasValue(swep_table.CanBuy, ROLE_TRAITOR)
+                local detectivebuyable = (WEPS.BuyableWeapons[ROLE_DETECTIVE] and table.HasValue(WEPS.BuyableWeapons[ROLE_DETECTIVE], id)) or table.HasValue(swep_table.CanBuy, ROLE_DETECTIVE)
                 -- If the weapon is buyable in either of the two methods by both the Traitor and the Detective, add it for this role too
                 if traitorbuyable and detectivebuyable then
                     table.insert(swep_table.CanBuy, role)
@@ -471,7 +495,7 @@ local function OrderEquipment(ply, cmd, args)
         -- If the player is a non-vanilla traitor and they should have all weapons that vanilla traitors have
         if sync_assassin or sync_hypnotist then
             -- Add the loaded weapons for Traitor
-            HandleRoleWeapons(role, BuyableWeapons[ROLE_TRAITOR], swep_table, id)
+            HandleRoleWeapons(role, WEPS.BuyableWeapons[ROLE_TRAITOR], swep_table, id)
 
             -- If this weapon is still not buyable but is buyable by Traitor, add this role directly
             if not table.HasValue(swep_table.CanBuy, role) and table.HasValue(swep_table.CanBuy, ROLE_TRAITOR) then
@@ -480,7 +504,7 @@ local function OrderEquipment(ply, cmd, args)
         end
         -- If the player is a detraitor they should have all the weapons of a detective
         if role == ROLE_DETRAITOR then
-            HandleRoleWeapons(role, BuyableWeapons[ROLE_DETECTIVE], swep_table, id)
+            HandleRoleWeapons(role, WEPS.BuyableWeapons[ROLE_DETECTIVE], swep_table, id)
 
             -- If this weapon is still not buyable but is buyable by Detective, add this role directly
             if not table.HasValue(swep_table.CanBuy, role) and table.HasValue(swep_table.CanBuy, ROLE_DETECTIVE) then
@@ -489,7 +513,7 @@ local function OrderEquipment(ply, cmd, args)
         end
 
         -- After all that, make sure each of the excluded weapons is NOT in the role's equipment list
-        local excludetable = ExcludeWeapons[role]
+        local excludetable = WEPS.ExcludeWeapons[role]
         if excludetable and table.HasValue(excludetable, id) and table.HasValue(swep_table.CanBuy, role) then
             table.RemoveByValue(swep_table.CanBuy, role)
         end
@@ -526,14 +550,28 @@ local function OrderEquipment(ply, cmd, args)
             end
         end
 
-        -- If it's still not allowed, check the extra buyable equipment
+        -- If it's not allowed, check the extra buyable equipment
         if not allowed then
-            for _, v in pairs(BuyableWeapons[role]) do
+            for _, v in ipairs(WEPS.BuyableWeapons[role]) do
                 -- If this isn't a weapon, get its information from one of the roles and compare that to the ID we have
                 if not weapons.GetStored(v) then
                     local equip = GetEquipmentItemById(id)
                     if equip ~= nil then
                         allowed = true
+                        break
+                    end
+                end
+            end
+        end
+
+        -- Lastly, if it is allowed check the exclude equipment list
+        if allowed then
+            for _, v in ipairs(WEPS.ExcludeWeapons[role]) do
+                -- If this isn't a weapon, get its information from one of the roles and compare that to the ID we have
+                if not weapons.GetStored(v) then
+                    local equip = GetEquipmentItemById(id)
+                    if equip ~= nil then
+                        allowed = false
                         break
                     end
                 end
@@ -569,7 +607,7 @@ local function OrderEquipment(ply, cmd, args)
         -- no longer restricted to only WEAPON_EQUIP weapons, just anything that
         -- is whitelisted and carryable
         if ply:CanCarryWeapon(swep_table) then
-            GiveEquipmentWeapon(ply:SteamID(), id)
+            GiveEquipmentWeapon(ply:SteamID64(), id)
 
             received = true
         end
@@ -587,7 +625,7 @@ local function OrderEquipment(ply, cmd, args)
                 net.Start("TTT_BoughtItem")
                 net.WriteBit(is_item)
                 if is_item then
-                    net.WriteUInt(id, 16)
+                    net.WriteUInt(id, 32)
                 else
                     net.WriteString(id)
                 end
@@ -674,10 +712,10 @@ local function TransferCredits(ply, cmd, args)
     if (not IsValid(ply)) or (not ply:IsActiveSpecial()) then return end
     if #args ~= 2 then return end
 
-    local uid = tostring(args[1])
+    local sid = tostring(args[1])
     local credits = tonumber(args[2])
-    if uid and credits then
-        local target = player.GetByUniqueID(uid)
+    if sid and credits then
+        local target = player.GetBySteamID64(sid)
         if (not IsValid(target)) or (not target:IsActiveSpecial()) or not IsSameTeam(target, ply) or (target == ply) then
             LANG.Msg(ply, "xfer_no_recip")
             return
@@ -705,10 +743,10 @@ local function FakeTransferCredits(ply, cmd, args)
     if (not IsValid(ply)) or (not ply:IsActiveSpecial()) then return end
     if #args ~= 2 then return end
 
-    local uid = tostring(args[1])
+    local sid = tostring(args[1])
     local credits = tonumber(args[2])
-    if uid and credits then
-        local target = player.GetByUniqueID(uid)
+    if sid and credits then
+        local target = player.GetBySteamID64(sid)
         if (not IsValid(target)) or (target == ply) then
             LANG.Msg(ply, "xfer_no_recip")
             return
@@ -729,6 +767,29 @@ local function FakeTransferCredits(ply, cmd, args)
 end
 
 concommand.Add("ttt_fake_transfer_credits", FakeTransferCredits)
+
+local function BotTransferCredits(ply, cmd, args)
+    if (not IsValid(ply)) or (not ply:IsActiveSpecial()) then return end
+    if #args ~= 2 then return end
+
+    local name = args[1]
+    local credits = tonumber(args[2])
+    if name and credits then
+        if ply:GetCredits() < credits then
+            LANG.Msg(ply, "xfer_no_credits")
+            return
+        end
+
+        credits = math.Clamp(credits, 0, ply:GetCredits())
+        if credits == 0 then return end
+
+        ply:SubtractCredits(credits)
+
+        LANG.Msg(ply, "xfer_success", { player = name })
+    end
+end
+
+concommand.Add("ttt_bot_transfer_credits", BotTransferCredits)
 
 -- Protect against non-TTT weapons that may break the HUD
 function GM:WeaponEquip(wep)

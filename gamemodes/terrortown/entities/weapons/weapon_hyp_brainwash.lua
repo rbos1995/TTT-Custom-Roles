@@ -134,16 +134,8 @@ if SERVER then
     end
 
     local function bodyply(body)
-        local ply = false
-
-        if body.sid == "BOT" then
-            ply = player.GetByUniqueID(body.uqid)
-        else
-            ply = player.GetBySteamID(body.sid)
-        end
-
+        local ply = player.GetBySteamID64(body.sid)
         if not IsValid(ply) then return false end
-
         return ply
     end
 
@@ -196,7 +188,7 @@ if SERVER then
 
         -- Un-haunt the Hypnotist if the target was the Phantom
         local owner = self:GetOwner()
-        if ply:IsPhantom() and ply:GetNWString("HauntingTarget", nil) == owner:UniqueID() then
+        if ply:IsPhantom() and ply:GetNWString("HauntingTarget", nil) == owner:SteamID64() then
             owner:SetNWBool("Haunted", false)
         end
 
@@ -207,6 +199,7 @@ if SERVER then
         ply:SetRole(ROLE_TRAITOR)
         ply:StripWeapon("weapon_zom_claws")
         ply:StripWeapon("weapon_vam_fangs")
+        ply:SetNWBool("RoleRevealed", false)
         ply:PrintMessage(HUD_PRINTCENTER, "You have been brainwashed and are now a traitor.")
         ply:SetHealth(spawnhealth)
 
@@ -246,7 +239,7 @@ if SERVER then
 
         self:SetState(DEFIB_BUSY)
         self:SetBegin(CurTime())
-        self:SetMessage("DEFIBRILLATING " .. string.upper(ply:Nick()))
+        self:SetMessage("BRAINWASHING " .. string.upper(ply:Nick()))
 
         self:GetOwner():EmitSound(hum, 75, math.random(98, 102), 1)
 
@@ -259,7 +252,7 @@ if SERVER then
             if self:GetBegin() + charge <= CurTime() then
                 self:Defib()
             elseif not self:GetOwner():KeyDown(IN_ATTACK) or self:GetOwner():GetEyeTrace(MASK_SHOT_HULL).Entity ~= self.Target then
-                self:Error("DEFIBRILLATION ABORTED")
+                self:Error("BRAINWASHING ABORTED")
             end
         end
     end

@@ -264,11 +264,26 @@ net.Receive("TTT_C4Warn", ReceiveC4Warn)
 
 local function ReceiveCorpseCall()
     local pos = net.ReadVector()
-    local eidx = net.ReadUInt(16)
-    table.insert(RADAR.called_corpses, { eidx = eidx, pos = pos, called = CurTime() })
+    local sid = net.ReadString()
+    table.insert(RADAR.called_corpses, { sid = sid, pos = pos, called = CurTime() })
 end
 
 net.Receive("TTT_CorpseCall", ReceiveCorpseCall)
+
+local function RemoveCorpseCall()
+    local sid = net.ReadString()
+    -- Remove the radar icon for the searched corpse
+    if RADAR and RADAR.called_corpses then
+        for i, v in pairs(RADAR.called_corpses) do
+            if v.sid == sid then
+                table.remove(RADAR.called_corpses, i)
+                return
+            end
+        end
+    end
+end
+
+net.Receive("TTT_RemoveCorpseCall", RemoveCorpseCall)
 
 local function RecieveTeleportMark()
     local pos = net.ReadVector()

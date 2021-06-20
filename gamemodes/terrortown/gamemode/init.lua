@@ -91,6 +91,7 @@ CreateConVar("ttt_vampire_enabled", "1", FCVAR_ARCHIVE)
 CreateConVar("ttt_swapper_enabled", "1", FCVAR_ARCHIVE)
 CreateConVar("ttt_assassin_enabled", "1", FCVAR_ARCHIVE)
 CreateConVar("ttt_killer_enabled", "1", FCVAR_ARCHIVE)
+CreateConVar("ttt_lookout_enabled", "1", FCVAR_ARCHIVE)
 
 CreateConVar("ttt_detraitor_chance", "0.2", FCVAR_ARCHIVE)
 CreateConVar("ttt_zombie_chance", "0.1", FCVAR_ARCHIVE)
@@ -103,6 +104,7 @@ CreateConVar("ttt_mercenary_chance", "0.25", FCVAR_ARCHIVE)
 CreateConVar("ttt_jester_chance", "0.25", FCVAR_ARCHIVE)
 CreateConVar("ttt_swapper_chance", "0.25", FCVAR_ARCHIVE)
 CreateConVar("ttt_killer_chance", "0.25", FCVAR_ARCHIVE)
+CreateConVar("ttt_lookout_chance", "0.25", FCVAR_ARCHIVE)
 
 CreateConVar("ttt_detraitor_required_traitors", "2", FCVAR_ARCHIVE)
 CreateConVar("ttt_mercenary_required_innos", "2", FCVAR_ARCHIVE)
@@ -115,6 +117,7 @@ CreateConVar("ttt_vampire_required_traitors", "2", FCVAR_ARCHIVE)
 CreateConVar("ttt_swapper_required_innos", "2", FCVAR_ARCHIVE)
 CreateConVar("ttt_assassin_required_traitors", "2", FCVAR_ARCHIVE)
 CreateConVar("ttt_killer_required_innos", "3", FCVAR_ARCHIVE)
+CreateConVar("ttt_lookout_required_innos", "2", FCVAR_ARCHIVE)
 
 CreateConVar("ttt_monster_pct", "0.33", FCVAR_ARCHIVE)
 CreateConVar("ttt_monsters_are_traitors", "0", FCVAR_ARCHIVE)
@@ -1015,7 +1018,7 @@ function BeginRound()
             for _, p in pairs(player.GetAll()) do
                 if p:Alive() and not p:IsSpec() then
                     -- Exclude Glitch from this list so they don't get discovered immediately
-                    if p:IsInnocent() or p:IsPhantom() or p:IsMercenary() or p:IsKiller() then
+                    if p:IsInnocent() or p:IsPhantom() or p:IsMercenary() or p:IsKiller() or p:IsLookout() then
                         table.insert(enemies, p:Nick())
                     -- Count monsters as enemies if Monsters-as-Traitors is not enabled
                     elseif p:IsMonsterTeam() and not player.IsMonsterTraitorAlly(p) then
@@ -1193,7 +1196,7 @@ function LogScore(type)
     end
 
     local roundRoles = { false, false, false, false, false, false, false, false, false, false, false, false, false }
-    local roleNames = { "Innocent", "Traitor", "Detective", "Mercenary", "Jester", "Phantom", "Hypnotist", "Glitch", "Zombie", "Vampire", "Swapper", "Assassin", "Killer", "Detraitor" }
+    local roleNames = { "Innocent", "Traitor", "Detective", "Mercenary", "Jester", "Phantom", "Hypnotist", "Glitch", "Zombie", "Vampire", "Swapper", "Assassin", "Killer", "Detraitor", "Lookout" }
 
     for _, v in pairs(player.GetAll()) do
         local traitor_win = type == WIN_TRAITOR and player.IsTraitorTeam(v)
@@ -1416,7 +1419,8 @@ function SelectRoles()
         [ROLE_SWAPPER] = {},
         [ROLE_ASSASSIN] = {},
         [ROLE_KILLER] = {},
-        [ROLE_DETRAITOR] = {}
+        [ROLE_DETRAITOR] = {},
+        [ROLE_LOOKOUT] = {},
     };
 
     if not GAMEMODE.LastRole then GAMEMODE.LastRole = {} end
@@ -1451,6 +1455,7 @@ function SelectRoles()
     local glitch_chance = GetConVar("ttt_glitch_chance"):GetFloat()
     local phantom_chance = GetConVar("ttt_phantom_chance"):GetFloat()
     local mercenary_chance = GetConVar("ttt_mercenary_chance"):GetFloat()
+    local lookout_chance = GetConVar("ttt_lookout_chance"):GetFloat()
 
     if choice_count == 0 then return end
 
@@ -1475,6 +1480,7 @@ function SelectRoles()
     local hasGlitch = false
     local hasKiller = false
     local hasDetraitor = false
+    local hasLookout = false 
     local repeatMax = 6
 
     PrintRoleText("-----CHECKING EXTERNALLY CHOSEN ROLES-----")
@@ -1542,6 +1548,9 @@ function SelectRoles()
                 elseif role == ROLE_GLITCH then
                     hasGlitch = true
                     PrintRole(v, "Glitch")
+                elseif role ==ROLE_LOOKOUT then
+                    hasLookout = true
+                    PrintRole(v, "Lookout")
                 elseif role == ROLE_INNOCENT then
                     PrintRole(v, "Innocent")
                 end
@@ -1665,7 +1674,7 @@ function SelectRoles()
         local pply, pick = GetRandomPlayer(choices)
 
         -- we are less likely to be a detective unless we were innocent last round
-        if (IsValid(pply) and (pply:GetBaseKarma() >= min_karma and WasRole(prev_roles, pply, ROLE_INNOCENT, ROLE_GLITCH, ROLE_PHANTOM, ROLE_MERCENARY) or math.random(1, repeatMax) == 1)) then
+        if (IsValid(pply) and (pply:GetBaseKarma() >= min_karma and WasRole(prev_roles, pply, ROLE_INNOCENT, ROLE_GLITCH, ROLE_PHANTOM, ROLE_MERCENARY, ROLE_LOOKOUT) or math.random(1, repeatMax) == 1)) then
             -- if a player has specified he does not want to be detective, we skip
             -- him here (he might still get it if we don't have enough
             -- alternatives)
@@ -1755,6 +1764,19 @@ function SelectRoles()
             end
         end
     end
+
+      -- select random index in choices table
+      pply, pick = GetRandomPlayer(choices)
+      if IsValid(pply) and (not WasRole(prev_roles, pply, ROLE_LOOKOUT) or math.random(1, repeatMax) == 1) then
+          if GetConVar("ttt_lookout_enabled"):GetBool() and #choices >= GetConVar("ttt_lookout_required_innos"):GetInt() and math.random() <= lookout_chance and not hasLookout then
+              if IsValid(pply) then
+                  PrintRole(pply, "Lookout")
+                  pply:SetRole(ROLE_LOOKOUT)
+                  table.remove(choices, pick)
+                  hasLookout = true
+              end
+          end
+      end
 
     -- Anyone left is innocent
     for _, v in pairs(choices) do

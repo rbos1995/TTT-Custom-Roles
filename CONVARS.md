@@ -18,10 +18,12 @@ ttt_jester_enabled    1 // Whether the Jester should spawn or not
 ttt_swapper_enabled   1 // Whether the Swapper should spawn or not
 ttt_killer_enabled    1 // Whether the Killer should spawn or not
 ttt_detraitor_enabled 0 // Whether the Detraitor should spawn or not
+ttt_lookout_enabled // Whether the Lookout should spawn or not
 
 // Role Spawn Chances
 ttt_glitch_chance    0.25 // Chance of the Glitch spawning in a round. NOTE: Glitch will only spawn if there are 2 vanilla traitors in the round. Any less than that and the Glitch is made obvious by looking at the scoreboard
 ttt_mercenary_chance 0.25 // Chance of the Mercenary spawning in a round
+ttt_lookout_chance 0.25 // Chance of the Mercenary spawning in a round
 ttt_phantom_chance   0.25 // Chance of the Phantom spawning in a round
 ttt_assassin_chance  0.20 // Chance of the Assassin spawning in a round
 ttt_hypnotist_chance 0.20 // Chance of the Hypnotist spawning in a round
@@ -34,6 +36,7 @@ ttt_detraitor_chance 0.20 // Chance of the Detraitor spawning in a round
 
 // Role Spawn Requirements
 ttt_glitch_required_innos       2 // Number of innocents for the Glitch to spawn
+ttt_lookout_required_innos      2 // Number of innocents for the Lookout to spawn
 ttt_mercenary_required_innos    2 // Number of innocents for the Mercenary to spawn
 ttt_phantom_required_innos      2 // Number of innocents for the Phantom to spawn
 ttt_assassin_required_traitors  2 // Number of traitors for the Assassin to spawn
@@ -92,6 +95,7 @@ ttt_shop_random_swa_enabled 0 // Whether role shop randomization is enabled for 
 // Innocent Credits
 ttt_det_credits_starting 1 // Number of credits the Detective starts with
 ttt_mer_credits_starting 1 // Number of credits the Mercenary starts with
+ttt_loo_credits_starting 1 // Number of credits the Lookout starts with 
 
 // Traitor/Monster/Killer credits
 ttt_credits_starting     2 // Number of credits the Traitor starts with

@@ -102,7 +102,8 @@ local rolecolor = {
     swapper = Color(111, 0, 255, 30),
     assassin = Color(112, 50, 0, 30),
     killer = Color(60, 0, 80, 30),
-    detraitor = Color(112, 27, 140, 255)
+    detraitor = Color(112, 27, 140, 255),
+    lookout = Color(113, 123, 40, 255),
 }
 
 function GM:TTTScoreboardColorForPlayer(ply)
@@ -168,6 +169,8 @@ function GM:TTTScoreboardRowColorForPlayer(ply)
             return rolecolor.killer
         elseif ply:IsDetraitor() then
             return rolecolor.detraitor
+        elseif ply:IsLookout() then
+            return rolecolor.lookout
         else
             return rolecolor.innocent
         end
@@ -265,6 +268,8 @@ function PANEL:Paint(width, height)
         rolestr = "der"
     elseif c == rolecolor.killer then
         rolestr = "kil"
+    elseif c == rolecolor.lookout then
+        rolestr = "loo"
     end
 
     if rolestr ~= "" then

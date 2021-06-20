@@ -45,9 +45,11 @@ function plymeta:GetAssassin() return self:GetRole() == ROLE_ASSASSIN end
 
 function plymeta:GetKiller() return self:GetRole() == ROLE_KILLER end
 
+function plymeta:GetLookout() return self:GetRole() == ROLE_LOOKOUT end
+
 function plymeta:GetTraitorTeam() return self:GetTraitor() or self:GetAssassin() or self:GetHypnotist() or self:GetDetraitor() end
 
-function plymeta:GetInnocentTeam() return self:GetDetective() or self:GetInnocent() or self:GetMercenary() or self:GetPhantom() or self:GetGlitch() end
+function plymeta:GetInnocentTeam() return self:GetDetective() or self:GetInnocent() or self:GetMercenary() or self:GetPhantom() or self:GetGlitch() or self:GetLookout() end
 
 function plymeta:GetMonsterTeam() return self:GetZombie() or self:GetVampire() end
 
@@ -103,6 +105,7 @@ plymeta.IsVampirePrime = plymeta.GetVampirePrime
 plymeta.IsSwapper = plymeta.GetSwapper
 plymeta.IsAssassin = plymeta.GetAssassin
 plymeta.IsKiller = plymeta.GetKiller
+plymeta.IsLookout = plymeta.GetLookout
 plymeta.IsTraitorTeam = plymeta.GetTraitorTeam
 plymeta.IsInnocentTeam = plymeta.GetInnocentTeam
 plymeta.IsMonsterTeam = plymeta.GetMonsterTeam
@@ -160,6 +163,8 @@ function plymeta:IsActiveSwapper() return self:IsActiveRole(ROLE_SWAPPER) end
 function plymeta:IsActiveAssassin() return self:IsActiveRole(ROLE_ASSASSIN) end
 
 function plymeta:IsActiveKiller() return self:IsActiveRole(ROLE_KILLER) end
+
+function plymeta:IsActiveLookout() return self:IsActiveRole(ROLE_LOOKOUT) end
 
 function plymeta:IsActiveSpecial() return self:IsSpecial() and self:IsActive() end
 

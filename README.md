@@ -10,7 +10,8 @@ Goal: Kill all members of the traitor and monsters teams\
 **Detective** - Inspect dead bodies to help identify the baddies\
 **Glitch** - An innocent that appears as a Traitor to members of the Traitor team\
 **Mercenary** - An innocent with a weapon shop\
-**Phantom** - Will haunt your killer, showing black smoke. When avenged, you have another chance for life
+**Phantom** - Will haunt your killer, showing black smoke. When avenged, you have another chance for life\
+**Lookout** - An innocent that tracks baddies/neutrals\
 
 # Traitor Team
 Goal: Kill all non-team members (except Jester/Swapper)\

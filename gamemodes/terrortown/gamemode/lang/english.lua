@@ -16,6 +16,7 @@ L.vampire = "Vampire"
 L.swapper = "Swapper"
 L.assassin = "Assassin"
 L.killer = "Killer"
+L.Lookout = "Lookout"
 L.monster = "Monster"
 L.innocent = "Innocent"
 L.hidden = "Hidden"
@@ -80,6 +81,7 @@ L.body_found_s = "They were a Swapper."
 L.body_found_a = "They were an Assassin!"
 L.body_found_k = "They were a Killer."
 L.body_found_i = "They were Innocent."
+L.body_found_lo = "They were a Lookout"
 
 L.body_confirm = "{finder} confirmed the death of {victim}."
 
@@ -217,6 +219,7 @@ L.search_role_s = "This person was a Swapper."
 L.search_role_a = "This person was an Assassin!"
 L.search_role_k = "This person was a Killer."
 L.search_role_i = "This person was Innocent."
+L.search_role_lo = "This person was Lookout"
 
 L.search_words = "Something tells you some of this person's last words were: '{lastwords}'"
 L.search_armor = "They were wearing nonstandard body armor."
@@ -667,6 +670,7 @@ L.target_jester = "JESTER"
 L.target_swapper = "SWAPPER"
 L.target_killer = "KILLER"
 L.target_detraitor = "DETRAITOR"
+L.target_lookout = "LOOKUT"
 L.target_fellow_traitor = "FELLOW TRAITOR"
 L.target_fellow_zombie = "FELLOW ZOMBIE"
 L.target_current_target = "CURRENT TARGET"
@@ -713,6 +717,10 @@ the traitors will be looking to take you down first!
 Press {menukey} to receive your equipment!]]
 
 L.info_popup_mercenary = [[You are a Mercenary! Try to survive and help your innocent friends!
+
+Press {menukey} to receive your equipment!]]
+
+L.info_popup_lookout = [[You are a Lookout! Try to work with your innocent friends to figure out who is bad and who is not! 
 
 Press {menukey} to receive your equipment!]]
 

@@ -231,6 +231,9 @@ function GM:PostDrawTranslucentRenderables()
                 elseif v:IsDetraitor() then
                     render.SetMaterial(indicator_matder)
                     render.DrawQuadEasy(pos, dir, 8, 8, indicator_col, 180)
+                elseif v:IsLookout() then
+                    render.SetMaterial(indicator_matder)
+                    render.DrawQuadEasy(pos, dir, 8, 8, indicator_col, 180)
                 end
             end
             if not hide_roles then
@@ -415,6 +418,7 @@ function GM:HUDDrawTargetID()
     local target_swapper = false
     local target_killer = false
     local target_detraitor = false
+    local target_lookout = false
     local target_fellow_traitor = false
     local target_fellow_zombie = false
     local target_current_target = false
@@ -471,6 +475,7 @@ function GM:HUDDrawTargetID()
             target_swapper = ent:IsSwapper()
             target_killer = ent:IsKiller()
             target_detraitor = ent:IsDetraitor()
+            target_lookout = ent:IsLookout()
         end
         if not hide_roles and GetRoundState() == ROUND_ACTIVE then
             if client:IsTraitorTeam() then
@@ -542,7 +547,7 @@ function GM:HUDDrawTargetID()
 
     local w, h = 0, 0 -- text width/height, reused several times
 
-    if target_innocent or target_detective or target_glitch or target_mercenary or target_phantom or target_traitor or target_assassin or target_hypnotist or target_vampire or target_zombie or target_jester or target_swapper or target_killer or target_fellow_traitor or target_fellow_zombie or target_detraitor then
+    if target_innocent or target_detective or target_glitch or target_mercenary or target_phantom or target_traitor or target_assassin or target_hypnotist or target_vampire or target_zombie or target_jester or target_swapper or target_killer or target_fellow_traitor or target_fellow_zombie or target_detraitor or target_lookout then
         surface.SetTexture(ring_tex)
 
         if target_innocent then
@@ -573,6 +578,8 @@ function GM:HUDDrawTargetID()
             surface.SetDrawColor(180, 23, 253, 200)
         elseif target_killer then
             surface.SetDrawColor(50, 0, 70, 200)
+        elseif target_lookout then 
+            surface.SetDrawColor(113, 123, 40, 200)
         end
         surface.DrawTexturedRect(x - 32, y - 32, 64, 64)
     end
@@ -705,6 +712,9 @@ function GM:HUDDrawTargetID()
 	elseif target_killer then
 		text = L.target_killer
 		clr = Color(50, 0, 70, 200)
+    elseif target_lookout then
+        text = L.target_lookout
+        clr = Color(113, 123, 40, 200) 
 	elseif ent.sb_tag and ent.sb_tag.txt ~= nil then
 		text = L[ent.sb_tag.txt]
 		clr = ent.sb_tag.color

@@ -81,6 +81,8 @@ function SendAssassinList(ply_or_rf) SendRoleList(ROLE_ASSASSIN, ply_or_rf) end
 
 function SendKillerList(ply_or_rf) SendRoleList(ROLE_KILLER, ply_or_rf) end
 
+function SendLookoutList(ply_or_rf) SendRoleList(ROLE_LOOKOUT, ply_or_rf) end
+
 function SendInnocentList(ply_or_rf) SendRoleList(ROLE_INNOCENT, ply_or_rf) end
 
 function SendConfirmedTraitorList(ply_or_rf) SendConfirmedRoleList(ROLE_TRAITOR, ply_or_rf) end
@@ -111,6 +113,7 @@ function SendFullStateUpdate()
     SendSwapperList()
     SendAssassinList()
     SendKillerList()
+    SendLookoutList()
     -- not useful to sync confirmed traitors here
 end
 
@@ -145,6 +148,7 @@ local function request_rolelist(ply)
         SendPhantomList(ply)
         SendSwapperList(ply)
         SendKillerList(ply)
+        SendLookoutList(ply)
 
         if (GetGlobalBool("ttt_monsters_are_traitors") or GetGlobalBool("ttt_zombies_are_traitors")) and ply:IsTraitorTeam() then
             SendZombieList(ply)
@@ -518,6 +522,30 @@ local function force_killer(ply)
 end
 
 concommand.Add("ttt_force_killer", force_killer, nil, nil, FCVAR_CHEAT)
+
+local function force_lookout(ply)
+    ply:SetRoleAndBroadcast(ROLE_LOOKOUT)
+    ply:SetMaxHealth(100)
+    ply:SetHealth(100)
+    ply:AddCredits(GetConVarNumber("ttt_loo_credits_starting"))
+    if ply:HasWeapon("weapon_hyp_brainwash") then
+        ply:StripWeapon("weapon_hyp_brainwash")
+    end
+    if ply:HasWeapon("weapon_vam_fangs") then
+        ply:StripWeapon("weapon_vam_fangs")
+    end
+    if ply:HasWeapon("weapon_zom_claws") then
+        ply:StripWeapon("weapon_zom_claws")
+    end
+    if ply:HasWeapon("weapon_kil_knife") then
+        ply:StripWeapon("weapon_kil_knife")
+    end
+    ply:Give("weapon_zm_improvised")
+
+    SendFullStateUpdate()
+end
+
+concommand.Add("ttt_force_lookout", force_lookout, nil, nil, FCVAR_CHEAT)
 
 local function force_spectate(ply, cmd, arg)
     if IsValid(ply) then

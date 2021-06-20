@@ -48,7 +48,8 @@ local bg_colors = {
     traitor = Color(200, 25, 25, 200),
     innocent = Color(25, 200, 25, 200),
     detective = Color(25, 25, 200, 200),
-    mercenary = Color(245, 200, 0, 200),
+    mercenary = Color(113,123,40, 200),
+    lookout = Color(245, 200, 0, 200),
     hypnotist = Color(255, 80, 235, 200),
     glitch = Color(245, 106, 0, 200),
     jester = Color(180, 23, 253, 200),
@@ -187,6 +188,8 @@ local function DrawBg(x, y, width, height, client)
         col = bg_colors.killer
     elseif client:IsDetraitor() then
         col = bg_colors.detraitor
+    elseif client:IsLookOut() then 
+        col = bg_colors.lookout
     end
 
     draw.RoundedBoxEx(8, x, y, tw, th, col, true, false, false, true)

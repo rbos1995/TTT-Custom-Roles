@@ -24,6 +24,7 @@ CLSCORE.SwapperIDs = {}
 CLSCORE.AssassinIDs = {}
 CLSCORE.KillerIDs = {}
 CLSCORE.DetraitorIDs = {}
+CLSCORE.LookoutIDs = {}
 CLSCORE.Players = {}
 CLSCORE.StartTime = 0
 CLSCORE.Panel = nil
@@ -407,8 +408,8 @@ function CLSCORE:BuildScorePanel(dpanel)
             else
                 was_monster = s.was_zombie or s.was_vampire
             end
-            local was_innocent = s.was_innocent or s.was_detective or s.was_phantom or s.was_mercenary or s.was_glitch
-            local role = s.was_traitor and T("traitor") or (s.was_detective and T("detective") or (s.was_hypnotist and T("hypnotist") or (s.was_mercenary and T("mercenary") or (s.was_jester and T("jester") or (s.was_phantom and T("phantom") or (s.was_glitch and T("glitch") or (s.was_zombie and T("zombie") or (s.was_vampire and T("vampire") or (s.was_swapper and T("swapper") or (s.was_assassin and T("assassin") or (s.was_killer and T("killer") or (s.was_detraitor and T("detraitor") or T("innocent")))))))))))))
+            local was_innocent = s.was_innocent or s.was_detective or s.was_phantom or s.was_mercenary or s.was_glitch, s.was_lookout
+            local role = s.was_traitor and T("traitor") or (s.was_detective and T("detective") or (s.was_hypnotist and T("hypnotist") or (s.was_mercenary and T("mercenary") or (s.was_jester and T("jester") or (s.was_phantom and T("phantom") or (s.was_glitch and T("glitch") or (s.was_zombie and T("zombie") or (s.was_vampire and T("vampire") or (s.was_swapper and T("swapper") or (s.was_assassin and T("assassin") or (s.was_killer and T("killer") or (s.was_detraitor and T("detraitor") or(s.was_lookout and T("lookout") or T("innocent"))))))))))))))
 
             local surv = ""
             if s.deaths > 0 then
@@ -713,7 +714,7 @@ function CLSCORE:BuildSummaryPanel(dpanel)
     for id, s in pairs(scores) do
         if id ~= -1 then
             local playerName = nicks[id]
-            local role = s.was_traitor and "tra" or (s.was_detective and "det" or (s.was_hypnotist and "hyp" or (s.was_jester and "jes" or (s.was_swapper and "swa" or (s.was_mercenary and "mer" or (s.was_glitch and "gli" or (s.was_phantom and "pha" or (s.was_zombie and "zom" or (s.was_assassin and "ass" or (s.was_vampire and "vam" or (s.was_killer and "kil" or (s.was_detraitor and "der" or "inn"))))))))))))
+            local role = s.was_traitor and "tra" or (s.was_detective and "det" or (s.was_hypnotist and "hyp" or (s.was_jester and "jes" or (s.was_swapper and "swa" or (s.was_mercenary and "mer" or (s.was_glitch and "gli" or (s.was_phantom and "pha" or (s.was_zombie and "zom" or (s.was_assassin and "ass" or (s.was_vampire and "vam" or (s.was_killer and "kil" or (s.was_detraitor and "der" or (s.was_lookout and "loo" or "inn")))))))))))))
 
             -- Convert the original swapper to their new role
             if s.was_swapper and jesterkillerrole >= ROLE_INNOCENT then
@@ -745,6 +746,8 @@ function CLSCORE:BuildSummaryPanel(dpanel)
                     role = "kil"
                 elseif jesterkillerrole == ROLE_DETRAITOR then
                     role = "der"
+                elseif jesterkillerrole == ROLE_LOOKOUT then
+                    role ="loo"
                 end
             end
 
@@ -1086,6 +1089,7 @@ function CLSCORE:Reset()
     self.AssassinIDs = {}
     self.KillerIDs = {}
     self.DetraitorIDs = {}
+    self.LookoutIDs = {}
     self.Players = {}
     self.RoundStarted = 0
 
@@ -1109,6 +1113,8 @@ function CLSCORE:Init(events)
     local assassin = nil
     local killer = nil
     local detraitor = nil
+    local lookout = nil
+
     for _, e in pairs(events) do
         if e.id == EVENT_GAME and e.state == ROUND_ACTIVE then
             starttime = e.t
@@ -1127,6 +1133,7 @@ function CLSCORE:Init(events)
             assassin = e.assassin_ids
             killer = e.killer_ids
             detraitor = e.detraitor_ids
+            lookout = e.lookout_ids
         end
 
         if starttime and traitors then
@@ -1160,9 +1167,10 @@ function CLSCORE:Init(events)
         HandleRoleChange(assassin, role, ROLE_ASSASSIN, sid)
         HandleRoleChange(killer, role, ROLE_KILLER, sid)
         HandleRoleChange(detraitor, role, ROLE_DETRAITOR, sid)
+        HandleRoleChange(lookout, role, ROLE_LOOKOUT, sid)
     end
 
-    scores = ScoreEventLog(events, scores, innocents, traitors, detectives, hypnotist, mercenary, jester, phantom, glitch, zombie, vampire, swapper, assassin, killer, detraitor)
+    scores = ScoreEventLog(events, scores, innocents, traitors, detectives, hypnotist, mercenary, jester, phantom, glitch, zombie, vampire, swapper, assassin, killer, detraitor, lookout)
 
     self.Players = nicks
     self.Scores = scores
@@ -1180,6 +1188,7 @@ function CLSCORE:Init(events)
     self.AssassinIDs = assassin
     self.KillerIDs = killer
     self.DetraitorIDs = detraitor
+    self.LookoutIDs = lookout
     self.StartTime = starttime
     self.Events = events
 end

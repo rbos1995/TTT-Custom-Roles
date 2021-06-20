@@ -93,6 +93,8 @@ function plymeta:SetDefaultCredits()
         self:SetCredits(math.ceil(GetConVar("ttt_det_credits_starting"):GetInt()))
     elseif self:IsMercenary() then
         self:SetCredits(math.ceil(GetConVar("ttt_mer_credits_starting"):GetInt()))
+    elseif self:IsLookout() then
+        self.SetCredits(math.ceil(GetConVar("ttt_loo_credits_starting"):GetInt()))
     elseif self:IsKiller() then
         self:SetCredits(math.ceil(GetConVar("ttt_kil_credits_starting"):GetInt()))
     elseif self:IsJester() then

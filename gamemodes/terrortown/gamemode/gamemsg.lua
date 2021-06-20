@@ -196,6 +196,9 @@ function GetInnocentFilter(alive_only)
     return GetPlayerFilter(function(p) return p:IsInnocent() and (not alive_only or p:IsTerror()) end)
 end
 
+function GetLookoutFilter(alive_only)
+    return GetPlayerFilter(function(p) return p:IsLookout() and (not alive_only or p:IsTerror()) end) 
+
 function GetTraitorsFilter(alive_only)
     return GetPlayerFilter(function(p) return p:IsTraitorTeam() and (not alive_only or p:IsTerror()) end)
 end

@@ -241,6 +241,7 @@
         "ROLE_INNOCENT",
         "ROLE_TRAITOR",
         "ROLE_MERCENARY",
+        "ROLE_LOOKOUT", 
         "ROLE_PHANTOM",
         "ROLE_JESTER",
         "ROLE_HYPNOTIST",

@@ -26,6 +26,7 @@ ROLE_SWAPPER = 10
 ROLE_ASSASSIN = 11
 ROLE_KILLER = 12
 ROLE_DETRAITOR = 13
+ROLE_LOOKOUT = 14
 
 -- Role colors
 ROLE_COLORS = {
@@ -42,7 +43,8 @@ ROLE_COLORS = {
     [ROLE_SWAPPER] = Color(111, 0, 255, 255),
     [ROLE_ASSASSIN] = Color(112, 50, 0, 255),
     [ROLE_KILLER] = Color(50, 0, 70, 255),
-    [ROLE_DETRAITOR] = Color(112, 27, 140, 255)
+    [ROLE_DETRAITOR] = Color(112, 27, 140, 255),
+    [ROLE_LOOKOUT] = Color(55, 170, 50, 255),
 }
 ROLE_COLORS_DARK = {
     [ROLE_INNOCENT] = Color(60, 160, 50, 155),
@@ -58,7 +60,8 @@ ROLE_COLORS_DARK = {
     [ROLE_SWAPPER] = Color(111, 0, 255, 100),
     [ROLE_ASSASSIN] = Color(112, 50, 0, 155),
     [ROLE_KILLER] = Color(50, 0, 70, 200),
-    [ROLE_DETRAITOR] = Color(112, 27, 140, 200)
+    [ROLE_DETRAITOR] = Color(112, 27, 140, 200),
+    [ROLE_LOOKOUT] = Color(60, 160, 50, 155),
 }
 
 -- Role strings
@@ -76,7 +79,8 @@ ROLE_STRINGS = {
     [ROLE_SWAPPER] = "swapper",
     [ROLE_ASSASSIN] = "assassin",
     [ROLE_KILLER] = "killer",
-    [ROLE_DETRAITOR] = "detraitor"
+    [ROLE_DETRAITOR] = "detraitor",
+    [ROLE_LOOKOUT] = "lookout",
 }
 
 ROLE_STRINGS_EXT = {
@@ -93,7 +97,8 @@ ROLE_STRINGS_EXT = {
     [ROLE_SWAPPER] = "a swapper",
     [ROLE_ASSASSIN] = "an assassin",
     [ROLE_KILLER] = "a killer",
-    [ROLE_DETRAITOR] = "a detraitor"
+    [ROLE_DETRAITOR] = "a detraitor",
+    [ROLE_LOOKOUT] = "a lookout", 
 }
 
 ROLE_STRINGS_SHORT = {
@@ -110,7 +115,8 @@ ROLE_STRINGS_SHORT = {
     [ROLE_SWAPPER] = "swa",
     [ROLE_ASSASSIN] = "asn",
     [ROLE_KILLER] = "kil",
-    [ROLE_DETRAITOR] = "der"
+    [ROLE_DETRAITOR] = "der",
+    [ROLE_LOOKOUT] = "loo", 
 }
 
 -- Game event log defs
@@ -376,6 +382,9 @@ DefaultEquipment = {
         EQUIP_RADAR,
         EQUIP_DISGUISE
     },
+    [ROLE_LOOKOUT] { 
+        EQUIP_RADAR
+    }
     -- non-buyable
     [ROLE_NONE] = {
         "weapon_ttt_confgrenade",

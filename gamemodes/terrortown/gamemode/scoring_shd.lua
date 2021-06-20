@@ -22,6 +22,7 @@ function ScoreInit()
         was_assassin = false,
         was_killer = false,
         was_detraitor = false,
+        was_lookout = false, 
         bonus = 0 -- non-kill points to add
     };
 end
@@ -42,6 +43,7 @@ local function UpdateScoreRoles(scores, id, eventinfo)
         scores[id].was_assassin = eventinfo.role == ROLE_ASSASSIN
         scores[id].was_killer = eventinfo.role == ROLE_KILLER
         scores[id].was_detraitor = eventinfo.role == ROLE_DETRAITOR
+        scores[id].was_lookout = eventinfo.role == ROLE_LOOKOUT
     end
 end
 
@@ -104,6 +106,7 @@ function ScoreEventLog(events, scores, innocents, traitors, detectives, hypnotis
         scores[id].was_assassin = table.HasValue(assassins, id)
         scores[id].was_killer = table.HasValue(killers, id)
         scores[id].was_detraitor = table.HasValue(detraitors, id)
+        scores[id].was_lookout = table.HasValue(lookouts, id)
     end
 
     for _, e in pairs(events) do

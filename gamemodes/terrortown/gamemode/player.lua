@@ -41,6 +41,7 @@ function GM:PlayerInitialSpawn(ply)
         SendSwapperList()
         SendAssassinList()
         SendKillerList()
+        SendLookoutList()
     end
 
     -- Game has started, tell this gusy where the round is at
@@ -884,7 +885,7 @@ function GM:DoPlayerDeath(ply, attacker, dmginfo)
             for _, p in pairs(player.GetAll()) do
                 if p:Alive() and not p:IsSpec() and p:Nick() ~= assassintarget then
                     -- Exclude Glitch from this list so they don't get discovered immediately
-                    if p:IsInnocent() or p:IsPhantom() or p:IsMercenary() or p:IsKiller() then
+                    if p:IsInnocent() or p:IsPhantom() or p:IsMercenary() or p:IsKiller() or p:IsLookout() then
                         table.insert(enemies, p:Nick())
                     -- Count monsters as enemies if Monsters-as-Traitors is not enabled
                     elseif p:IsMonsterTeam() and not player.IsMonsterTraitorAlly(p) then

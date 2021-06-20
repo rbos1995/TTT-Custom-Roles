@@ -143,12 +143,14 @@ function SCORE:HandleSelection()
             table.insert(killers, ply:SteamID64())
         elseif ply:IsDetraitor() then
             table.insert(detraitors, ply:SteamID64())
+        elseif ply:IsLookout() then 
+            table.insert(lookouts, ply:SteamID64())
         elseif ply:IsInnocent() then
             table.insert(innocents, ply:SteamID64())
         end
     end
 
-    self:AddEvent({ id = EVENT_SELECTED, innocent_ids = innocents, traitor_ids = traitors, detective_ids = detectives, hypnotist_ids = hypnotists, mercenary_ids = mercenaries, jester_ids = jesters, phantom_ids = phantoms, glitch_ids = glitches, zombie_ids = zombies, vampire_ids = vampires, swapper_ids = swappers, assassin_ids = assassins, killer_ids = killers, detraitor_ids = detraitors })
+    self:AddEvent({ id = EVENT_SELECTED, innocent_ids = innocents, traitor_ids = traitors, detective_ids = detectives, hypnotist_ids = hypnotists, mercenary_ids = mercenaries, jester_ids = jesters, phantom_ids = phantoms, glitch_ids = glitches, zombie_ids = zombies, vampire_ids = vampires, swapper_ids = swappers, assassin_ids = assassins, killer_ids = killers, detraitor_ids = detraitors, lookout_ids = lookouts, })
 end
 
 function SCORE:HandleBodyFound(finder, found)
@@ -234,6 +236,8 @@ function SCORE:ApplyEventLogScores(wintype)
             table.insert(killers, ply:SteamID64())
         elseif ply:IsDetraitor() then
             table.insert(detraitors, ply:SteamID64())
+        elseif ply:IsLookout() then
+            table.insert(lookouts, ply:SteamID64())
         elseif ply:IsInnocent() then
             table.insert(innocents, ply:SteamID64())
         end

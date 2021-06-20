@@ -26,6 +26,9 @@ local function GetTextForLocalPlayer()
     elseif client:IsPhantom() then
         return GetPTranslation("info_popup_phantom", { menukey = menukey })
 
+    elseif client:IsLookOut() then
+        return GetPTranslation("info_popup_lookout", { menukey = menukey })
+
     elseif client:IsMonsterTeam() then
         local monsterlabel = "info_popup_"
         if client:IsZombie() then

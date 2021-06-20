@@ -54,7 +54,8 @@ local function GetLoadoutWeapons(r)
             [ROLE_SWAPPER] = {},
             [ROLE_ASSASSIN] = {},
             [ROLE_KILLER] = {},
-            [ROLE_DETRAITOR] = {}
+            [ROLE_DETRAITOR] = {},
+            [ROLE_LOOOUT] = {},
         };
 
         for _, w in pairs(weapons.GetList()) do
